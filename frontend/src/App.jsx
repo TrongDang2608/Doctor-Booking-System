@@ -5,6 +5,13 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 // Pages
 import Home from './pages/Home';
 import Auth from './pages/Auth';
+import AuthUnified from './pages/AuthUnified';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Doctors from './pages/Doctors';
+import Specialties from './pages/Specialties';
+import About from './pages/About';
+import Contact from './pages/Contact';
 import NotFound from './pages/NotFound';
 
 // Import Admin pages
@@ -38,8 +45,26 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Auth />} />
-          <Route path="/register" element={<Auth />} />
+          
+          {/* Auth routes */}
+          <Route path="/login" element={<AuthUnified />} />
+          <Route path="/register" element={<AuthUnified />} />
+          
+          {/* Legacy routes - redirect to main login */}
+          <Route path="/login/admin" element={<Login />} />
+          <Route path="/login/doctor" element={<Login />} />
+          <Route path="/login/patient" element={<Login />} />
+          
+          {/* Role-specific register routes */}
+          <Route path="/register/admin" element={<Register />} />
+          <Route path="/register/doctor" element={<Register />} />
+          <Route path="/register/patient" element={<Register />} />
+          
+          {/* Public pages */}
+          <Route path="/doctors" element={<Doctors />} />
+          <Route path="/specialties" element={<Specialties />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           
           {/* Protected routes */}
           <Route

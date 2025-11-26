@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
+import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
 import Logo from '../components/common/Logo';
 import videoBg from '../assets/625148e1956a6a29189fca52d43d74f576029421.mp4';
 import './Home.css';
@@ -88,15 +90,7 @@ const Home = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="home-nav">
-        <div className="home-nav-content">
-          <Logo size="medium" showSubtitle={false} />
-          <div className="home-nav-actions">
-            <Link to="/login" className="nav-link">Đăng nhập</Link>
-            <Link to="/register" className="nav-button">Đăng ký</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="home-hero">
@@ -110,12 +104,9 @@ const Home = () => {
             </span>
           </h1>
           <p className="hero-description">
-            Hệ thống đặt lịch khám bệnh hiện đại, giúp bạn kết nối với các bác sĩ chuyên khoa hàng đầu. 
-            Quản lý sức khỏe của bạn một cách dễ dàng và tiện lợi.
+            Hệ Thống Đặt Lịch Hẹn Với Bác Sĩ "Tiện Lợi - Nhanh Chóng - Thông Minh".
           </p>
           <div className="hero-actions">
-            <Link to="/register" className="hero-button primary">Bắt đầu ngay</Link>
-            <Link to="/login" className="hero-button secondary">Đã có tài khoản?</Link>
           </div>
         </div>
       </section>
@@ -210,16 +201,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="home-footer">
-        <div className="home-footer-content">
-          <Logo size="small" showSubtitle={true} />
-          <p className="footer-text">© 2024 Doctor Booking. Tất cả quyền được bảo lưu.</p>
-          <div className="footer-links">
-            <Link to="/login">Đăng nhập</Link>
-            <Link to="/register">Đăng ký</Link>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

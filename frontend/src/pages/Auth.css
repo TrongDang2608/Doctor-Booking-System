@@ -121,6 +121,65 @@
   min-height: 500px;
 }
 
+/* Role Header */
+.auth-role-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.role-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--role-color)20 0%, var(--role-color)10 100%);
+  border: 2px solid var(--role-color);
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.role-icon-wrapper i {
+  width: 40px;
+  height: 40px;
+  color: var(--role-color);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.auth-note {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.auth-footer-links {
+  margin-top: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.auth-footer-links p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.auth-footer-links a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.auth-footer-links a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
 /* Auth Logo */
 .auth-logo {
   display: flex;

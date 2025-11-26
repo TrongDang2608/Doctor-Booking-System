@@ -1,197 +1,234 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ErrorMessage from '../components/common/ErrorMessage';
 import Loading from '../components/common/Loading';
+import './Login.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
-    password: '',
     email: '',
+    password: '',
+    confirmPassword: '',
     fullName: '',
-    phone: '',
+    phone: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Initialize Feather Icons
+    const initIcons = () => {
+      if (window.feather) {
+        window.feather.replace();
+      }
+    };
+    
+    initIcons();
+    
+    // Set body background to prevent white flash
+    document.body.style.background = '#0e1015';
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.background = '';
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: e.target.value
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await register(formData);
-      navigate('/patient/dashboard');
+      const userData = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName,
+        phone: formData.phone,
+        role: 'PATIENT' // Default role
+      };
+
+      const response = await register(userData);
+      
+      // Redirect based on role
+      if (response.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (response.role === 'DOCTOR') {
+        navigate('/doctor/dashboard');
+      } else {
+        navigate('/patient/dashboard');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
-    } finally {
+      setError(err.response?.data?.message || err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <Loading message="Registering..." />;
+    return <Loading message="Đang đăng ký..." />;
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#f5f5f5',
-      padding: '20px'
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '40px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        width: '100%',
-        maxWidth: '500px'
-      }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Register</h2>
-        
-        <ErrorMessage message={error} onClose={() => setError('')} />
+    <div className="linear-login-page linear-register-page">
+      {/* Back to Home Button */}
+      <Link to="/" className="linear-back-home">
+        <i data-feather="arrow-left"></i>
+      </Link>
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Full Name *
-            </label>
+      <div className="linear-login-container">
+        {/* Heading */}
+        <h1 className="linear-login-heading">Sign Up For Doctor Booking</h1>
+
+        {/* Error Message */}
+        {error && (
+          <div className="linear-error-message">
+            <ErrorMessage message={error} />
+          </div>
+        )}
+
+        {/* Register Form */}
+        <form onSubmit={handleSubmit} className="linear-login-form">
+          <div className="linear-form-group">
             <input
               type="text"
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
+              placeholder="Họ và tên"
               required
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
+              autoFocus
+              className="linear-input"
             />
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Username *
-            </label>
+          <div className="linear-form-group">
             <input
               type="text"
               name="username"
               value={formData.username}
               onChange={handleChange}
+              placeholder="Tên đăng nhập"
               required
-              minLength={3}
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
+              className="linear-input"
             />
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Email *
-            </label>
+          <div className="linear-form-group">
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
+              placeholder="Email"
               required
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
+              className="linear-input"
             />
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Password *
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength={6}
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Phone
-            </label>
+          <div className="linear-form-group">
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
+              placeholder="Số điện thoại"
+              required
+              className="linear-input"
             />
           </div>
 
-          <button
-            type="submit"
+          <div className="linear-form-group">
+            <div className="linear-password-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Mật khẩu"
+                required
+                className="linear-input"
+              />
+              <button
+                type="button"
+                className="linear-password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                <i data-feather={showPassword ? 'eye-off' : 'eye'}></i>
+              </button>
+            </div>
+          </div>
+
+          <div className="linear-form-group">
+            <div className="linear-password-wrapper">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Xác nhận mật khẩu"
+                required
+                className="linear-input"
+              />
+              <button
+                type="button"
+                className="linear-password-toggle"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                tabIndex={-1}
+              >
+                <i data-feather={showConfirmPassword ? 'eye-off' : 'eye'}></i>
+              </button>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            className="linear-submit-button"
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '16px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.6 : 1
-            }}
           >
-            {loading ? 'Registering...' : 'Register'}
+            Đăng ký
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '20px' }}>
-          Already have an account? <Link to="/login" style={{ color: '#3498db' }}>Login here</Link>
-        </p>
+        {/* Footer */}
+        <div className="linear-login-footer">
+          <p className="linear-footer-text">
+            Đã có tài khoản?{' '}
+            <Link to="/login" className="linear-footer-link">
+              Đăng nhập
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Register;
-

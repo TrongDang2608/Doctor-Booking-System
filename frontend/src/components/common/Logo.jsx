@@ -24,6 +24,7 @@ const Logo = ({ size = 'medium', showSubtitle = true, className = '', useImage =
   );
 
   // SVG logo mặc định
+    // eslint-disable-next-line no-unreachable
   return (
     <div className={`logo-container ${className}`} data-size={size}>
       <div className="logo-icon">
