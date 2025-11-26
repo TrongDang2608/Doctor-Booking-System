@@ -3,8 +3,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 // Pages
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Home from './pages/Home';
+import Auth from './pages/Auth';
 import NotFound from './pages/NotFound';
 
 // Import Admin pages
@@ -37,8 +37,9 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Public routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Auth />} />
+          <Route path="/register" element={<Auth />} />
           
           {/* Protected routes */}
           <Route
@@ -96,7 +97,6 @@ function App() {
           <Route path="/404" element={<NotFound />} />
           
           {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
