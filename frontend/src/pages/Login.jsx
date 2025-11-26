@@ -1,16 +1,39 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ErrorMessage from '../components/common/ErrorMessage';
 import Loading from '../components/common/Loading';
+import logoImage from '../assets/DoctorBooking.png';
+import './Login.css';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Initialize Feather Icons
+    const initIcons = () => {
+      if (window.feather) {
+        window.feather.replace();
+      }
+    };
+    
+    initIcons();
+    
+    // Set body background to prevent white flash
+    document.body.style.background = '#0e1015';
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.background = '';
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,152 +41,100 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const authResponse = await login(username, password);
-      
-      // Persistent logging
-      const logPersistent = (msg, data) => {
-        console.log(msg, data || '');
-        if (!window.debugLogs) window.debugLogs = [];
-        window.debugLogs.push({ timestamp: new Date().toISOString(), message: msg, data });
-      };
-      
-      logPersistent('✅ Login successful - Response:', authResponse);
-      
-      // Wait a moment for state to update
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Get role from response or localStorage
-      const role = authResponse?.role || JSON.parse(localStorage.getItem('user') || '{}')?.role;
-      logPersistent('🔍 Role determined:', role);
-      
-      // Verify token and user are saved
-      const token = localStorage.getItem('token');
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      logPersistent('💾 Storage check:', { 
-        hasToken: !!token, 
-        hasUser: !!user, 
-        userRole: user?.role 
-      });
-      
-      if (!role) {
-        logPersistent('❌ No role found!', { authResponse, user });
-        setError('Login failed: Role information missing');
-        return;
-      }
+      const response = await login(email, password);
       
       // Redirect based on role
-      let redirectPath = '/patient/dashboard';
-      if (role === 'ADMIN') {
-        redirectPath = '/admin/dashboard';
-      } else if (role === 'DOCTOR') {
-        redirectPath = '/doctor/dashboard';
+      if (response.role === 'ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (response.role === 'DOCTOR') {
+        navigate('/doctor/dashboard');
+      } else {
+        navigate('/patient/dashboard');
       }
-      
-      logPersistent('🚀 Redirecting to:', redirectPath);
-      navigate(redirectPath);
     } catch (err) {
-      console.error('❌ Login error:', err);
-      if (!window.debugLogs) window.debugLogs = [];
-      window.debugLogs.push({ 
-        timestamp: new Date().toISOString(), 
-        message: 'Login error', 
-        error: err 
-      });
-      setError(err.response?.data?.message || err.message || 'Login failed. Please check your credentials.');
-    } finally {
+      setError(err.response?.data?.message || err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <Loading message="Logging in..." />;
+    return <Loading message="Đang đăng nhập..." />;
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      minHeight: '100vh',
-      backgroundColor: '#f5f5f5'
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '40px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        width: '100%',
-        maxWidth: '400px'
-      }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '30px' }}>Login</h2>
-        
-        <ErrorMessage message={error} onClose={() => setError('')} />
+    <div className="linear-login-page">
+      {/* Back to Home Button */}
+      <Link to="/" className="linear-back-home">
+        <i data-feather="arrow-left"></i>
+      </Link>
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Username or Email
-            </label>
+      <div className="linear-login-container">
+        {/* Heading */}
+        <h1 className="linear-login-heading">Log In To Doctor Booking</h1>
+
+        {/* Error Message */}
+        {error && (
+          <div className="linear-error-message">
+            <ErrorMessage message={error} />
+          </div>
+        )}
+
+        {/* Login Form */}
+        <form onSubmit={handleSubmit} className="linear-login-form">
+          <div className="linear-form-group">
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Nhập Tên Đăng Nhập"
               required
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
+              autoFocus
+              className="linear-input"
             />
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px'
-              }}
-            />
+          <div className="linear-form-group">
+            <div className="linear-password-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Nhập Mật Khẩu"
+                required
+                className="linear-input"
+              />
+              <button
+                type="button"
+                className="linear-password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                <i data-feather={showPassword ? 'eye-off' : 'eye'}></i>
+              </button>
+            </div>
           </div>
 
-          <button
-            type="submit"
+          <button 
+            type="submit" 
+            className="linear-submit-button"
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              fontSize: '16px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.6 : 1
-            }}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            Đăng nhập
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: '20px' }}>
-          Don't have an account? <Link to="/register" style={{ color: '#3498db' }}>Register here</Link>
-        </p>
+        {/* Footer */}
+        <div className="linear-login-footer">
+          <p className="linear-footer-text">
+            Chưa có tài khoản?{' '}
+            <Link to="/register" className="linear-footer-link">
+              Đăng ký
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Login;
-

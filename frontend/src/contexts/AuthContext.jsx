@@ -24,21 +24,15 @@ export const AuthProvider = ({ children }) => {
     let currentUser = null;
     if (roleFromPath) {
       currentUser = authService.getCurrentUser(roleFromPath);
-      if (currentUser) {
-        console.log(`AuthContext mount - Loaded ${roleFromPath} user from localStorage:`, currentUser);
-      }
     }
     
     // Fallback: try to load any user
     if (!currentUser) {
       currentUser = authService.getCurrentUser();
-      console.log('AuthContext mount - Loaded user from localStorage (fallback):', currentUser);
     }
     
     if (currentUser) {
       setUser(currentUser);
-    } else {
-      console.log('AuthContext - No user found in localStorage');
     }
     setLoading(false);
   }, []);
@@ -46,7 +40,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       const authResponse = await authService.login(username, password);
-      console.log('Auth response received:', authResponse);
       
       // Save to localStorage
       authService.setAuthData(authResponse);
@@ -60,7 +53,6 @@ export const AuthProvider = ({ children }) => {
         fullName: authResponse.fullName,
       };
       setUser(userData);
-      console.log('User state updated:', userData);
       
       return authResponse;
     } catch (error) {
