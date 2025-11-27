@@ -11,10 +11,12 @@ const DataTable = ({
   if (loading) {
     return (
       <div style={{ 
-        backgroundColor: 'white', 
+        background: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         padding: '40px', 
-        borderRadius: '8px',
-        textAlign: 'center'
+        borderRadius: '12px',
+        textAlign: 'center',
+        color: '#aaa'
       }}>
         <div>Loading...</div>
       </div>
@@ -24,23 +26,24 @@ const DataTable = ({
   if (!data || data.length === 0) {
     return (
       <div style={{ 
-        backgroundColor: 'white', 
+        background: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         padding: '40px', 
-        borderRadius: '8px',
+        borderRadius: '12px',
         textAlign: 'center',
-        color: '#666'
+        color: '#aaa'
       }}>
-        <p>{emptyMessage}</p>
+        {typeof emptyMessage === 'string' ? <p>{emptyMessage}</p> : emptyMessage}
       </div>
     );
   }
 
   return (
     <div style={{
-      backgroundColor: 'white',
-      borderRadius: '8px',
+      background: 'rgba(255, 255, 255, 0.05)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
+      borderRadius: '12px',
       overflow: 'hidden',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
       overflowX: 'auto',
     }}>
       <table style={{ 
@@ -49,7 +52,7 @@ const DataTable = ({
         minWidth: '600px'
       }}>
         <thead>
-          <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
+          <tr style={{ background: 'rgba(255, 255, 255, 0.05)', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
             {columns.map((column, index) => (
               <th
                 key={index}
@@ -58,7 +61,7 @@ const DataTable = ({
                   textAlign: column.align || 'left',
                   fontWeight: '600',
                   fontSize: '14px',
-                  color: '#495057',
+                  color: '#e0e0e0',
                 }}
               >
                 {column.header}
@@ -72,13 +75,13 @@ const DataTable = ({
               key={keyExtractor(row)}
               onClick={() => onRowClick && onRowClick(row)}
               style={{
-                borderBottom: '1px solid #dee2e6',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
                 transition: 'background-color 0.2s',
                 cursor: onRowClick ? 'pointer' : 'default',
               }}
               onMouseEnter={(e) => {
                 if (onRowClick) {
-                  e.currentTarget.style.backgroundColor = '#f8f9fa';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
                 }
               }}
               onMouseLeave={(e) => {
@@ -94,6 +97,7 @@ const DataTable = ({
                     padding: '15px 12px',
                     textAlign: column.align || 'left',
                     fontSize: '14px',
+                    color: '#aaa',
                   }}
                 >
                   {column.render ? column.render(row) : row[column.accessor]}

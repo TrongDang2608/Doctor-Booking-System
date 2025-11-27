@@ -1,12 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import logoImage from '../../assets/DoctorBooking.png';
+import HealthAIChat from './HealthAIChat';
+import './PatientLayout.css';
 
 const PatientLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [chatOpen, setChatOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+
+    useEffect(() => {
+        // Initialize Feather Icons
+        if (window.feather) {
+            window.feather.replace();
+        }
+        // Auto-open chat if on healthlyai route
+        if (location.pathname === '/patient/healthlyai') {
+            setChatOpen(true);
+        } else {
+            setChatOpen(false);
+        }
+    }, [location.pathname]);
 
     const handleLogout = () => {
         logout();
@@ -14,11 +31,11 @@ const PatientLayout = ({ children }) => {
     };
 
     const menuItems = [
-        { path: '/patient/dashboard', label: 'Dashboard', icon: '📊' },
-        { path: '/patient/profile', label: 'My Profile', icon: '👤' },
-        { path: '/patient/booking', label: 'New Booking', icon: '📅' },
-        { path: '/patient/history', label: 'Booking History', icon: '📋' },
-        { path: '/patient/doctors', label: 'Find Doctors', icon: '👨‍⚕️' },
+        { path: '/patient/dashboard', label: 'Dashboard', icon: 'layout', route: '/patient/dashboard' },
+        { path: '/patient/booking', label: 'New Booking', icon: 'calendar', route: '/patient/booking' },
+        { path: '/patient/history', label: 'Booking History', icon: 'clock', route: '/patient/history' },
+        { path: '/patient/doctors', label: 'Find Doctors', icon: 'search', route: '/patient/doctors' },
+        { path: '/patient/healthlyai', label: 'HealthAI Chat', icon: 'message-circle', route: '/patient/healthlyai' },
     ];
 
     const isActive = (path) => {
@@ -26,107 +43,96 @@ const PatientLayout = ({ children }) => {
     };
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+        <div className="patient-layout">
             {/* Sidebar */}
-            <div
-                style={{
-                    width: sidebarOpen ? '250px' : '70px',
-                    backgroundColor: '#3498db',
-                    color: 'white',
-                    transition: 'width 0.3s',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    position: 'fixed',
-                    height: '100vh',
-                    overflowY: 'auto',
-                }}
-            >
-                <div style={{ padding: '20px', borderBottom: '1px solid #2980b9' }}>
-                    <h2 style={{ margin: 0, fontSize: sidebarOpen ? '20px' : '16px', whiteSpace: 'nowrap' }}>
-                        {sidebarOpen ? '🏥 Patient Portal' : '🏥'}
-                    </h2>
+            <aside className={`patient-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
+                <div className="sidebar-header">
+                    <Link to="/" className="sidebar-logo">
+                        <div className="logo-icon-wrapper">
+                            <img 
+                                src={logoImage} 
+                                alt="Doctor Booking Logo" 
+                                className="logo-image"
+                            />
+                        </div>
+                        {sidebarOpen && (
+                            <div className="logo-text-wrapper">
+                                <span className="logo-brand-name">Doctor Booking</span>
+                            </div>
+                        )}
+                    </Link>
                 </div>
 
-                <nav style={{ flex: 1, padding: '10px 0' }}>
+                <nav className="sidebar-nav">
                     {menuItems.map((item) => (
                         <Link
                             key={item.path}
-                            to={item.path}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                padding: '15px 20px',
-                                color: isActive(item.path) ? '#ecf0f1' : 'white',
-                                textDecoration: 'none',
-                                backgroundColor: isActive(item.path) ? '#2980b9' : 'transparent',
-                                borderLeft: isActive(item.path) ? '4px solid #ecf0f1' : '4px solid transparent',
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!isActive(item.path)) {
-                                    e.currentTarget.style.backgroundColor = '#2980b9';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!isActive(item.path)) {
-                                    e.currentTarget.style.backgroundColor = 'transparent';
-                                }
-                            }}
+                            to={item.route}
+                            className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
                         >
-              <span style={{ fontSize: '20px', marginRight: sidebarOpen ? '15px' : '0', minWidth: '25px' }}>
-                {item.icon}
-              </span>
+                            <i data-feather={item.icon}></i>
                             {sidebarOpen && <span>{item.label}</span>}
                         </Link>
                     ))}
                 </nav>
 
-                <div style={{ padding: '20px', borderTop: '1px solid #2980b9' }}>
-                    <div style={{ marginBottom: '10px', fontSize: '14px', opacity: 0.8 }}>
-                        {sidebarOpen && `Logged in as: ${user?.fullName || user?.username}`}
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            backgroundColor: '#e74c3c',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        {sidebarOpen ? 'Logout' : '🚪'}
+                <div className="sidebar-footer">
+                    {sidebarOpen && (
+                        <Link
+                            to="/patient/profile"
+                            className={`user-info ${isActive('/patient/profile') ? 'active' : ''}`}
+                        >
+                            <div className="user-avatar">
+                                <i data-feather="user"></i>
+                            </div>
+                            <div className="user-details">
+                                <div className="user-name">{user?.fullName || user?.username}</div>
+                                <div className="user-role">My Profile</div>
+                            </div>
+                            <i data-feather="chevron-right" className="user-arrow"></i>
+                        </Link>
+                    )}
+                    {!sidebarOpen && (
+                        <Link
+                            to="/patient/profile"
+                            className={`nav-item ${isActive('/patient/profile') ? 'active' : ''}`}
+                            style={{ marginBottom: '0.75rem' }}
+                        >
+                            <i data-feather="user"></i>
+                        </Link>
+                    )}
+                    <button className="logout-btn" onClick={handleLogout}>
+                        <i data-feather="log-out"></i>
+                        {sidebarOpen && <span>Logout</span>}
                     </button>
                 </div>
-            </div>
+            </aside>
 
             {/* Main Content */}
-            <div
-                style={{
-                    marginLeft: sidebarOpen ? '250px' : '70px',
-                    flex: 1,
-                    transition: 'margin-left 0.3s',
-                    padding: '20px',
-                }}
-            >
-                <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <button
+            <main className="patient-main">
+                <div className="main-header">
+                    <button 
+                        className="sidebar-toggle"
                         onClick={() => setSidebarOpen(!sidebarOpen)}
-                        style={{
-                            padding: '8px 15px',
-                            backgroundColor: '#3498db',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                        }}
                     >
-                        {sidebarOpen ? '◀' : '▶'}
+                        <i data-feather={sidebarOpen ? 'chevron-left' : 'chevron-right'}></i>
                     </button>
                 </div>
-                {children}
-            </div>
+                <div className={`main-content ${chatOpen ? 'with-chat' : ''}`}>
+                    {children}
+                </div>
+            </main>
+
+            {/* HealthAI Chat Panel - Only show if NOT on healthlyai route (because HealthAIPage renders it) */}
+            {chatOpen && location.pathname !== '/patient/healthlyai' && (
+                <HealthAIChat onClose={() => {
+                    setChatOpen(false);
+                    // Only navigate if not already on a patient route
+                    if (!location.pathname.startsWith('/patient/')) {
+                        navigate('/patient/dashboard');
+                    }
+                }} />
+            )}
         </div>
     );
 };

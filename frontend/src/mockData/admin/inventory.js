@@ -218,3 +218,4 @@ export const inventoryStats = {
   totalMovementsThisMonth: 450
 };
 
+

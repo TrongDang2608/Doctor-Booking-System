@@ -3,6 +3,7 @@ import PatientLayout from '../../components/patient/PatientLayout';
 import { patientService } from '../../services/patientService';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
+import '../patient/patientPages.css';
 
 const PatientProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -113,274 +114,201 @@ const PatientProfile = () => {
 
   return (
     <PatientLayout>
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div className="patient-page">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <h1>My Profile</h1>
           {!editMode && (
             <button
               onClick={() => setEditMode(true)}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#3498db',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
+              className="btn btn-primary"
             >
               Edit Profile
             </button>
           )}
         </div>
 
-        <ErrorMessage message={error} onClose={() => setError('')} />
-        {success && (
-          <div style={{
-            padding: '15px',
-            backgroundColor: '#d4edda',
-            border: '1px solid #c3e6cb',
-            borderRadius: '4px',
-            color: '#155724',
-            marginBottom: '15px',
-          }}>
-            {success}
-          </div>
-        )}
+        {error && <div className="alert alert-error">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
           {/* Profile Information */}
-          <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ marginBottom: '20px' }}>Profile Information</h2>
+          <div className="patient-card">
+            <h2>Profile Information</h2>
             {!editMode ? (
-              <div style={{ display: 'grid', gap: '15px' }}>
-                <div><strong>Full Name:</strong> {profile.fullName}</div>
-                <div><strong>Email:</strong> {profile.email}</div>
-                <div><strong>Date of Birth:</strong> {profile.dateOfBirth || '-'}</div>
-                <div><strong>Gender:</strong> {profile.gender || '-'}</div>
-                <div><strong>Phone:</strong> {profile.phone || '-'}</div>
-                <div><strong>Address:</strong> {profile.address || '-'}</div>
-                <div><strong>Emergency Contact:</strong> {profile.emergencyContact || '-'}</div>
-                <div><strong>Emergency Phone:</strong> {profile.emergencyPhone || '-'}</div>
+              <div className="patient-form">
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <div style={{ color: '#e0e0e0' }}>{profile.fullName}</div>
+                </div>
+                <div className="form-group">
+                  <label>Email</label>
+                  <div style={{ color: '#e0e0e0' }}>{profile.email}</div>
+                </div>
+                <div className="form-group">
+                  <label>Date of Birth</label>
+                  <div style={{ color: '#e0e0e0' }}>{profile.dateOfBirth || '-'}</div>
+                </div>
+                <div className="form-group">
+                  <label>Gender</label>
+                  <div style={{ color: '#e0e0e0' }}>{profile.gender || '-'}</div>
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <div style={{ color: '#e0e0e0' }}>{profile.phone || '-'}</div>
+                </div>
+                <div className="form-group">
+                  <label>Address</label>
+                  <div style={{ color: '#e0e0e0' }}>{profile.address || '-'}</div>
+                </div>
+                <div className="form-group">
+                  <label>Emergency Contact</label>
+                  <div style={{ color: '#e0e0e0' }}>{profile.emergencyContact || '-'}</div>
+                </div>
+                <div className="form-group">
+                  <label>Emergency Phone</label>
+                  <div style={{ color: '#e0e0e0' }}>{profile.emergencyPhone || '-'}</div>
+                </div>
               </div>
             ) : (
-              <form onSubmit={handleUpdateProfile}>
-                <div style={{ display: 'grid', gap: '15px' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      required
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Date of Birth
-                    </label>
-                    <input
-                      type="date"
-                      name="dateOfBirth"
-                      value={formData.dateOfBirth}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Gender
-                    </label>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    >
-                      <option value="">Select Gender</option>
-                      <option value="MALE">Male</option>
-                      <option value="FEMALE">Female</option>
-                      <option value="OTHER">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Phone
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Address
-                    </label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Emergency Contact
-                    </label>
-                    <input
-                      type="text"
-                      name="emergencyContact"
-                      value={formData.emergencyContact}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Emergency Phone
-                    </label>
-                    <input
-                      type="tel"
-                      name="emergencyPhone"
-                      value={formData.emergencyPhone}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      type="submit"
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#2ecc71',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Save Changes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditMode(false);
-                        loadProfile();
-                      }}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#95a5a6',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
+              <form onSubmit={handleUpdateProfile} className="patient-form">
+                <div className="form-group">
+                  <label>Full Name *</label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Date of Birth</label>
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Gender</label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Phone</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Address</label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Emergency Contact</label>
+                  <input
+                    type="text"
+                    name="emergencyContact"
+                    value={formData.emergencyContact}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Emergency Phone</label>
+                  <input
+                    type="tel"
+                    name="emergencyPhone"
+                    value={formData.emergencyPhone}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button type="submit" className="btn btn-success">Save Changes</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditMode(false);
+                      loadProfile();
+                    }}
+                    className="btn btn-secondary"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </form>
             )}
           </div>
 
           {/* Change Password */}
-          <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ marginBottom: '20px' }}>Change Password</h2>
+          <div className="patient-card">
+            <h2>Change Password</h2>
             {!showPasswordForm ? (
               <button
                 onClick={() => setShowPasswordForm(true)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#e74c3c',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
+                className="btn btn-danger"
               >
                 Change Password
               </button>
             ) : (
-              <form onSubmit={handleChangePassword}>
-                <div style={{ display: 'grid', gap: '15px' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Current Password *
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                      required
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      New Password *
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                      required
-                      minLength={6}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Confirm New Password *
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                      required
-                      minLength={6}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      type="submit"
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#2ecc71',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Update Password
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowPasswordForm(false);
-                        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                      }}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#95a5a6',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
+              <form onSubmit={handleChangePassword} className="patient-form">
+                <div className="form-group">
+                  <label>Current Password *</label>
+                  <input
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label>New Password *</label>
+                  <input
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Confirm New Password *</label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button type="submit" className="btn btn-success">Update Password</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordForm(false);
+                      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                    }}
+                    className="btn btn-secondary"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </form>
             )}

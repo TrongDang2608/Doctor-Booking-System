@@ -4,6 +4,7 @@ import { patientService } from '../../services/patientService';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import { useNavigate } from 'react-router-dom';
+import '../patient/patientPages.css';
 
 const NewBooking = () => {
   const [doctors, setDoctors] = useState([]);
@@ -87,130 +88,88 @@ const NewBooking = () => {
 
   return (
     <PatientLayout>
-      <div>
-        <h1 style={{ marginBottom: '20px' }}>Book New Appointment</h1>
+      <div className="patient-page">
+        <h1>Book New Appointment</h1>
 
-        <ErrorMessage message={error} onClose={() => setError('')} />
-        {success && (
-          <div style={{
-            padding: '15px',
-            backgroundColor: '#d4edda',
-            border: '1px solid #c3e6cb',
-            borderRadius: '4px',
-            color: '#155724',
-            marginBottom: '15px',
-          }}>
-            {success}
-          </div>
-        )}
+        {error && <div className="alert alert-error">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
 
-        <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-          <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gap: '20px' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                  Select Doctor *
-                </label>
+        <div className="patient-card">
+          <form onSubmit={handleSubmit} className="patient-form">
+            <div className="form-group">
+              <label>Select Doctor *</label>
+              <select
+                name="doctorId"
+                value={formData.doctorId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Choose a doctor...</option>
+                {doctors.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    Dr. {doctor.fullName} - {doctor.specialization}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.25rem' }}>
+              <div className="form-group">
+                <label>Appointment Date *</label>
+                <input
+                  type="date"
+                  name="appointmentDate"
+                  value={formData.appointmentDate}
+                  onChange={handleChange}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Appointment Time *</label>
                 <select
-                  name="doctorId"
-                  value={formData.doctorId}
+                  name="appointmentTime"
+                  value={formData.appointmentTime}
                   onChange={handleChange}
                   required
-                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '16px' }}
                 >
-                  <option value="">Choose a doctor...</option>
-                  {doctors.map((doctor) => (
-                    <option key={doctor.id} value={doctor.id}>
-                      Dr. {doctor.fullName} - {doctor.specialization}
+                  <option value="">Select time...</option>
+                  {availableTimeSlots.map((time) => (
+                    <option key={time} value={time}>
+                      {time}
                     </option>
                   ))}
                 </select>
               </div>
+            </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                    Appointment Date *
-                  </label>
-                  <input
-                    type="date"
-                    name="appointmentDate"
-                    value={formData.appointmentDate}
-                    onChange={handleChange}
-                    min={new Date().toISOString().split('T')[0]}
-                    required
-                    style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '16px' }}
-                  />
-                </div>
+            <div className="form-group">
+              <label>Notes (Optional)</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                rows="4"
+                placeholder="Any additional information or concerns..."
+              />
+            </div>
 
-                <div>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                    Appointment Time *
-                  </label>
-                  <select
-                    name="appointmentTime"
-                    value={formData.appointmentTime}
-                    onChange={handleChange}
-                    required
-                    style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '16px' }}
-                  >
-                    <option value="">Select time...</option>
-                    {availableTimeSlots.map((time) => (
-                      <option key={time} value={time}>
-                        {time}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                  Notes (Optional)
-                </label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  rows="4"
-                  placeholder="Any additional information or concerns..."
-                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit', fontSize: '16px' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={() => navigate('/patient/dashboard')}
-                  style={{
-                    padding: '12px 24px',
-                    backgroundColor: '#95a5a6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  style={{
-                    padding: '12px 24px',
-                    backgroundColor: '#2ecc71',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: submitting ? 'not-allowed' : 'pointer',
-                    fontSize: '16px',
-                    opacity: submitting ? 0.6 : 1,
-                  }}
-                >
-                  {submitting ? 'Booking...' : 'Book Appointment'}
-                </button>
-              </div>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => navigate('/patient/dashboard')}
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="btn btn-success"
+              >
+                {submitting ? 'Booking...' : 'Book Appointment'}
+              </button>
             </div>
           </form>
         </div>

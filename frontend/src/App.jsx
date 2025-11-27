@@ -29,6 +29,7 @@ import TreatmentManagement from './pages/doctor/TreatmentManagement';
 import PatientSearch from './pages/doctor/PatientSearch';
 
 // Import Patient pages
+import PatientPortal from './pages/patient/PatientPortal';
 import PatientDashboard from './pages/patient/PatientDashboard';
 import PatientProfile from './pages/patient/PatientProfile';
 import NewBooking from './pages/patient/NewBooking';
@@ -36,6 +37,7 @@ import BookingHistory from './pages/patient/BookingHistory';
 import DoctorSearch from './pages/patient/DoctorSearch';
 import FeedbackForm from './pages/patient/FeedbackForm';
 import TreatmentHistory from './pages/patient/TreatmentHistory';
+import HealthAIPage from './pages/patient/HealthAIPage';
 const Unauthorized = () => <div><h1>Unauthorized</h1><p>You don't have permission to access this page.</p></div>;
 
 function App() {
@@ -100,6 +102,14 @@ function App() {
           />
           
           <Route
+            path="/patient"
+            element={
+              <ProtectedRoute requiredRole="PATIENT">
+                <PatientPortal />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/patient/*"
             element={
               <ProtectedRoute requiredRole="PATIENT">
@@ -111,6 +121,7 @@ function App() {
                   <Route path="doctors" element={<DoctorSearch />} />
                   <Route path="treatments" element={<TreatmentHistory />} />
                   <Route path="feedback" element={<FeedbackForm />} />
+                  <Route path="healthlyai" element={<HealthAIPage />} />
                   <Route path="*" element={<Navigate to="/patient/dashboard" replace />} />
                 </Routes>
               </ProtectedRoute>

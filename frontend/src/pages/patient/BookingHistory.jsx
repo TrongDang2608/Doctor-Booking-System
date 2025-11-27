@@ -7,6 +7,7 @@ import ErrorMessage from '../../components/common/ErrorMessage';
 import DataTable from '../../components/common/DataTable';
 import { formatDate, formatDateTime } from '../../utils/formatDate';
 import { formatTime } from '../../utils/formatTime';
+import '../patient/patientPages.css';
 
 const BookingHistory = () => {
     const [appointments, setAppointments] = useState([]);
@@ -116,24 +117,11 @@ const BookingHistory = () => {
 
     return (
         <PatientLayout>
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
-                <h1 style={{ marginBottom: '30px', fontSize: '32px', fontWeight: '600', color: '#2c3e50' }}>
-                    Booking History
-                </h1>
+            <div className="patient-page">
+                <h1>Booking History</h1>
 
-                <ErrorMessage message={error} onClose={() => setError('')} />
-                {success && (
-                    <div style={{
-                        padding: '15px',
-                        backgroundColor: '#d4edda',
-                        border: '1px solid #c3e6cb',
-                        borderRadius: '6px',
-                        color: '#155724',
-                        marginBottom: '20px',
-                    }}>
-                        {success}
-                    </div>
-                )}
+                {error && <div className="alert alert-error">{error}</div>}
+                {success && <div className="alert alert-success">{success}</div>}
 
                 <DataTable
                     columns={[
