@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import UserInfo from './UserInfo';
 import logoImage from '../../assets/DoctorBooking.png';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,11 +23,6 @@ const Navbar = () => {
       window.feather.replace();
     }
   }, [user]);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
 
   const menuItems = [
     { path: '/', label: 'Trang chủ' },
@@ -69,14 +64,17 @@ const Navbar = () => {
         <div className="navbar-actions">
           {user ? (
             <>
-              <Link to="/dashboard" className="navbar-user">
-                <span className="user-avatar">👤</span>
-                <span className="user-name">{user.fullName || user.username}</span>
-              </Link>
-              <button onClick={handleLogout} className="navbar-logout-btn">
-                <i data-feather="log-out"></i>
-                Đăng xuất
-              </button>
+              {/* Booking Button - Only show for PATIENT role */}
+              {user.role === 'PATIENT' && (
+                <Link 
+                  to="/patient/dashboard" 
+                  className="navbar-booking-btn"
+                >
+                  <i data-feather="calendar"></i>
+                  Đặt lịch
+                </Link>
+              )}
+              <UserInfo />
             </>
           ) : (
             <>

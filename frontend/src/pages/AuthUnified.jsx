@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ErrorMessage from '../components/common/ErrorMessage';
 import Loading from '../components/common/Loading';
+import videoBg from '../assets/625148e1956a6a29189fca52d43d74f576029421.mp4';
 import './AuthUnified.css';
 
 const AuthUnified = () => {
@@ -32,7 +33,7 @@ const AuthUnified = () => {
     initIcons();
     
     // Set body background to prevent white flash
-    document.body.style.background = '#0e1015';
+    document.body.style.background = '#0f172a';
     document.body.style.overflow = 'hidden';
     
     return () => {
@@ -64,14 +65,8 @@ const AuthUnified = () => {
     try {
       const response = await login(email, password);
       
-      // Redirect based on role
-      if (response.role === 'ADMIN') {
-        navigate('/admin/dashboard');
-      } else if (response.role === 'DOCTOR') {
-        navigate('/doctor/dashboard');
-      } else {
-        navigate('/patient/dashboard');
-      }
+      // Redirect to homepage after login
+      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
       setLoading(false);
@@ -107,14 +102,8 @@ const AuthUnified = () => {
 
       const response = await register(userData);
       
-      // Redirect based on role
-      if (response.role === 'ADMIN') {
-        navigate('/admin/dashboard');
-      } else if (response.role === 'DOCTOR') {
-        navigate('/doctor/dashboard');
-      } else {
-        navigate('/patient/dashboard');
-      }
+      // Redirect to homepage after registration
+      navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
       setLoading(false);
@@ -141,6 +130,20 @@ const AuthUnified = () => {
 
   return (
     <div className="auth-unified-page">
+      {/* Video Background */}
+      <div className="auth-video-wrapper">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="auth-video"
+        >
+          <source src={videoBg} type="video/mp4" />
+        </video>
+        <div className="auth-video-overlay"></div>
+      </div>
+
       {/* Back to Home Button */}
       <Link to="/" className="linear-back-home">
         <i data-feather="arrow-left"></i>
