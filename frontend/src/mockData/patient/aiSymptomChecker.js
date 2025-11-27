@@ -138,3 +138,4 @@ export const specialtyMapping = {
   "Tai mũi họng": ["đau họng", "nghẹt mũi", "đau tai", "chảy mũi"]
 };
 
+

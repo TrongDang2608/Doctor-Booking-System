@@ -122,3 +122,4 @@ export const appointmentStats = {
   peakHours: ["09:00", "10:00", "14:00", "15:00"]
 };
 
+

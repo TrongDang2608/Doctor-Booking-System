@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#grad1)"/>
+  <!-- Medical cross -->
+  <rect x="45" y="30" width="10" height="40" rx="2" fill="#FFFFFF"/>
+  <rect x="30" y="45" width="40" height="10" rx="2" fill="#FFFFFF"/>
+  <!-- Small accent circles -->
+  <circle cx="25" cy="25" r="3" fill="#FFFFFF" opacity="0.6"/>
+  <circle cx="75" cy="25" r="3" fill="#FFFFFF" opacity="0.6"/>
+  <circle cx="25" cy="75" r="3" fill="#FFFFFF" opacity="0.6"/>
+  <circle cx="75" cy="75" r="3" fill="#FFFFFF" opacity="0.6"/>
+</svg>

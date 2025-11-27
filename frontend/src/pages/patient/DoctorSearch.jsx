@@ -4,6 +4,7 @@ import { patientService } from '../../services/patientService';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import DoctorDetail from '../../components/patient/DoctorDetail';
+import '../patient/patientPages.css';
 
 const DoctorSearch = () => {
   const [doctors, setDoctors] = useState([]);
@@ -68,37 +69,32 @@ const DoctorSearch = () => {
 
   return (
     <PatientLayout>
-      <div>
-        <h1 style={{ marginBottom: '20px' }}>Find Doctors</h1>
+      <div className="patient-page">
+        <h1>Find Doctors</h1>
 
-        <ErrorMessage message={error} onClose={() => setError('')} />
+        {error && <div className="alert alert-error">{error}</div>}
 
-        <div style={{ marginBottom: '20px' }}>
-          <input
-            type="text"
-            placeholder="Search by doctor name or specialization..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              maxWidth: '500px',
-              padding: '10px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '16px',
-            }}
-          />
+        <div className="patient-card" style={{ marginBottom: '2rem' }}>
+          <div className="form-group">
+            <input
+              type="text"
+              placeholder="Search by doctor name or specialization..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ maxWidth: '500px' }}
+            />
+          </div>
         </div>
 
         {loading && doctors.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '20px' }}>
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
             <Loading message="Loading doctors..." />
           </div>
         )}
 
         {!loading && doctors.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px', backgroundColor: 'white', borderRadius: '8px' }}>
-            <p>No doctors found</p>
+          <div className="patient-card" style={{ textAlign: 'center' }}>
+            <p style={{ color: '#aaa' }}>No doctors found</p>
           </div>
         )}
 
@@ -106,52 +102,38 @@ const DoctorSearch = () => {
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: '20px',
+            gap: '1.5rem',
           }}>
             {doctors.map((doctor) => (
               <div
                 key={doctor.id}
-                style={{
-                  backgroundColor: 'white',
-                  padding: '20px',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  border: '1px solid #e0e0e0',
-                }}
+                className="patient-card"
               >
-                <h3 style={{ marginTop: 0, marginBottom: '10px', color: '#3498db' }}>
+                <h3 style={{ marginTop: 0, marginBottom: '0.75rem', color: '#667eea' }}>
                   Dr. {doctor.fullName}
                 </h3>
-                <p style={{ margin: '5px 0', color: '#666' }}>
-                  <strong>Specialization:</strong> {doctor.specialization}
+                <p style={{ margin: '0.5rem 0', color: '#aaa' }}>
+                  <strong style={{ color: '#e0e0e0' }}>Specialization:</strong> {doctor.specialization}
                 </p>
                 {doctor.qualification && (
-                  <p style={{ margin: '5px 0', color: '#666', fontSize: '14px' }}>
+                  <p style={{ margin: '0.5rem 0', color: '#aaa', fontSize: '0.9rem' }}>
                     {doctor.qualification}
                   </p>
                 )}
                 {doctor.experience > 0 && (
-                  <p style={{ margin: '5px 0', color: '#666', fontSize: '14px' }}>
+                  <p style={{ margin: '0.5rem 0', color: '#aaa', fontSize: '0.9rem' }}>
                     {doctor.experience} years of experience
                   </p>
                 )}
                 {doctor.phone && (
-                  <p style={{ margin: '5px 0', color: '#666', fontSize: '14px' }}>
+                  <p style={{ margin: '0.5rem 0', color: '#aaa', fontSize: '0.9rem' }}>
                     📞 {doctor.phone}
                   </p>
                 )}
                 <button
                   onClick={() => handleViewDetails(doctor.id)}
-                  style={{
-                    marginTop: '15px',
-                    width: '100%',
-                    padding: '10px',
-                    backgroundColor: '#3498db',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                  }}
+                  className="btn btn-primary"
+                  style={{ marginTop: '1rem', width: '100%' }}
                 >
                   View Details
                 </button>
