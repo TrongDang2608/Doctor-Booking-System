@@ -44,6 +44,17 @@ const PatientLayout = ({ children }) => {
 
     return (
         <div className="patient-layout">
+            {/* Background Video */}
+            <video 
+                className="patient-background-video"
+                autoPlay
+                loop
+                muted
+                playsInline
+            >
+                <source src="/backgroundfe.mp4" type="video/mp4" />
+            </video>
+            
             {/* Sidebar */}
             <aside className={`patient-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
                 <div className="sidebar-header">

@@ -153,7 +153,7 @@ const Login = () => {
           <ErrorMessage message={error} onClose={() => setError('')} />
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="auth-form">
+          <form onSubmit={handleSubmit} className="auth-form" autoComplete="on">
             <div className="form-group">
               <label htmlFor="username">Tên đăng nhập hoặc Email</label>
               <input
@@ -163,6 +163,7 @@ const Login = () => {
                 value={loginData.username}
                 onChange={handleChange}
                 required
+                autoComplete="username"
                 placeholder="Nhập tên đăng nhập hoặc email"
               />
             </div>
@@ -176,6 +177,7 @@ const Login = () => {
                 value={loginData.password}
                 onChange={handleChange}
                 required
+                autoComplete="current-password"
                 placeholder="Nhập mật khẩu"
               />
             </div>
