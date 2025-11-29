@@ -172,15 +172,19 @@ const AuthUnified = () => {
           <form 
             onSubmit={isSignUp ? handleRegister : handleLogin} 
             className="auth-unified-form"
+            autoComplete="on"
           >
             {/* Full Name - Only in Sign Up */}
             <div className={`auth-form-field ${isSignUp ? 'expanded' : 'collapsed'}`}>
               <input
                 type="text"
+                name="fullName"
+                id="fullName"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Họ và tên"
                 required={isSignUp}
+                autoComplete="name"
                 className="linear-input"
               />
             </div>
@@ -189,10 +193,13 @@ const AuthUnified = () => {
             <div className={`auth-form-field ${isSignUp ? 'expanded' : 'collapsed'}`}>
               <input
                 type="text"
+                name="username"
+                id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Tên đăng nhập"
                 required={isSignUp}
+                autoComplete="username"
                 className="linear-input"
               />
             </div>
@@ -201,11 +208,14 @@ const AuthUnified = () => {
             <div className="auth-form-field">
               <input
                 type={isSignUp ? 'email' : 'text'}
+                name={isSignUp ? 'email' : 'username'}
+                id={isSignUp ? 'email' : 'username'}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={isSignUp ? 'Email' : 'Nhập Tên Đăng Nhập'}
                 required
                 autoFocus={!isSignUp}
+                autoComplete={isSignUp ? 'email' : 'username'}
                 className="linear-input"
               />
             </div>
@@ -214,10 +224,13 @@ const AuthUnified = () => {
             <div className={`auth-form-field ${isSignUp ? 'expanded' : 'collapsed'}`}>
               <input
                 type="tel"
+                name="phone"
+                id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Số điện thoại"
                 required={isSignUp}
+                autoComplete="tel"
                 className="linear-input"
               />
             </div>
@@ -227,10 +240,13 @@ const AuthUnified = () => {
               <div className="linear-password-wrapper">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Nhập Mật Khẩu"
                   required
+                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
                   className="linear-input"
                 />
                 <button
@@ -249,10 +265,13 @@ const AuthUnified = () => {
               <div className="linear-password-wrapper">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
+                  name="confirmPassword"
+                  id="confirmPassword"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Xác nhận mật khẩu"
                   required={isSignUp}
+                  autoComplete="new-password"
                   className="linear-input"
                 />
                 <button

@@ -114,16 +114,18 @@ const Register = () => {
         )}
 
         {/* Register Form */}
-        <form onSubmit={handleSubmit} className="linear-login-form">
+        <form onSubmit={handleSubmit} className="linear-login-form" autoComplete="on">
           <div className="linear-form-group">
             <input
               type="text"
               name="fullName"
+              id="fullName"
               value={formData.fullName}
               onChange={handleChange}
               placeholder="Họ và tên"
               required
               autoFocus
+              autoComplete="name"
               className="linear-input"
             />
           </div>
@@ -132,10 +134,12 @@ const Register = () => {
             <input
               type="text"
               name="username"
+              id="username"
               value={formData.username}
               onChange={handleChange}
               placeholder="Tên đăng nhập"
               required
+              autoComplete="username"
               className="linear-input"
             />
           </div>
@@ -144,10 +148,12 @@ const Register = () => {
             <input
               type="email"
               name="email"
+              id="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Email"
               required
+              autoComplete="email"
               className="linear-input"
             />
           </div>
@@ -156,10 +162,12 @@ const Register = () => {
             <input
               type="tel"
               name="phone"
+              id="phone"
               value={formData.phone}
               onChange={handleChange}
               placeholder="Số điện thoại"
               required
+              autoComplete="tel"
               className="linear-input"
             />
           </div>
@@ -169,10 +177,12 @@ const Register = () => {
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
+                id="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Mật khẩu"
                 required
+                autoComplete="new-password"
                 className="linear-input"
               />
               <button
@@ -191,10 +201,12 @@ const Register = () => {
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
+                id="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Xác nhận mật khẩu"
                 required
+                autoComplete="new-password"
                 className="linear-input"
               />
               <button

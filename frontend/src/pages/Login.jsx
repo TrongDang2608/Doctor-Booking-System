@@ -80,15 +80,18 @@ const Login = () => {
         )}
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="linear-login-form">
+        <form onSubmit={handleSubmit} className="linear-login-form" autoComplete="on">
           <div className="linear-form-group">
             <input
               type="text"
+              name="username"
+              id="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Nhập Tên Đăng Nhập"
               required
               autoFocus
+              autoComplete="username"
               className="linear-input"
             />
           </div>
@@ -97,10 +100,13 @@ const Login = () => {
             <div className="linear-password-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
+                name="password"
+                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Nhập Mật Khẩu"
                 required
+                autoComplete="current-password"
                 className="linear-input"
               />
               <button
