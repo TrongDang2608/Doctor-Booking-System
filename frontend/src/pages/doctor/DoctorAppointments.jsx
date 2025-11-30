@@ -6,6 +6,7 @@ import ErrorMessage from '../../components/common/ErrorMessage';
 import TreatmentForm from '../../components/doctor/TreatmentForm';
 import { formatDate } from '../../utils/formatDate';
 import { formatTime } from '../../utils/formatTime';
+import './DoctorAppointments.css';
 
 const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -84,35 +85,23 @@ const DoctorAppointments = () => {
 
   return (
       <DoctorLayout>
-        <div>
-          <h1 style={{ marginBottom: '20px' }}>My Appointments</h1>
+        <div className="doctor-appointments">
+          <h1 className="page-title">My Appointments</h1>
 
           <ErrorMessage message={error} onClose={() => setError('')} />
 
-          <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <label style={{ fontWeight: '500' }}>Filter by Date:</label>
+          <div className="filter-container">
+            <label className="filter-label">Filter by Date:</label>
             <input
                 type="date"
                 value={filterDate}
                 onChange={(e) => setFilterDate(e.target.value)}
-                style={{
-                  padding: '8px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '16px',
-                }}
+                className="filter-input"
             />
             {filterDate && (
                 <button
                     onClick={() => setFilterDate('')}
-                    style={{
-                      padding: '8px 15px',
-                      backgroundColor: '#95a5a6',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                    }}
+                    className="clear-filter-btn"
                 >
                   Clear Filter
                 </button>
@@ -120,67 +109,51 @@ const DoctorAppointments = () => {
           </div>
 
           {appointments.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px', backgroundColor: 'white', borderRadius: '8px' }}>
+              <div className="empty-state">
                 <p>No appointments found</p>
               </div>
           ) : (
-              <div style={{
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="appointments-table-container">
+                <table className="appointments-table">
                   <thead>
-                  <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Patient</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Date</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Time</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
-                    <th style={{ padding: '12px', textAlign: 'left' }}>Notes</th>
-                    <th style={{ padding: '12px', textAlign: 'center' }}>Actions</th>
+                  <tr>
+                    <th>Patient</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
                   </tr>
                   </thead>
                   <tbody>
                   {appointments.map((appointment) => (
-                      <tr key={appointment.id} style={{ borderBottom: '1px solid #dee2e6' }}>
-                        <td style={{ padding: '12px' }}>
-                          <div>{appointment.patientName}</div>
-                          <div style={{ fontSize: '12px', color: '#666' }}>{appointment.patientPhone}</div>
+                      <tr key={appointment.id}>
+                        <td>
+                          <div className="patient-info">
+                            <div className="patient-name">{appointment.patientName}</div>
+                            <div className="patient-phone">{appointment.patientPhone}</div>
+                          </div>
                         </td>
-                        <td style={{ padding: '12px' }}>{formatDate(appointment.appointmentDate)}</td>
-                        <td style={{ padding: '12px' }}>{formatTime(appointment.appointmentTime)}</td>
-                        <td style={{ padding: '12px' }}>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '4px',
+                        <td>{formatDate(appointment.appointmentDate)}</td>
+                        <td>{formatTime(appointment.appointmentTime)}</td>
+                        <td>
+                      <span className="status-badge" style={{
                         backgroundColor: getStatusColor(appointment.status) + '20',
                         color: getStatusColor(appointment.status),
-                        fontSize: '12px',
-                        fontWeight: '500',
                       }}>
                         {appointment.status}
                       </span>
                         </td>
-                        <td style={{ padding: '12px', maxWidth: '200px', fontSize: '14px' }}>
+                        <td className="notes-cell">
                           {appointment.notes || '-'}
                         </td>
-                        <td style={{ padding: '12px', textAlign: 'center' }}>
-                          <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <td className="actions-cell">
+                          <div className="actions-buttons">
                             {appointment.status === 'PENDING' && (
                                 <button
                                     onClick={() => handleConfirm(appointment.id)}
                                     disabled={processingId === appointment.id}
-                                    style={{
-                                      padding: '6px 12px',
-                                      backgroundColor: '#3498db',
-                                      color: 'white',
-                                      border: 'none',
-                                      borderRadius: '4px',
-                                      cursor: processingId === appointment.id ? 'not-allowed' : 'pointer',
-                                      fontSize: '12px',
-                                      opacity: processingId === appointment.id ? 0.6 : 1,
-                                    }}
+                                    className="action-btn confirm-btn"
                                 >
                                   {processingId === appointment.id ? 'Confirming...' : 'Confirm'}
                                 </button>
@@ -188,21 +161,13 @@ const DoctorAppointments = () => {
                             {appointment.status === 'CONFIRMED' && (
                                 <button
                                     onClick={() => handleCreateTreatment(appointment)}
-                                    style={{
-                                      padding: '6px 12px',
-                                      backgroundColor: '#2ecc71',
-                                      color: 'white',
-                                      border: 'none',
-                                      borderRadius: '4px',
-                                      cursor: 'pointer',
-                                      fontSize: '12px',
-                                    }}
+                                    className="action-btn treatment-btn"
                                 >
                                   Create Treatment
                                 </button>
                             )}
                             {appointment.status === 'COMPLETED' && (
-                                <span style={{ fontSize: '12px', color: '#666' }}>Completed</span>
+                                <span className="completed-text">Completed</span>
                             )}
                           </div>
                         </td>

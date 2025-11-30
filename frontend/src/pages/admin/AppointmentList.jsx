@@ -6,6 +6,7 @@ import ErrorMessage from '../../components/common/ErrorMessage';
 import DataTable from '../../components/common/DataTable';
 import { formatDate, formatDateTime } from '../../utils/formatDate';
 import { formatTime } from '../../utils/formatTime';
+import './adminPages.css';
 
 const AppointmentList = () => {
   const [appointments, setAppointments] = useState([]);
@@ -56,50 +57,25 @@ const AppointmentList = () => {
 
   return (
     <AdminLayout>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
-        <h1 style={{ marginBottom: '30px', fontSize: '32px', fontWeight: '600', color: '#2c3e50' }}>
+      <div className="admin-page">
+        <h1 className="page-title">
           Appointment Management
         </h1>
 
         <ErrorMessage message={error} onClose={() => setError('')} />
 
-        <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <label style={{ fontWeight: '500', color: '#495057' }}>Filter by Date:</label>
+        <div className="filter-container">
+          <label className="filter-label">Filter by Date:</label>
           <input
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            style={{
-              padding: '10px',
-              border: '1px solid #ddd',
-              borderRadius: '6px',
-              fontSize: '16px',
-              transition: 'border-color 0.2s',
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3498db'}
-            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+            className="filter-input"
           />
           {filterDate && (
             <button
               onClick={() => setFilterDate('')}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#95a5a6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#7f8c8d';
-                e.target.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = '#95a5a6';
-                e.target.style.transform = 'translateY(0)';
-              }}
+              className="clear-filter-btn"
             >
               Clear Filter
             </button>
@@ -113,8 +89,8 @@ const AppointmentList = () => {
               accessor: 'patientName',
               render: (appointment) => (
                 <div>
-                  <div style={{ fontWeight: '500' }}>{appointment.patientName}</div>
-                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                  <div style={{ fontWeight: '600', color: '#e0e0e0' }}>{appointment.patientName}</div>
+                  <div style={{ fontSize: '0.85rem', color: '#94A3B8', marginTop: '0.25rem' }}>
                     {appointment.patientPhone}
                   </div>
                 </div>
@@ -125,8 +101,8 @@ const AppointmentList = () => {
               accessor: 'doctorName',
               render: (appointment) => (
                 <div>
-                  <div style={{ fontWeight: '500' }}>{appointment.doctorName}</div>
-                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                  <div style={{ fontWeight: '600', color: '#e0e0e0' }}>{appointment.doctorName}</div>
+                  <div style={{ fontSize: '0.85rem', color: '#94A3B8', marginTop: '0.25rem' }}>
                     {appointment.doctorSpecialization}
                   </div>
                 </div>
@@ -148,13 +124,9 @@ const AppointmentList = () => {
               render: (appointment) => {
                 const color = getStatusColor(appointment.status);
                 return (
-                  <span style={{
-                    padding: '6px 12px',
-                    borderRadius: '4px',
+                  <span className="status-badge" style={{
                     backgroundColor: color + '20',
                     color: color,
-                    fontSize: '12px',
-                    fontWeight: '500',
                   }}>
                     {appointment.status}
                   </span>
@@ -165,7 +137,7 @@ const AppointmentList = () => {
               header: 'Notes',
               accessor: 'notes',
               render: (appointment) => (
-                <div style={{ maxWidth: '200px', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ maxWidth: '200px', fontSize: '0.9rem', color: '#94A3B8', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {appointment.notes || '-'}
                 </div>
               )

@@ -4,6 +4,7 @@ import { doctorService } from '../../services/doctorService';
 import Loading from '../../components/common/Loading';
 import StatCard from '../../components/common/StatCard';
 import ActionButton from '../../components/common/ActionButton';
+import './DoctorDashboard.css';
 
 const DoctorDashboard = () => {
   const [stats, setStats] = useState({
@@ -67,45 +68,28 @@ const DoctorDashboard = () => {
 
   return (
     <DoctorLayout>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
-        <h1 style={{ marginBottom: '30px', fontSize: '32px', fontWeight: '600', color: '#2c3e50' }}>
+      <div className="doctor-dashboard">
+        <h1 className="dashboard-title">
           Doctor Dashboard
         </h1>
         
         {error && (
-          <div style={{
-            marginBottom: '20px',
-            padding: '12px 16px',
-            backgroundColor: '#fee',
-            color: '#c33',
-            borderRadius: '6px',
-            border: '1px solid #fcc'
-          }}>
+          <div className="error-message">
             {error}
           </div>
         )}
         
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-          gap: '20px',
-          marginBottom: '30px'
-        }}>
+        <div className="stats-grid">
           {statCards.map((card, index) => (
             <StatCard key={index} {...card} />
           ))}
         </div>
 
-        <div style={{ 
-          backgroundColor: 'white', 
-          padding: '30px', 
-          borderRadius: '8px', 
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          <h2 style={{ marginBottom: '20px', fontSize: '24px', fontWeight: '600', color: '#2c3e50' }}>
+        <div className="quick-actions-card">
+          <h2 className="quick-actions-title">
             Quick Actions
           </h2>
-          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+          <div className="actions-container">
             <ActionButton to="/doctor/appointments" color="#3498db">
               View Appointments
             </ActionButton>

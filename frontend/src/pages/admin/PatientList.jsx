@@ -5,6 +5,7 @@ import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import DataTable from '../../components/common/DataTable';
 import { formatDate } from '../../utils/formatDate';
+import './adminPages.css';
 
 const PatientList = () => {
   const [allPatients, setAllPatients] = useState([]);
@@ -72,30 +73,20 @@ const PatientList = () => {
 
   return (
     <AdminLayout>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
-        <h1 style={{ marginBottom: '30px', fontSize: '32px', fontWeight: '600', color: '#2c3e50' }}>
+      <div className="admin-page">
+        <h1 className="page-title">
           Patient Management
         </h1>
 
         <ErrorMessage message={error} onClose={() => setError('')} />
 
-        <div style={{ marginBottom: '20px' }}>
+        <div className="search-container">
           <input
             type="text"
             placeholder="Search patients by name, ID, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              maxWidth: '500px',
-              padding: '12px 16px',
-              border: '1px solid #ddd',
-              borderRadius: '6px',
-              fontSize: '16px',
-              transition: 'border-color 0.2s',
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3498db'}
-            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+            className="search-input"
           />
         </div>
 
@@ -123,18 +114,7 @@ const PatientList = () => {
                     e.stopPropagation();
                     handleViewDetails(patient.id);
                   }}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#3498db',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#2980b9'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#3498db'}
+                  className="btn-view"
                 >
                   View Details
                 </button>
@@ -163,80 +143,80 @@ const PatientDetailModal = ({ patient, onClose }) => {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      backdropFilter: 'blur(4px)',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 1000,
+      padding: '2rem',
     }}>
       <div style={{
-        backgroundColor: 'white',
-        padding: '30px',
-        borderRadius: '8px',
+        backgroundColor: 'rgba(15, 15, 15, 0.95)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        padding: '2rem',
+        borderRadius: '16px',
         width: '90%',
         maxWidth: '700px',
         maxHeight: '90vh',
         overflowY: 'auto',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+        color: '#e0e0e0',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2>Patient Details</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <h2 style={{ margin: 0, color: '#e0e0e0' }}>Patient Details</h2>
           <button
             onClick={onClose}
             style={{
-              background: 'none',
+              background: 'transparent',
               border: 'none',
               fontSize: '24px',
               cursor: 'pointer',
+              color: '#aaa',
+              padding: '0.5rem',
+              borderRadius: '8px',
+              transition: 'all 0.2s',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.target.style.color = '#e0e0e0';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'transparent';
+              e.target.style.color = '#aaa';
             }}
           >
             ×
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <strong>ID:</strong> {patient.id}
-          </div>
-          <div>
-            <strong>Name:</strong> {patient.fullName}
-          </div>
-          <div>
-            <strong>Email:</strong> {patient.email}
-          </div>
-          <div>
-            <strong>Phone:</strong> {patient.phone || '-'}
-          </div>
-          <div>
-            <strong>Date of Birth:</strong> {patient.dateOfBirth ? formatDate(patient.dateOfBirth) : '-'}
-          </div>
-          <div>
-            <strong>Gender:</strong> {patient.gender || '-'}
-          </div>
-          <div>
-            <strong>Address:</strong> {patient.address || '-'}
-          </div>
-          <div>
-            <strong>Emergency Contact:</strong> {patient.emergencyContact || '-'}
-          </div>
-          <div>
-            <strong>Emergency Phone:</strong> {patient.emergencyPhone || '-'}
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem', padding: '1.5rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
+          <div><strong style={{ color: '#06b6d4' }}>ID:</strong> <span style={{ color: '#e0e0e0' }}>{patient.id}</span></div>
+          <div><strong style={{ color: '#06b6d4' }}>Name:</strong> <span style={{ color: '#e0e0e0' }}>{patient.fullName}</span></div>
+          <div><strong style={{ color: '#06b6d4' }}>Email:</strong> <span style={{ color: '#e0e0e0' }}>{patient.email}</span></div>
+          <div><strong style={{ color: '#06b6d4' }}>Phone:</strong> <span style={{ color: '#e0e0e0' }}>{patient.phone || '-'}</span></div>
+          <div><strong style={{ color: '#06b6d4' }}>Date of Birth:</strong> <span style={{ color: '#e0e0e0' }}>{patient.dateOfBirth ? formatDate(patient.dateOfBirth) : '-'}</span></div>
+          <div><strong style={{ color: '#06b6d4' }}>Gender:</strong> <span style={{ color: '#e0e0e0' }}>{patient.gender || '-'}</span></div>
+          <div><strong style={{ color: '#06b6d4' }}>Address:</strong> <span style={{ color: '#e0e0e0' }}>{patient.address || '-'}</span></div>
+          <div><strong style={{ color: '#06b6d4' }}>Emergency Contact:</strong> <span style={{ color: '#e0e0e0' }}>{patient.emergencyContact || '-'}</span></div>
+          <div><strong style={{ color: '#06b6d4' }}>Emergency Phone:</strong> <span style={{ color: '#e0e0e0' }}>{patient.emergencyPhone || '-'}</span></div>
         </div>
 
         {patient.treatments && patient.treatments.length > 0 && (
-          <div style={{ marginTop: '30px' }}>
-            <h3>Treatment History</h3>
+          <div style={{ marginTop: '2rem' }}>
+            <h3 style={{ color: '#e0e0e0', marginBottom: '1rem' }}>Treatment History</h3>
             <div style={{
-              backgroundColor: '#f8f9fa',
-              padding: '15px',
-              borderRadius: '4px',
-              marginTop: '10px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              padding: '1.5rem',
+              borderRadius: '12px',
+              marginTop: '1rem',
             }}>
               {patient.treatments.map((treatment) => (
-                <div key={treatment.id} style={{ marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #dee2e6' }}>
-                  <div><strong>Date:</strong> {formatDate(treatment.createdAt)}</div>
-                  <div><strong>Doctor:</strong> {treatment.doctorName}</div>
-                  {treatment.diagnosis && <div><strong>Diagnosis:</strong> {treatment.diagnosis}</div>}
+                <div key={treatment.id} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                  <div style={{ color: '#e0e0e0' }}><strong style={{ color: '#06b6d4' }}>Date:</strong> {formatDate(treatment.createdAt)}</div>
+                  <div style={{ color: '#e0e0e0' }}><strong style={{ color: '#06b6d4' }}>Doctor:</strong> {treatment.doctorName}</div>
+                  {treatment.diagnosis && <div style={{ color: '#e0e0e0' }}><strong style={{ color: '#06b6d4' }}>Diagnosis:</strong> {treatment.diagnosis}</div>}
                 </div>
               ))}
             </div>
@@ -245,15 +225,8 @@ const PatientDetailModal = ({ patient, onClose }) => {
 
         <button
           onClick={onClose}
-          style={{
-            marginTop: '20px',
-            padding: '10px 20px',
-            backgroundColor: '#95a5a6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          className="btn-cancel"
+          style={{ marginTop: '20px' }}
         >
           Close
         </button>
