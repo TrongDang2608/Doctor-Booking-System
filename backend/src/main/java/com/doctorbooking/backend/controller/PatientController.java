@@ -7,6 +7,8 @@ import com.doctorbooking.backend.dto.request.UpdatePatientProfileRequest;
 import com.doctorbooking.backend.dto.response.*;
 import com.doctorbooking.backend.model.User;
 import com.doctorbooking.backend.service.*;
+import com.doctorbooking.backend.dto.request.SymptomCheckRequest; // Thêm import
+import com.doctorbooking.backend.dto.response.SymptomCheckResponse; // Thêm import
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @RestController
@@ -30,6 +34,7 @@ public class PatientController {
     private final TreatmentService treatmentService;
     private final FeedbackService feedbackService;
     private final UserService userService;
+    private final AISymptomService aiSymptomService;
 
     // ========== Profile Management ==========
 
@@ -233,6 +238,21 @@ public class PatientController {
         Long userId = getCurrentUserId();
         PatientResponse patient = patientService.getPatientByUserId(userId);
         return patient.getId();
+    }
+
+    // ========== Methods AISymptoms ==========
+    private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
+
+    @PostMapping("/ai/check-symptoms")
+    public ResponseEntity<SymptomCheckResponse> checkSymptoms(@Valid @RequestBody SymptomCheckRequest request) {
+        logger.info("Nhận request Check Triệu chứng từ Client. Input: {}", request.getSymptoms());
+        try {
+            SymptomCheckResponse response = aiSymptomService.analyzeSymptoms(request.getSymptoms());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Controller bắt được lỗi: ", e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
 
