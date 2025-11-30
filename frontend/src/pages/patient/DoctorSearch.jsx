@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, MapPin, Clock, Star, Award, Video, 
-  CheckCircle, XCircle, Compare, X, Calendar,
+  CheckCircle, XCircle, GitCompare, X, Calendar,
   TrendingUp, DollarSign, User
 } from 'lucide-react';
 import PatientLayout from '../../components/patient/PatientLayout';
@@ -123,7 +123,10 @@ const DoctorSearch = () => {
           address: doctor.address || `123 Medical Street, District ${index + 1}`
         },
         price: 200000 + Math.floor(Math.random() * 300000),
-        videoStoryUrl: `/api/videos/doctor-${doctor.id}.mp4` // Mock video URL
+        // Video URL priority: 1) From API, 2) From public root (/doctor-{id}.mp4), 3) From videos folder, 4) null (show initial)
+        videoStoryUrl: doctor.videoStoryUrl || 
+                      doctor.videoUrl || 
+                      (doctor.id ? `/doctor-${doctor.id}.mp4` : null)
       }));
       
       setDoctors(enhanced);
@@ -274,16 +277,18 @@ const DoctorSearch = () => {
                       onMouseLeave={() => handleVideoHover(doctor.id, false)}
                     >
                       <div className="video-ring-container">
-                        <video
-                          ref={el => videoRefs.current[doctor.id] = el}
-                          className="video-story"
-                          muted
-                          loop
-                          playsInline
-                          onError={() => handleVideoError(doctor.id)}
-                        >
-                          <source src={doctor.videoStoryUrl} type="video/mp4" />
-                        </video>
+                        {doctor.videoStoryUrl && (
+                          <video
+                            ref={el => videoRefs.current[doctor.id] = el}
+                            className="video-story"
+                            muted
+                            loop
+                            playsInline
+                            onError={() => handleVideoError(doctor.id)}
+                          >
+                            <source src={doctor.videoStoryUrl} type="video/mp4" />
+                          </video>
+                        )}
                         <div className="video-ring-overlay">
                           <div className="doctor-initial">
                             {doctor.fullName?.charAt(0) || 'D'}
@@ -416,7 +421,7 @@ const DoctorSearch = () => {
               onClick={() => setShowCompareModal(true)}
             >
               <div className="compare-widget-content">
-                <Compare size={20} />
+                <GitCompare size={20} />
                 <span>Comparing {compareList.length} Doctor{compareList.length > 1 ? 's' : ''}</span>
                 <button 
                   className="compare-close"

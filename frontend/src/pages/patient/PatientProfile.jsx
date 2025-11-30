@@ -86,8 +86,6 @@ const PatientProfile = () => {
   const loadAllData = async () => {
     try {
       setLoading(true);
-      // Simulate loading delay for skeleton effect
-      await new Promise(resolve => setTimeout(resolve, 2000));
       
       const [profileData, treatmentsData] = await Promise.all([
         patientService.getProfile().catch(() => null),
