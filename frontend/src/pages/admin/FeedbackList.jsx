@@ -4,6 +4,7 @@ import { adminService } from '../../services/adminService';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import { formatDate } from '../../utils/formatDate';
+import './adminPages.css';
 
 const FeedbackList = () => {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -50,22 +51,17 @@ const FeedbackList = () => {
 
   return (
     <AdminLayout>
-      <div>
-        <h1 style={{ marginBottom: '20px' }}>Feedback Management</h1>
+      <div className="admin-page">
+        <h1 className="page-title">Feedback Management</h1>
 
         <ErrorMessage message={error} onClose={() => setError('')} />
 
-        <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <label style={{ fontWeight: '500' }}>Filter by Status:</label>
+        <div className="filter-container">
+          <label className="filter-label">Filter by Status:</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            style={{
-              padding: '8px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '16px',
-            }}
+            className="filter-select"
           >
             <option value="">All</option>
             <option value="PENDING">Pending</option>
@@ -74,64 +70,49 @@ const FeedbackList = () => {
         </div>
 
         {feedbacks.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px', backgroundColor: 'white', borderRadius: '8px' }}>
+          <div className="empty-state">
             <p>No feedbacks found</p>
           </div>
         ) : (
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '8px',
-            overflow: 'hidden',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="table-container">
+            <table className="admin-table">
               <thead>
-                <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #dee2e6' }}>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Patient</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Rating</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Comment</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Status</th>
-                  <th style={{ padding: '12px', textAlign: 'left' }}>Date</th>
-                  <th style={{ padding: '12px', textAlign: 'center' }}>Actions</th>
+                <tr>
+                  <th>Patient</th>
+                  <th>Rating</th>
+                  <th>Comment</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {feedbacks.map((feedback) => (
-                  <tr key={feedback.id} style={{ borderBottom: '1px solid #dee2e6' }}>
-                    <td style={{ padding: '12px' }}>{feedback.patientName}</td>
-                    <td style={{ padding: '12px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <tr key={feedback.id}>
+                    <td style={{ color: '#e0e0e0' }}>{feedback.patientName}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <span>{'⭐'.repeat(feedback.rating)}</span>
-                        <span style={{ fontSize: '14px', color: '#666' }}>({feedback.rating}/5)</span>
+                        <span style={{ fontSize: '0.85rem', color: '#94A3B8' }}>({feedback.rating}/5)</span>
                       </div>
                     </td>
-                    <td style={{ padding: '12px', maxWidth: '300px' }}>
+                    <td style={{ maxWidth: '300px', color: '#94A3B8' }}>
                       {feedback.comment || '-'}
                     </td>
-                    <td style={{ padding: '12px' }}>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        backgroundColor: feedback.status === 'READ' ? '#d4edda' : '#fff3cd',
-                        color: feedback.status === 'READ' ? '#155724' : '#856404',
-                        fontSize: '12px',
+                    <td>
+                      <span className="status-badge" style={{
+                        backgroundColor: feedback.status === 'READ' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                        color: feedback.status === 'READ' ? '#10B981' : '#F59E0B',
                       }}>
                         {feedback.status}
                       </span>
                     </td>
-                    <td style={{ padding: '12px' }}>{formatDate(feedback.createdAt)}</td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <td style={{ color: '#94A3B8' }}>{formatDate(feedback.createdAt)}</td>
+                    <td className="actions-cell">
                       {feedback.status === 'PENDING' && (
                         <button
                           onClick={() => handleMarkAsRead(feedback.id)}
-                          style={{
-                            padding: '5px 10px',
-                            backgroundColor: '#3498db',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                          }}
+                          className="btn-mark-read"
                         >
                           Mark as Read
                         </button>

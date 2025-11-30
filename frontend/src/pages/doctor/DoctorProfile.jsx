@@ -3,6 +3,7 @@ import DoctorLayout from '../../components/doctor/DoctorLayout';
 import { doctorService } from '../../services/doctorService';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
+import './DoctorProfile.css';
 
 const DoctorProfile = () => {
   const [profile, setProfile] = useState(null);
@@ -113,20 +114,13 @@ const DoctorProfile = () => {
 
   return (
     <DoctorLayout>
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h1>My Profile</h1>
+      <div className="doctor-profile">
+        <div className="profile-header">
+          <h1 className="profile-title">My Profile</h1>
           {!editMode && (
             <button
               onClick={() => setEditMode(true)}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#3498db',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
+              className="edit-btn"
             >
               Edit Profile
             </button>
@@ -135,269 +129,223 @@ const DoctorProfile = () => {
 
         <ErrorMessage message={error} onClose={() => setError('')} />
         {success && (
-          <div style={{
-            padding: '15px',
-            backgroundColor: '#d4edda',
-            border: '1px solid #c3e6cb',
-            borderRadius: '4px',
-            color: '#155724',
-            marginBottom: '15px',
-          }}>
+          <div className="success-message">
             {success}
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+        <div className="profile-grid">
           {/* Profile Information */}
-          <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ marginBottom: '20px' }}>Profile Information</h2>
+          <div className="profile-card">
+            <h2 className="card-title">Profile Information</h2>
             {!editMode ? (
-              <div style={{ display: 'grid', gap: '15px' }}>
-                <div>
+              <div className="profile-info">
+                <div className="info-item">
                   <strong>Full Name:</strong> {profile.fullName}
                 </div>
-                <div>
+                <div className="info-item">
                   <strong>Specialization:</strong> {profile.specialization}
                 </div>
-                <div>
+                <div className="info-item">
                   <strong>Qualification:</strong> {profile.qualification || '-'}
                 </div>
-                <div>
+                <div className="info-item">
                   <strong>Experience:</strong> {profile.experience} years
                 </div>
-                <div>
+                <div className="info-item">
                   <strong>Email:</strong> {profile.email}
                 </div>
-                <div>
+                <div className="info-item">
                   <strong>Phone:</strong> {profile.phone || '-'}
                 </div>
-                <div>
+                <div className="info-item">
                   <strong>Address:</strong> {profile.address || '-'}
                 </div>
                 {profile.bio && (
-                  <div>
+                  <div className="info-item">
                     <strong>Bio:</strong>
-                    <p style={{ marginTop: '5px', color: '#666' }}>{profile.bio}</p>
+                    <p>{profile.bio}</p>
                   </div>
                 )}
               </div>
             ) : (
-              <form onSubmit={handleUpdateProfile}>
-                <div style={{ display: 'grid', gap: '15px' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      required
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Specialization *
-                    </label>
-                    <input
-                      type="text"
-                      name="specialization"
-                      value={formData.specialization}
-                      onChange={handleInputChange}
-                      required
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Qualification
-                    </label>
-                    <input
-                      type="text"
-                      name="qualification"
-                      value={formData.qualification}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Experience (years)
-                    </label>
-                    <input
-                      type="number"
-                      name="experience"
-                      value={formData.experience}
-                      onChange={handleInputChange}
-                      min="0"
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Phone
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Address
-                    </label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Bio
-                    </label>
-                    <textarea
-                      name="bio"
-                      value={formData.bio}
-                      onChange={handleInputChange}
-                      rows="4"
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit' }}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      type="submit"
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#2ecc71',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Save Changes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditMode(false);
-                        loadProfile();
-                      }}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#95a5a6',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
+              <form onSubmit={handleUpdateProfile} className="profile-form">
+                <div>
+                  <label className="form-label">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    required
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">
+                    Specialization *
+                  </label>
+                  <input
+                    type="text"
+                    name="specialization"
+                    value={formData.specialization}
+                    onChange={handleInputChange}
+                    required
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">
+                    Qualification
+                  </label>
+                  <input
+                    type="text"
+                    name="qualification"
+                    value={formData.qualification}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">
+                    Experience (years)
+                  </label>
+                  <input
+                    type="number"
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleInputChange}
+                    min="0"
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">
+                    Address
+                  </label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">
+                    Bio
+                  </label>
+                  <textarea
+                    name="bio"
+                    value={formData.bio}
+                    onChange={handleInputChange}
+                    rows="4"
+                    className="form-textarea"
+                  />
+                </div>
+                <div className="form-buttons">
+                  <button
+                    type="submit"
+                    className="btn-save"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditMode(false);
+                      loadProfile();
+                    }}
+                    className="btn-cancel"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </form>
             )}
           </div>
 
           {/* Change Password */}
-          <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ marginBottom: '20px' }}>Change Password</h2>
+          <div className="profile-card">
+            <h2 className="card-title">Change Password</h2>
             {!showPasswordForm ? (
               <button
                 onClick={() => setShowPasswordForm(true)}
-                style={{
-                  padding: '10px 20px',
-                  backgroundColor: '#e74c3c',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
+                className="btn-change-password"
               >
                 Change Password
               </button>
             ) : (
-              <form onSubmit={handleChangePassword}>
-                <div style={{ display: 'grid', gap: '15px' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Current Password *
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                      required
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      New Password *
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                      required
-                      minLength={6}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                      Confirm New Password *
-                    </label>
-                    <input
-                      type="password"
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                      required
-                      minLength={6}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
-                    />
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      type="submit"
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#2ecc71',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Update Password
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowPasswordForm(false);
-                        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                      }}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#95a5a6',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
+              <form onSubmit={handleChangePassword} className="profile-form">
+                <div>
+                  <label className="form-label">
+                    Current Password *
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    required
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">
+                    New Password *
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    required
+                    minLength={6}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">
+                    Confirm New Password *
+                  </label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    required
+                    minLength={6}
+                    className="form-input"
+                  />
+                </div>
+                <div className="form-buttons">
+                  <button
+                    type="submit"
+                    className="btn-save"
+                  >
+                    Update Password
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordForm(false);
+                      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                    }}
+                    className="btn-cancel"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </form>
             )}

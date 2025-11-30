@@ -5,6 +5,7 @@ import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import DataTable from '../../components/common/DataTable';
 import DoctorForm from '../../components/admin/DoctorForm';
+import './adminPages.css';
 
 const DoctorManagement = () => {
   const [allDoctors, setAllDoctors] = useState([]);
@@ -90,32 +91,14 @@ const DoctorManagement = () => {
 
   return (
     <AdminLayout>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: '600', color: '#2c3e50', margin: 0 }}>
+      <div className="admin-page">
+        <div className="page-header">
+          <h1 className="page-title">
             Doctor Management
           </h1>
           <button
             onClick={handleCreate}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#2ecc71',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: '500',
-              fontSize: '14px',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#27ae60';
-              e.target.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#2ecc71';
-              e.target.style.transform = 'translateY(0)';
-            }}
+            className="btn-primary"
           >
             + Add Doctor
           </button>
@@ -123,23 +106,13 @@ const DoctorManagement = () => {
 
         <ErrorMessage message={error} onClose={() => setError('')} />
 
-        <div style={{ marginBottom: '20px' }}>
+        <div className="search-container">
           <input
             type="text"
             placeholder="Search doctors by name, specialization, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              maxWidth: '500px',
-              padding: '12px 16px',
-              border: '1px solid #ddd',
-              borderRadius: '6px',
-              fontSize: '16px',
-              transition: 'border-color 0.2s',
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3498db'}
-            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+            className="search-input"
           />
         </div>
 
@@ -165,13 +138,9 @@ const DoctorManagement = () => {
               header: 'Status',
               accessor: 'status',
               render: (doctor) => (
-                <span style={{
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  backgroundColor: doctor.status === 'ACTIVE' ? '#d4edda' : '#f8d7da',
-                  color: doctor.status === 'ACTIVE' ? '#155724' : '#721c24',
-                  fontSize: '12px',
-                  fontWeight: '500',
+                <span className="status-badge" style={{
+                  backgroundColor: doctor.status === 'ACTIVE' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                  color: doctor.status === 'ACTIVE' ? '#10B981' : '#EF4444',
                 }}>
                   {doctor.status}
                 </span>
@@ -181,24 +150,13 @@ const DoctorManagement = () => {
               header: 'Actions',
               align: 'center',
               render: (doctor) => (
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                <div className="action-buttons">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEdit(doctor);
                     }}
-                    style={{
-                      padding: '6px 12px',
-                      backgroundColor: '#3498db',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#2980b9'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#3498db'}
+                    className="btn-edit"
                   >
                     Edit
                   </button>
@@ -207,18 +165,7 @@ const DoctorManagement = () => {
                       e.stopPropagation();
                       handleDelete(doctor.id);
                     }}
-                    style={{
-                      padding: '6px 12px',
-                      backgroundColor: '#e74c3c',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#c0392b'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#e74c3c'}
+                    className="btn-delete"
                   >
                     Delete
                   </button>
