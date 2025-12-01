@@ -36,12 +36,13 @@ const HealthAIChat = ({ onClose, isFullPage = false }) => {
     };
 
     setChatHistory(prev => [...prev, userMessage]);
+    const currentInput = inputValue;
     setInputValue('');
     setIsTyping(true);
 
     try {
       // Logic điều hướng nhanh client-side
-      const lowerInput = userMessage.content.toLowerCase();
+      const lowerInput = currentInput.toLowerCase();
       if (lowerInput.includes('ví') || lowerInput.includes('wallet')) {
         setTimeout(() => { setActiveMode('wallet'); setIsTyping(false); }, 500);
         return;
@@ -51,8 +52,43 @@ const HealthAIChat = ({ onClose, isFullPage = false }) => {
         return;
       }
 
-      // Gọi AI Service
-      const data = await patientService.checkSymptoms(userMessage.content);
+      // Gọi AI Service với error handling tốt hơn
+      let data;
+      try {
+        data = await patientService.checkSymptoms(currentInput);
+      } catch (apiError) {
+        console.error("API Error:", apiError);
+        
+        // Kiểm tra nếu response có data (có thể là error response từ server)
+        if (apiError.response && apiError.response.data) {
+          data = apiError.response.data;
+        } else {
+          // Tạo fallback response thông minh
+          data = {
+            suggestedSpecialization: 'Other',
+            riskLevel: 'Low',
+            advice: 'Xin lỗi, tôi gặp khó khăn trong việc kết nối với hệ thống. ' +
+                    'Vui lòng thử lại sau một chút hoặc mô tả lại câu hỏi/triệu chứng của bạn.',
+            reason: 'Lỗi kết nối với hệ thống',
+            homeRemedies: [
+              'Kiểm tra kết nối mạng của bạn.',
+              'Thử lại sau vài phút.',
+              'Mô tả lại câu hỏi một cách chi tiết hơn.'
+            ]
+          };
+        }
+      }
+
+      // Validate và đảm bảo data có đầy đủ thông tin
+      if (!data || !data.advice) {
+        data = {
+          suggestedSpecialization: data?.suggestedSpecialization || 'Other',
+          riskLevel: data?.riskLevel || 'Low',
+          advice: data?.advice || 'Xin lỗi, tôi không thể xử lý câu hỏi này. Vui lòng thử lại hoặc mô tả rõ hơn.',
+          reason: data?.reason || 'Không thể phân tích được thông tin',
+          homeRemedies: data?.homeRemedies || ['Vui lòng thử lại với thông tin chi tiết hơn.']
+        };
+      }
 
       // Xử lý logic hiển thị
       // Nếu là 'Other' hoặc 'General' (khi không có khoa phù hợp), ta sẽ không hiện nút đặt lịch
@@ -63,9 +99,9 @@ const HealthAIChat = ({ onClose, isFullPage = false }) => {
       const aiResponse = {
         id: Date.now() + 1,
         type: 'ai',
-        content: data.advice, // Lời khuyên chính
-        homeRemedies: data.homeRemedies, // Cách giảm đau tại nhà
-        reason: data.reason,
+        content: data.advice || 'Xin lỗi, tôi không thể xử lý câu hỏi này.',
+        homeRemedies: data.homeRemedies || [],
+        reason: data.reason || '',
         timestamp: new Date(),
         // Chỉ tạo object suggestion nếu có khoa phù hợp
         suggestion: isBookingAvailable ? {
@@ -77,11 +113,18 @@ const HealthAIChat = ({ onClose, isFullPage = false }) => {
       setChatHistory(prev => [...prev, aiResponse]);
 
     } catch (error) {
-      console.error("AI Error:", error);
+      console.error("Unexpected Error:", error);
+      // Tạo response lỗi thân thiện hơn
       setChatHistory(prev => [...prev, {
         id: Date.now() + 1,
         type: 'ai',
-        content: 'Xin lỗi, hệ thống đang bận hoặc gặp lỗi kết nối. Vui lòng thử lại sau.',
+        content: 'Xin lỗi, tôi gặp sự cố không mong đợi. Vui lòng thử lại sau một chút.',
+        reason: 'Lỗi hệ thống',
+        homeRemedies: [
+          'Thử lại sau vài phút.',
+          'Kiểm tra kết nối mạng.',
+          'Liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục.'
+        ],
         timestamp: new Date()
       }]);
     } finally {
@@ -138,19 +181,28 @@ const HealthAIChat = ({ onClose, isFullPage = false }) => {
                                   {/* Hiển thị nội dung chính */}
                                   <p style={{whiteSpace: 'pre-line'}}>{msg.content}</p>
 
-                                  {/* Hiển thị phần chi tiết từ AI */}
+                                  {/* Hiển thị phần chi tiết từ AI - CHỈ hiển thị khi có thông tin thực sự */}
                                   {msg.type === 'ai' && (
                                       <div className="ai-details" style={{fontSize: '0.9rem', marginTop: '10px'}}>
 
-                                        {/* 1. Lý do chẩn đoán (Chữ nhỏ, màu xám) */}
-                                        {msg.reason && (
+                                        {/* 1. Lý do chẩn đoán - CHỈ hiển thị khi có reason thực sự và không phải log kỹ thuật */}
+                                        {msg.reason && 
+                                         msg.reason.trim() !== '' && 
+                                         !msg.reason.toLowerCase().includes('người dùng') &&
+                                         !msg.reason.toLowerCase().includes('cần thêm thông tin') &&
+                                         !msg.reason.toLowerCase().includes('chỉ nói') && (
                                             <p style={{color: '#666', fontStyle: 'italic', marginBottom: '8px'}}>
                                               🔍 <strong>Chẩn đoán:</strong> {msg.reason}
                                             </p>
                                         )}
 
-                                        {/* 2. Lời khuyên tại nhà (Khung màu xanh) */}
-                                        {msg.homeRemedies && msg.homeRemedies.length > 0 && (
+                                        {/* 2. Lời khuyên tại nhà - CHỈ hiển thị khi có homeRemedies và có reason (nghĩa là có phân tích y tế) */}
+                                        {msg.homeRemedies && 
+                                         msg.homeRemedies.length > 0 && 
+                                         msg.reason && 
+                                         msg.reason.trim() !== '' &&
+                                         !msg.reason.toLowerCase().includes('người dùng') &&
+                                         !msg.reason.toLowerCase().includes('chỉ nói') && (
                                             <div style={{
                                               backgroundColor: '#f0fdf4',
                                               borderLeft: '4px solid #22c55e',

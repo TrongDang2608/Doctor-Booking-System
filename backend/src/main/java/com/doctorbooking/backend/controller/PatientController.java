@@ -245,13 +245,53 @@ public class PatientController {
 
     @PostMapping("/ai/check-symptoms")
     public ResponseEntity<SymptomCheckResponse> checkSymptoms(@Valid @RequestBody SymptomCheckRequest request) {
-        logger.info("Nhận request Check Triệu chứng từ Client. Input: {}", request.getSymptoms());
+        logger.info("Nhận request từ Client. Input: {}", request.getSymptoms());
         try {
-            SymptomCheckResponse response = aiSymptomService.analyzeSymptoms(request.getSymptoms());
+            // Validate input
+            if (request.getSymptoms() == null || request.getSymptoms().trim().isEmpty()) {
+                logger.warn("Input rỗng hoặc null");
+                SymptomCheckResponse errorResponse = new SymptomCheckResponse(
+                        "Other",
+                        "Low",
+                        "Vui lòng mô tả triệu chứng hoặc câu hỏi của bạn.",
+                        "Thiếu thông tin đầu vào",
+                        List.of("Nhập mô tả triệu chứng hoặc câu hỏi của bạn vào ô chat.")
+                );
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+
+            // Gọi service
+            SymptomCheckResponse response = aiSymptomService.analyzeSymptoms(request.getSymptoms().trim());
+            logger.info("Trả về response thành công cho input: {}", request.getSymptoms());
             return ResponseEntity.ok(response);
+            
+        } catch (IllegalArgumentException e) {
+            logger.warn("Lỗi validation: {}", e.getMessage());
+            SymptomCheckResponse errorResponse = new SymptomCheckResponse(
+                    "Other",
+                    "Low",
+                    "Vui lòng cung cấp thông tin hợp lệ.",
+                    "Dữ liệu đầu vào không hợp lệ",
+                    List.of("Vui lòng kiểm tra lại thông tin bạn đã nhập.")
+            );
+            return ResponseEntity.badRequest().body(errorResponse);
+            
         } catch (Exception e) {
-            logger.error("Controller bắt được lỗi: ", e);
-            return ResponseEntity.badRequest().build();
+            logger.error("Lỗi không mong đợi trong Controller: ", e);
+            // Service đã xử lý và trả về fallback response, nên ta vẫn trả về response từ service
+            // Nếu service throw exception, ta tạo fallback response
+            SymptomCheckResponse fallbackResponse = new SymptomCheckResponse(
+                    "Other",
+                    "Low",
+                    "Xin lỗi, hệ thống đang gặp sự cố tạm thời. Vui lòng thử lại sau một chút.",
+                    "Lỗi hệ thống",
+                    List.of(
+                            "Thử lại sau vài phút.",
+                            "Kiểm tra kết nối mạng của bạn.",
+                            "Liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục."
+                    )
+            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(fallbackResponse);
         }
     }
 }
