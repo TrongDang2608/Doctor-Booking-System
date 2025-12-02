@@ -90,59 +90,59 @@ const DoctorManagement = () => {
 
   return (
     <AdminLayout>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: '600', color: '#2c3e50', margin: 0 }}>
-            Doctor Management
-          </h1>
-          <button
-            onClick={handleCreate}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#2ecc71',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: '500',
-              fontSize: '14px',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#27ae60';
-              e.target.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#2ecc71';
-              e.target.style.transform = 'translateY(0)';
-            }}
+      <div className="space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Doctor Management</h1>
+            <p className="text-gray-600 mt-1">{doctors.length} total doctors</p>
+          </div>
+          <button 
+            onClick={handleCreate} 
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium shadow-sm"
           >
-            + Add Doctor
+            <span className="text-xl">+</span>
+            Add Doctor
           </button>
         </div>
 
-        <ErrorMessage message={error} onClose={() => setError('')} />
+        {/* Error Alert */}
+        {error && (
+          <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-800">
+            <span className="text-lg">⚠️</span>
+            <span className="flex-1">{error}</span>
+            <button 
+              onClick={() => setError('')} 
+              className="text-red-800 hover:text-red-900 font-bold text-xl leading-none"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
-        <div style={{ marginBottom: '20px' }}>
-          <input
-            type="text"
-            placeholder="Search doctors by name, specialization, or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              maxWidth: '500px',
-              padding: '12px 16px',
-              border: '1px solid #ddd',
-              borderRadius: '6px',
-              fontSize: '16px',
-              transition: 'border-color 0.2s',
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3498db'}
-            onBlur={(e) => e.target.style.borderColor = '#ddd'}
-          />
+        {/* Search Section */}
+        <div className="relative">
+          <div className="relative max-w-2xl">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔍</span>
+            <input
+              type="text"
+              className="w-full pl-12 pr-12 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
+              placeholder="Search doctors by name, specialization, or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button 
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-bold text-xl leading-none"
+                onClick={() => setSearchTerm('')}
+              >
+                ×
+              </button>
+            )}
+          </div>
         </div>
 
+        {/* Doctor Form Modal */}
         {showForm && (
           <DoctorForm
             doctor={editingDoctor}
@@ -151,6 +151,7 @@ const DoctorManagement = () => {
           />
         )}
 
+        {/* Data Table */}
         <DataTable
           columns={[
             { header: 'Name', accessor: 'fullName' },
@@ -165,14 +166,11 @@ const DoctorManagement = () => {
               header: 'Status',
               accessor: 'status',
               render: (doctor) => (
-                <span style={{
-                  padding: '6px 12px',
-                  borderRadius: '4px',
-                  backgroundColor: doctor.status === 'ACTIVE' ? '#d4edda' : '#f8d7da',
-                  color: doctor.status === 'ACTIVE' ? '#155724' : '#721c24',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                }}>
+                <span className={`px-3 py-1.5 rounded-md text-xs font-semibold ${
+                  doctor.status === 'ACTIVE' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
                   {doctor.status}
                 </span>
               )
@@ -181,24 +179,13 @@ const DoctorManagement = () => {
               header: 'Actions',
               align: 'center',
               render: (doctor) => (
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                <div className="flex gap-2 justify-center">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleEdit(doctor);
                     }}
-                    style={{
-                      padding: '6px 12px',
-                      backgroundColor: '#3498db',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#2980b9'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#3498db'}
+                    className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
                   >
                     Edit
                   </button>
@@ -207,18 +194,7 @@ const DoctorManagement = () => {
                       e.stopPropagation();
                       handleDelete(doctor.id);
                     }}
-                    style={{
-                      padding: '6px 12px',
-                      backgroundColor: '#e74c3c',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      transition: 'background-color 0.2s',
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#c0392b'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#e74c3c'}
+                    className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200 text-sm font-medium"
                   >
                     Delete
                   </button>

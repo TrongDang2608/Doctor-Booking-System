@@ -72,30 +72,18 @@ const PatientList = () => {
 
   return (
     <AdminLayout>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
-        <h1 style={{ marginBottom: '30px', fontSize: '32px', fontWeight: '600', color: '#2c3e50' }}>
-          Patient Management
-        </h1>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-900">Patient Management</h1>
 
         <ErrorMessage message={error} onClose={() => setError('')} />
 
-        <div style={{ marginBottom: '20px' }}>
+        <div>
           <input
             type="text"
             placeholder="Search patients by name, ID, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: '100%',
-              maxWidth: '500px',
-              padding: '12px 16px',
-              border: '1px solid #ddd',
-              borderRadius: '6px',
-              fontSize: '16px',
-              transition: 'border-color 0.2s',
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3498db'}
-            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+            className="w-full max-w-2xl px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
           />
         </div>
 
@@ -123,18 +111,7 @@ const PatientList = () => {
                     e.stopPropagation();
                     handleViewDetails(patient.id);
                   }}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#3498db',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#2980b9'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#3498db'}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
                 >
                   View Details
                 </button>
@@ -157,106 +134,97 @@ const PatientList = () => {
 
 const PatientDetailModal = ({ patient, onClose }) => {
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000,
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '30px',
-        borderRadius: '8px',
-        width: '90%',
-        maxWidth: '700px',
-        maxHeight: '90vh',
-        overflowY: 'auto',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2>Patient Details</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
+          <h2 className="text-2xl font-bold text-gray-900">Patient Details</h2>
           <button
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '24px',
-              cursor: 'pointer',
-            }}
+            className="text-gray-400 hover:text-gray-600 text-3xl leading-none font-light"
           >
             ×
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-          <div>
-            <strong>ID:</strong> {patient.id}
-          </div>
-          <div>
-            <strong>Name:</strong> {patient.fullName}
-          </div>
-          <div>
-            <strong>Email:</strong> {patient.email}
-          </div>
-          <div>
-            <strong>Phone:</strong> {patient.phone || '-'}
-          </div>
-          <div>
-            <strong>Date of Birth:</strong> {patient.dateOfBirth ? formatDate(patient.dateOfBirth) : '-'}
-          </div>
-          <div>
-            <strong>Gender:</strong> {patient.gender || '-'}
-          </div>
-          <div>
-            <strong>Address:</strong> {patient.address || '-'}
-          </div>
-          <div>
-            <strong>Emergency Contact:</strong> {patient.emergencyContact || '-'}
-          </div>
-          <div>
-            <strong>Emergency Phone:</strong> {patient.emergencyPhone || '-'}
-          </div>
-        </div>
-
-        {patient.treatments && patient.treatments.length > 0 && (
-          <div style={{ marginTop: '30px' }}>
-            <h3>Treatment History</h3>
-            <div style={{
-              backgroundColor: '#f8f9fa',
-              padding: '15px',
-              borderRadius: '4px',
-              marginTop: '10px',
-            }}>
-              {patient.treatments.map((treatment) => (
-                <div key={treatment.id} style={{ marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #dee2e6' }}>
-                  <div><strong>Date:</strong> {formatDate(treatment.createdAt)}</div>
-                  <div><strong>Doctor:</strong> {treatment.doctorName}</div>
-                  {treatment.diagnosis && <div><strong>Diagnosis:</strong> {treatment.diagnosis}</div>}
-                </div>
-              ))}
+        {/* Patient Info */}
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">ID:</span>
+              <p className="text-gray-900 mt-1">{patient.id}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Name:</span>
+              <p className="text-gray-900 mt-1">{patient.fullName}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Email:</span>
+              <p className="text-gray-900 mt-1">{patient.email}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Phone:</span>
+              <p className="text-gray-900 mt-1">{patient.phone || '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Date of Birth:</span>
+              <p className="text-gray-900 mt-1">{patient.dateOfBirth ? formatDate(patient.dateOfBirth) : '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Gender:</span>
+              <p className="text-gray-900 mt-1">{patient.gender || '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
+              <span className="text-sm font-semibold text-gray-600">Address:</span>
+              <p className="text-gray-900 mt-1">{patient.address || '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Emergency Contact:</span>
+              <p className="text-gray-900 mt-1">{patient.emergencyContact || '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Emergency Phone:</span>
+              <p className="text-gray-900 mt-1">{patient.emergencyPhone || '-'}</p>
             </div>
           </div>
-        )}
 
-        <button
-          onClick={onClose}
-          style={{
-            marginTop: '20px',
-            padding: '10px 20px',
-            backgroundColor: '#95a5a6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          Close
-        </button>
+          {/* Treatment History */}
+          {patient.treatments && patient.treatments.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Treatment History</h3>
+              <div className="space-y-3">
+                {patient.treatments.map((treatment) => (
+                  <div key={treatment.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-sm font-semibold text-gray-600">Date:</span>
+                        <p className="text-gray-900">{formatDate(treatment.createdAt)}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-semibold text-gray-600">Doctor:</span>
+                        <p className="text-gray-900">{treatment.doctorName}</p>
+                      </div>
+                      {treatment.diagnosis && (
+                        <div className="col-span-2">
+                          <span className="text-sm font-semibold text-gray-600">Diagnosis:</span>
+                          <p className="text-gray-900">{treatment.diagnosis}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="w-full mt-6 px-4 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

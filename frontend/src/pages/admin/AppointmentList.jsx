@@ -56,56 +56,31 @@ const AppointmentList = () => {
 
   return (
     <AdminLayout>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 20px' }}>
-        <h1 style={{ marginBottom: '30px', fontSize: '32px', fontWeight: '600', color: '#2c3e50' }}>
-          Appointment Management
-        </h1>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-900">Appointment Management</h1>
 
         <ErrorMessage message={error} onClose={() => setError('')} />
 
-        <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <label style={{ fontWeight: '500', color: '#495057' }}>Filter by Date:</label>
+        {/* Filter Section */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <label className="font-semibold text-gray-700">Filter by Date:</label>
           <input
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            style={{
-              padding: '10px',
-              border: '1px solid #ddd',
-              borderRadius: '6px',
-              fontSize: '16px',
-              transition: 'border-color 0.2s',
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3498db'}
-            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+            className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
           />
           {filterDate && (
             <button
               onClick={() => setFilterDate('')}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#95a5a6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = '#7f8c8d';
-                e.target.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = '#95a5a6';
-                e.target.style.transform = 'translateY(0)';
-              }}
+              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
             >
               Clear Filter
             </button>
           )}
         </div>
 
+        {/* Data Table */}
         <DataTable
           columns={[
             {
@@ -113,10 +88,8 @@ const AppointmentList = () => {
               accessor: 'patientName',
               render: (appointment) => (
                 <div>
-                  <div style={{ fontWeight: '500' }}>{appointment.patientName}</div>
-                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                    {appointment.patientPhone}
-                  </div>
+                  <div className="font-semibold text-gray-900">{appointment.patientName}</div>
+                  <div className="text-xs text-gray-500 mt-1">{appointment.patientPhone}</div>
                 </div>
               )
             },
@@ -125,10 +98,8 @@ const AppointmentList = () => {
               accessor: 'doctorName',
               render: (appointment) => (
                 <div>
-                  <div style={{ fontWeight: '500' }}>{appointment.doctorName}</div>
-                  <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                    {appointment.doctorSpecialization}
-                  </div>
+                  <div className="font-semibold text-gray-900">{appointment.doctorName}</div>
+                  <div className="text-xs text-gray-500 mt-1">{appointment.doctorSpecialization}</div>
                 </div>
               )
             },
@@ -146,16 +117,15 @@ const AppointmentList = () => {
               header: 'Status',
               accessor: 'status',
               render: (appointment) => {
-                const color = getStatusColor(appointment.status);
+                const statusStyles = {
+                  PENDING: 'bg-yellow-100 text-yellow-800',
+                  CONFIRMED: 'bg-blue-100 text-blue-800',
+                  COMPLETED: 'bg-green-100 text-green-800',
+                  CANCELLED: 'bg-red-100 text-red-800',
+                };
+                const className = statusStyles[appointment.status] || 'bg-gray-100 text-gray-800';
                 return (
-                  <span style={{
-                    padding: '6px 12px',
-                    borderRadius: '4px',
-                    backgroundColor: color + '20',
-                    color: color,
-                    fontSize: '12px',
-                    fontWeight: '500',
-                  }}>
+                  <span className={`px-3 py-1.5 rounded-md text-xs font-semibold ${className}`}>
                     {appointment.status}
                   </span>
                 );
@@ -165,7 +135,7 @@ const AppointmentList = () => {
               header: 'Notes',
               accessor: 'notes',
               render: (appointment) => (
-                <div style={{ maxWidth: '200px', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div className="max-w-[200px] text-sm truncate">
                   {appointment.notes || '-'}
                 </div>
               )
