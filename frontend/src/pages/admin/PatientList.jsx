@@ -5,7 +5,6 @@ import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import DataTable from '../../components/common/DataTable';
 import { formatDate } from '../../utils/formatDate';
-import './adminPages.css';
 
 const PatientList = () => {
   const [allPatients, setAllPatients] = useState([]);

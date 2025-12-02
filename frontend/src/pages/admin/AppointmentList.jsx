@@ -6,7 +6,6 @@ import ErrorMessage from '../../components/common/ErrorMessage';
 import DataTable from '../../components/common/DataTable';
 import { formatDate, formatDateTime } from '../../utils/formatDate';
 import { formatTime } from '../../utils/formatTime';
-import './adminPages.css';
 
 const AppointmentList = () => {
   const [appointments, setAppointments] = useState([]);
