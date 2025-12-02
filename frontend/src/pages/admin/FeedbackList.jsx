@@ -51,17 +51,31 @@ const FeedbackList = () => {
 
   return (
     <AdminLayout>
-      <div className="admin-page">
-        <h1 className="page-title">Feedback Management</h1>
+      <div className="space-y-6">
+        {/* Page Header */}
+        <h1 className="text-3xl font-bold text-gray-900">Feedback Management</h1>
 
-        <ErrorMessage message={error} onClose={() => setError('')} />
+        {/* Error Alert */}
+        {error && (
+          <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-800">
+            <span className="text-lg">⚠️</span>
+            <span className="flex-1">{error}</span>
+            <button 
+              onClick={() => setError('')} 
+              className="text-red-800 hover:text-red-900 font-bold text-xl leading-none"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
-        <div className="filter-container">
-          <label className="filter-label">Filter by Status:</label>
+        {/* Filter Section */}
+        <div className="flex items-center gap-3">
+          <label className="font-semibold text-gray-700">Filter by Status:</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="filter-select"
+            className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
           >
             <option value="">All</option>
             <option value="PENDING">Pending</option>
@@ -69,59 +83,68 @@ const FeedbackList = () => {
           </select>
         </div>
 
+        {/* Feedback Table */}
         {feedbacks.length === 0 ? (
-          <div className="empty-state">
-            <p>No feedbacks found</p>
+          <div className="flex flex-col items-center justify-center py-16 bg-white rounded-lg border border-gray-200">
+            <span className="text-6xl mb-4">📭</span>
+            <p className="text-gray-500 text-lg">No feedbacks found</p>
           </div>
         ) : (
-          <div className="table-container">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Patient</th>
-                  <th>Rating</th>
-                  <th>Comment</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {feedbacks.map((feedback) => (
-                  <tr key={feedback.id}>
-                    <td style={{ color: '#e0e0e0' }}>{feedback.patientName}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span>{'⭐'.repeat(feedback.rating)}</span>
-                        <span style={{ fontSize: '0.85rem', color: '#94A3B8' }}>({feedback.rating}/5)</span>
-                      </div>
-                    </td>
-                    <td style={{ maxWidth: '300px', color: '#94A3B8' }}>
-                      {feedback.comment || '-'}
-                    </td>
-                    <td>
-                      <span className="status-badge" style={{
-                        backgroundColor: feedback.status === 'READ' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)',
-                        color: feedback.status === 'READ' ? '#10B981' : '#F59E0B',
-                      }}>
-                        {feedback.status}
-                      </span>
-                    </td>
-                    <td style={{ color: '#94A3B8' }}>{formatDate(feedback.createdAt)}</td>
-                    <td className="actions-cell">
-                      {feedback.status === 'PENDING' && (
-                        <button
-                          onClick={() => handleMarkAsRead(feedback.id)}
-                          className="btn-mark-read"
-                        >
-                          Mark as Read
-                        </button>
-                      )}
-                    </td>
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Patient</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Rating</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Comment</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {feedbacks.map((feedback) => (
+                    <tr key={feedback.id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {feedback.patientName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{'⭐'.repeat(feedback.rating)}</span>
+                          <span className="text-xs text-gray-500 font-medium">({feedback.rating}/5)</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">
+                        {feedback.comment || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${
+                          feedback.status === 'PENDING' 
+                            ? 'bg-yellow-100 text-yellow-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {feedback.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                        {formatDate(feedback.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        {feedback.status === 'PENDING' && (
+                          <button
+                            onClick={() => handleMarkAsRead(feedback.id)}
+                            className="px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200 text-sm font-medium"
+                          >
+                            Mark as Read
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

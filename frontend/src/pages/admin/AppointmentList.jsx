@@ -57,31 +57,31 @@ const AppointmentList = () => {
 
   return (
     <AdminLayout>
-      <div className="admin-page">
-        <h1 className="page-title">
-          Appointment Management
-        </h1>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-900">Appointment Management</h1>
 
         <ErrorMessage message={error} onClose={() => setError('')} />
 
-        <div className="filter-container">
-          <label className="filter-label">Filter by Date:</label>
+        {/* Filter Section */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <label className="font-semibold text-gray-700">Filter by Date:</label>
           <input
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="filter-input"
+            className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
           />
           {filterDate && (
             <button
               onClick={() => setFilterDate('')}
-              className="clear-filter-btn"
+              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
             >
               Clear Filter
             </button>
           )}
         </div>
 
+        {/* Data Table */}
         <DataTable
           columns={[
             {
@@ -89,10 +89,8 @@ const AppointmentList = () => {
               accessor: 'patientName',
               render: (appointment) => (
                 <div>
-                  <div style={{ fontWeight: '600', color: '#e0e0e0' }}>{appointment.patientName}</div>
-                  <div style={{ fontSize: '0.85rem', color: '#94A3B8', marginTop: '0.25rem' }}>
-                    {appointment.patientPhone}
-                  </div>
+                  <div className="font-semibold text-gray-900">{appointment.patientName}</div>
+                  <div className="text-xs text-gray-500 mt-1">{appointment.patientPhone}</div>
                 </div>
               )
             },
@@ -101,10 +99,8 @@ const AppointmentList = () => {
               accessor: 'doctorName',
               render: (appointment) => (
                 <div>
-                  <div style={{ fontWeight: '600', color: '#e0e0e0' }}>{appointment.doctorName}</div>
-                  <div style={{ fontSize: '0.85rem', color: '#94A3B8', marginTop: '0.25rem' }}>
-                    {appointment.doctorSpecialization}
-                  </div>
+                  <div className="font-semibold text-gray-900">{appointment.doctorName}</div>
+                  <div className="text-xs text-gray-500 mt-1">{appointment.doctorSpecialization}</div>
                 </div>
               )
             },
@@ -122,12 +118,15 @@ const AppointmentList = () => {
               header: 'Status',
               accessor: 'status',
               render: (appointment) => {
-                const color = getStatusColor(appointment.status);
+                const statusStyles = {
+                  PENDING: 'bg-yellow-100 text-yellow-800',
+                  CONFIRMED: 'bg-blue-100 text-blue-800',
+                  COMPLETED: 'bg-green-100 text-green-800',
+                  CANCELLED: 'bg-red-100 text-red-800',
+                };
+                const className = statusStyles[appointment.status] || 'bg-gray-100 text-gray-800';
                 return (
-                  <span className="status-badge" style={{
-                    backgroundColor: color + '20',
-                    color: color,
-                  }}>
+                  <span className={`px-3 py-1.5 rounded-md text-xs font-semibold ${className}`}>
                     {appointment.status}
                   </span>
                 );
@@ -137,7 +136,7 @@ const AppointmentList = () => {
               header: 'Notes',
               accessor: 'notes',
               render: (appointment) => (
-                <div style={{ maxWidth: '200px', fontSize: '0.9rem', color: '#94A3B8', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div className="max-w-[200px] text-sm truncate">
                   {appointment.notes || '-'}
                 </div>
               )

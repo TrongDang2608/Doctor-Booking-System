@@ -73,20 +73,18 @@ const PatientList = () => {
 
   return (
     <AdminLayout>
-      <div className="admin-page">
-        <h1 className="page-title">
-          Patient Management
-        </h1>
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold text-gray-900">Patient Management</h1>
 
         <ErrorMessage message={error} onClose={() => setError('')} />
 
-        <div className="search-container">
+        <div>
           <input
             type="text"
             placeholder="Search patients by name, ID, or email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
+            className="w-full max-w-2xl px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
           />
         </div>
 
@@ -114,7 +112,7 @@ const PatientList = () => {
                     e.stopPropagation();
                     handleViewDetails(patient.id);
                   }}
-                  className="btn-view"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
                 >
                   View Details
                 </button>
@@ -137,99 +135,97 @@ const PatientList = () => {
 
 const PatientDetailModal = ({ patient, onClose }) => {
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      backdropFilter: 'blur(4px)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000,
-      padding: '2rem',
-    }}>
-      <div style={{
-        backgroundColor: 'rgba(15, 15, 15, 0.95)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        padding: '2rem',
-        borderRadius: '16px',
-        width: '90%',
-        maxWidth: '700px',
-        maxHeight: '90vh',
-        overflowY: 'auto',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-        color: '#e0e0e0',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-          <h2 style={{ margin: 0, color: '#e0e0e0' }}>Patient Details</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
+          <h2 className="text-2xl font-bold text-gray-900">Patient Details</h2>
           <button
             onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              fontSize: '24px',
-              cursor: 'pointer',
-              color: '#aaa',
-              padding: '0.5rem',
-              borderRadius: '8px',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-              e.target.style.color = '#e0e0e0';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'transparent';
-              e.target.style.color = '#aaa';
-            }}
+            className="text-gray-400 hover:text-gray-600 text-3xl leading-none font-light"
           >
             ×
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem', padding: '1.5rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px' }}>
-          <div><strong style={{ color: '#06b6d4' }}>ID:</strong> <span style={{ color: '#e0e0e0' }}>{patient.id}</span></div>
-          <div><strong style={{ color: '#06b6d4' }}>Name:</strong> <span style={{ color: '#e0e0e0' }}>{patient.fullName}</span></div>
-          <div><strong style={{ color: '#06b6d4' }}>Email:</strong> <span style={{ color: '#e0e0e0' }}>{patient.email}</span></div>
-          <div><strong style={{ color: '#06b6d4' }}>Phone:</strong> <span style={{ color: '#e0e0e0' }}>{patient.phone || '-'}</span></div>
-          <div><strong style={{ color: '#06b6d4' }}>Date of Birth:</strong> <span style={{ color: '#e0e0e0' }}>{patient.dateOfBirth ? formatDate(patient.dateOfBirth) : '-'}</span></div>
-          <div><strong style={{ color: '#06b6d4' }}>Gender:</strong> <span style={{ color: '#e0e0e0' }}>{patient.gender || '-'}</span></div>
-          <div><strong style={{ color: '#06b6d4' }}>Address:</strong> <span style={{ color: '#e0e0e0' }}>{patient.address || '-'}</span></div>
-          <div><strong style={{ color: '#06b6d4' }}>Emergency Contact:</strong> <span style={{ color: '#e0e0e0' }}>{patient.emergencyContact || '-'}</span></div>
-          <div><strong style={{ color: '#06b6d4' }}>Emergency Phone:</strong> <span style={{ color: '#e0e0e0' }}>{patient.emergencyPhone || '-'}</span></div>
-        </div>
-
-        {patient.treatments && patient.treatments.length > 0 && (
-          <div style={{ marginTop: '2rem' }}>
-            <h3 style={{ color: '#e0e0e0', marginBottom: '1rem' }}>Treatment History</h3>
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              padding: '1.5rem',
-              borderRadius: '12px',
-              marginTop: '1rem',
-            }}>
-              {patient.treatments.map((treatment) => (
-                <div key={treatment.id} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <div style={{ color: '#e0e0e0' }}><strong style={{ color: '#06b6d4' }}>Date:</strong> {formatDate(treatment.createdAt)}</div>
-                  <div style={{ color: '#e0e0e0' }}><strong style={{ color: '#06b6d4' }}>Doctor:</strong> {treatment.doctorName}</div>
-                  {treatment.diagnosis && <div style={{ color: '#e0e0e0' }}><strong style={{ color: '#06b6d4' }}>Diagnosis:</strong> {treatment.diagnosis}</div>}
-                </div>
-              ))}
+        {/* Patient Info */}
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">ID:</span>
+              <p className="text-gray-900 mt-1">{patient.id}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Name:</span>
+              <p className="text-gray-900 mt-1">{patient.fullName}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Email:</span>
+              <p className="text-gray-900 mt-1">{patient.email}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Phone:</span>
+              <p className="text-gray-900 mt-1">{patient.phone || '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Date of Birth:</span>
+              <p className="text-gray-900 mt-1">{patient.dateOfBirth ? formatDate(patient.dateOfBirth) : '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Gender:</span>
+              <p className="text-gray-900 mt-1">{patient.gender || '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
+              <span className="text-sm font-semibold text-gray-600">Address:</span>
+              <p className="text-gray-900 mt-1">{patient.address || '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Emergency Contact:</span>
+              <p className="text-gray-900 mt-1">{patient.emergencyContact || '-'}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <span className="text-sm font-semibold text-gray-600">Emergency Phone:</span>
+              <p className="text-gray-900 mt-1">{patient.emergencyPhone || '-'}</p>
             </div>
           </div>
-        )}
 
-        <button
-          onClick={onClose}
-          className="btn-cancel"
-          style={{ marginTop: '20px' }}
-        >
-          Close
-        </button>
+          {/* Treatment History */}
+          {patient.treatments && patient.treatments.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Treatment History</h3>
+              <div className="space-y-3">
+                {patient.treatments.map((treatment) => (
+                  <div key={treatment.id} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-sm font-semibold text-gray-600">Date:</span>
+                        <p className="text-gray-900">{formatDate(treatment.createdAt)}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-semibold text-gray-600">Doctor:</span>
+                        <p className="text-gray-900">{treatment.doctorName}</p>
+                      </div>
+                      {treatment.diagnosis && (
+                        <div className="col-span-2">
+                          <span className="text-sm font-semibold text-gray-600">Diagnosis:</span>
+                          <p className="text-gray-900">{treatment.diagnosis}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="w-full mt-6 px-4 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
