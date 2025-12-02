@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminService } from '../../services/adminService';
 import ErrorMessage from '../common/ErrorMessage';
+import { toast } from 'react-toastify';
 
 const DoctorForm = ({ doctor, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -50,50 +51,106 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
 
     try {
       if (doctor) {
-        await adminService.updateDoctor(doctor.id, formData);
+        // For update, only send fields that should be updated
+        const updateData = {
+          email: formData.email,
+          fullName: formData.fullName,
+          specialization: formData.specialization,
+          qualification: formData.qualification,
+          experience: formData.experience,
+          phone: formData.phone,
+          address: formData.address,
+          bio: formData.bio,
+        };
+        // Only include password if it's not empty
+        if (formData.password && formData.password.trim() !== '') {
+          updateData.password = formData.password;
+        }
+        await adminService.updateDoctor(doctor.id, updateData);
+        toast.success('Doctor updated successfully!', { position: 'top-right', autoClose: 3000 });
       } else {
         await adminService.createDoctor(formData);
+        toast.success('Doctor created successfully!', { position: 'top-right', autoClose: 3000 });
       }
-      onSuccess();
+      // Delay to show toast before navigating
+      setTimeout(() => {
+        setLoading(false);
+        onSuccess();
+      }, 300);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save doctor');
-    } finally {
       setLoading(false);
+      const errorMsg = err.response?.data?.message || 'Failed to save doctor';
+      setError(errorMsg);
+      toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
-          <h2 className="text-2xl font-bold text-gray-900">{doctor ? 'Edit Doctor' : 'Add New Doctor'}</h2>
+    <div className="bg-white rounded-lg shadow p-6">
+      {/* Error Alert */}
+      {error && (
+        <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-800">
+          <span className="text-lg">⚠️</span>
+          <span className="flex-1">{error}</span>
           <button 
-            onClick={onClose} 
-            className="text-gray-400 hover:text-gray-600 text-3xl leading-none font-light"
+            onClick={() => setError('')} 
+            className="text-red-800 hover:text-red-900 font-bold text-xl leading-none"
           >
             ×
           </button>
         </div>
+      )}
 
-        {/* Error Alert */}
-        {error && (
-          <div className="mx-6 mt-4 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-800">
-            <span className="text-lg">⚠️</span>
-            <span className="flex-1">{error}</span>
-            <button 
-              onClick={() => setError('')} 
-              className="text-red-800 hover:text-red-900 font-bold text-xl leading-none"
-            >
-              ×
-            </button>
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            {/* Username - only show when creating */}
+            {!doctor && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Username <span className="text-red-500">*</span></label>
+                <input 
+                  type="text" 
+                  name="username" 
+                  value={formData.username} 
+                  onChange={handleChange} 
+                  required 
+                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
+                  placeholder="johndoe" 
+                />
+              </div>
+            )}
+
+            {/* Password - only show when creating, or optional when editing */}
+            {!doctor ? (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Password <span className="text-red-500">*</span></label>
+                <input 
+                  type="password" 
+                  name="password" 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  required 
+                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
+                  placeholder="••••••••" 
+                />
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Password <span className="text-gray-500 font-normal">(leave blank to keep current)</span>
+                </label>
+                <input 
+                  type="password" 
+                  name="password" 
+                  value={formData.password} 
+                  onChange={handleChange} 
+                  className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
+                  placeholder="••••••••" 
+                />
+              </div>
+            )}
+
+            <div className={!doctor ? 'md:col-span-2' : ''}>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name <span className="text-red-500">*</span></label>
               <input 
                 type="text" 
@@ -107,19 +164,6 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Username <span className="text-red-500">*</span></label>
-              <input 
-                type="text" 
-                name="username" 
-                value={formData.username} 
-                onChange={handleChange} 
-                required 
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
-                placeholder="johndoe" 
-              />
-            </div>
-
-            <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Email <span className="text-red-500">*</span></label>
               <input 
                 type="email" 
@@ -129,21 +173,6 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
                 required 
                 className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
                 placeholder="john.doe@hospital.com" 
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Password {doctor ? <span className="text-gray-500 font-normal">(leave blank to keep current)</span> : <span className="text-red-500">*</span>}
-              </label>
-              <input 
-                type="password" 
-                name="password" 
-                value={formData.password} 
-                onChange={handleChange} 
-                required={!doctor} 
-                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
-                placeholder="••••••••" 
               />
             </div>
 
@@ -222,25 +251,31 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
             />
           </div>
 
-          {/* Form Actions */}
-          <div className="flex gap-3 pt-4">
-            <button 
-              type="button" 
-              onClick={onClose} 
-              className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium"
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              disabled={loading} 
-              className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium disabled:bg-indigo-400 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Saving...' : doctor ? 'Update Doctor' : 'Create Doctor'}
-            </button>
-          </div>
-        </form>
-      </div>
+        {/* Form Actions */}
+        <div className="flex gap-3 pt-4">
+          <button 
+            type="button" 
+            onClick={onClose} 
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium disabled:bg-indigo-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {loading && (
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            {loading ? 'Updating...' : doctor ? 'Update Doctor' : 'Create Doctor'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
