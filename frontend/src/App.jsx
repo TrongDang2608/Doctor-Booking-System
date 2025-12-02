@@ -18,8 +18,10 @@ import NotFound from './pages/NotFound';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import DoctorManagement from './pages/admin/DoctorManagement';
 import PatientList from './pages/admin/PatientList';
+import PatientManagement from './pages/admin/PatientManagement';
 import AppointmentList from './pages/admin/AppointmentList';
 import FeedbackList from './pages/admin/FeedbackList';
+import UserManagement from './pages/admin/UserManagement';
 
 // Import Doctor pages
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
@@ -75,8 +77,13 @@ function App() {
               <ProtectedRoute requiredRole="ADMIN">
                 <Routes>
                   <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="users" element={<UserManagement />} />
+                  <Route path="users/edit/:id" element={<UserManagement />} />
                   <Route path="doctors" element={<DoctorManagement />} />
-                  <Route path="patients" element={<PatientList />} />
+                  <Route path="doctors/edit/:id" element={<DoctorManagement />} />
+                  <Route path="patients" element={<PatientManagement />} />
+                  <Route path="patients/edit/:id" element={<PatientManagement />} />
+                  <Route path="patients-old" element={<PatientList />} />
                   <Route path="appointments" element={<AppointmentList />} />
                   <Route path="feedbacks" element={<FeedbackList />} />
                   <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
