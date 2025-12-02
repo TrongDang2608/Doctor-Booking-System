@@ -39,6 +39,32 @@ export const adminService = {
     return response.data;
   },
 
+  createPatient: async (patientData) => {
+    try {
+      const response = await api.post('/admin/patients', patientData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  updatePatient: async (id, patientData) => {
+    try {
+      const response = await api.put(`/admin/patients/${id}`, patientData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  deletePatient: async (id) => {
+    try {
+      await api.delete(`/admin/patients/${id}`);
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   // Appointment Management
   getAllAppointments: async (date) => {
     const params = date ? { date } : {};
