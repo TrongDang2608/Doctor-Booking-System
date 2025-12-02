@@ -194,7 +194,7 @@ const AuthUnified = () => {
               <input
                 type="text"
                 name="username"
-                id="username"
+                id="authunified-username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Tên đăng nhập"
@@ -241,7 +241,7 @@ const AuthUnified = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   name="password"
-                  id="password"
+                  id="authunified-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Nhập Mật Khẩu"
@@ -264,15 +264,15 @@ const AuthUnified = () => {
             <div className={`auth-form-field ${isSignUp ? 'expanded' : 'collapsed'}`}>
               <div className="linear-password-wrapper">
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  id="confirmPassword"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Xác nhận mật khẩu"
-                  required={isSignUp}
-                  autoComplete="new-password"
-                  className="linear-input"
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                id="authunified-confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Xác nhận mật khẩu"
+                required={isSignUp}
+                autoComplete="new-password"
+                className="linear-input"
                 />
                 <button
                   type="button"

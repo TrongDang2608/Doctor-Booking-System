@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import logoImage from '../../assets/DoctorBooking.png';
 import HealthAIChat from './HealthAIChat';
+import AnimatedLogoutButton from '../common/AnimatedLogoutButton';
 import './PatientLayout.css';
 
 const PatientLayout = ({ children }) => {
@@ -123,10 +124,13 @@ const PatientLayout = ({ children }) => {
                             <i data-feather="user"></i>
                         </Link>
                     )}
-                    <button className="logout-btn" onClick={handleLogout}>
-                        <i data-feather="log-out"></i>
-                        {sidebarOpen && <span>Logout</span>}
-                    </button>
+                    <div className="animated-logout-wrapper">
+                        <AnimatedLogoutButton 
+                            onLogout={handleLogout} 
+                            variant="transparent"
+                            showText={sidebarOpen}
+                        />
+                    </div>
                 </div>
             </aside>
 

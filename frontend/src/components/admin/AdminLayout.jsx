@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import AnimatedLogoutButton from '../common/AnimatedLogoutButton';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -85,13 +86,13 @@ const AdminLayout = ({ children }) => {
               </div>
             </div>
           )}
-          <button 
-            onClick={handleLogout} 
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white border border-gray-200 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-300 transition-all duration-200 font-medium"
-          >
-            <i data-feather="log-out" className="w-5 h-5"></i>
-            {sidebarOpen && <span className="text-sm">Logout</span>}
-          </button>
+          <div className="w-full flex items-center justify-center">
+            <AnimatedLogoutButton 
+              onLogout={handleLogout} 
+              variant="light"
+              showText={sidebarOpen}
+            />
+          </div>
         </div>
       </aside>
 

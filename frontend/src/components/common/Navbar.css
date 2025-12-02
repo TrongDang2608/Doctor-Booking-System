@@ -10,6 +10,7 @@
   border-bottom: 1px solid rgba(139, 92, 246, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+  overflow: visible;  /* Allow logout animation to show */
 }
 
 .navbar.scrolled {
@@ -26,6 +27,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
+  overflow: visible;  /* Allow logout animation to show */
 }
 
 /* Logo */
@@ -162,6 +164,7 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
+  overflow: visible;  /* Allow animations to show outside */
 }
 
 /* Login Dropdown */
