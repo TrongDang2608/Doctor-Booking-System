@@ -7,6 +7,8 @@ import com.doctorbooking.backend.dto.request.UpdatePatientProfileRequest;
 import com.doctorbooking.backend.dto.response.*;
 import com.doctorbooking.backend.model.User;
 import com.doctorbooking.backend.service.*;
+import com.doctorbooking.backend.dto.request.SymptomCheckRequest; // Thêm import
+import com.doctorbooking.backend.dto.response.SymptomCheckResponse; // Thêm import
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @RestController
@@ -30,6 +34,7 @@ public class PatientController {
     private final TreatmentService treatmentService;
     private final FeedbackService feedbackService;
     private final UserService userService;
+    private final AISymptomService aiSymptomService;
 
     // ========== Profile Management ==========
 
@@ -233,6 +238,61 @@ public class PatientController {
         Long userId = getCurrentUserId();
         PatientResponse patient = patientService.getPatientByUserId(userId);
         return patient.getId();
+    }
+
+    // ========== Methods AISymptoms ==========
+    private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
+
+    @PostMapping("/ai/check-symptoms")
+    public ResponseEntity<SymptomCheckResponse> checkSymptoms(@Valid @RequestBody SymptomCheckRequest request) {
+        logger.info("Nhận request từ Client. Input: {}", request.getSymptoms());
+        try {
+            // Validate input
+            if (request.getSymptoms() == null || request.getSymptoms().trim().isEmpty()) {
+                logger.warn("Input rỗng hoặc null");
+                SymptomCheckResponse errorResponse = new SymptomCheckResponse(
+                        "Other",
+                        "Low",
+                        "Vui lòng mô tả triệu chứng hoặc câu hỏi của bạn.",
+                        "Thiếu thông tin đầu vào",
+                        List.of("Nhập mô tả triệu chứng hoặc câu hỏi của bạn vào ô chat.")
+                );
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+
+            // Gọi service
+            SymptomCheckResponse response = aiSymptomService.analyzeSymptoms(request.getSymptoms().trim());
+            logger.info("Trả về response thành công cho input: {}", request.getSymptoms());
+            return ResponseEntity.ok(response);
+            
+        } catch (IllegalArgumentException e) {
+            logger.warn("Lỗi validation: {}", e.getMessage());
+            SymptomCheckResponse errorResponse = new SymptomCheckResponse(
+                    "Other",
+                    "Low",
+                    "Vui lòng cung cấp thông tin hợp lệ.",
+                    "Dữ liệu đầu vào không hợp lệ",
+                    List.of("Vui lòng kiểm tra lại thông tin bạn đã nhập.")
+            );
+            return ResponseEntity.badRequest().body(errorResponse);
+            
+        } catch (Exception e) {
+            logger.error("Lỗi không mong đợi trong Controller: ", e);
+            // Service đã xử lý và trả về fallback response, nên ta vẫn trả về response từ service
+            // Nếu service throw exception, ta tạo fallback response
+            SymptomCheckResponse fallbackResponse = new SymptomCheckResponse(
+                    "Other",
+                    "Low",
+                    "Xin lỗi, hệ thống đang gặp sự cố tạm thời. Vui lòng thử lại sau một chút.",
+                    "Lỗi hệ thống",
+                    List.of(
+                            "Thử lại sau vài phút.",
+                            "Kiểm tra kết nối mạng của bạn.",
+                            "Liên hệ hỗ trợ nếu vấn đề vẫn tiếp tục."
+                    )
+            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(fallbackResponse);
+        }
     }
 }
 

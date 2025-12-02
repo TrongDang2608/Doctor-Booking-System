@@ -18,5 +18,8 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
            "LOWER(d.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(d.specialization) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Doctor> searchDoctors(@Param("keyword") String keyword);
+
+    @Query("SELECT DISTINCT d.specialization FROM Doctor d WHERE d.status = 'ACTIVE'")
+    List<String> findDistinctSpecializations();
 }
 

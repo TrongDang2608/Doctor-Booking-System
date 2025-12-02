@@ -74,5 +74,12 @@ export const patientService = {
     const response = await api.get('/patient/feedbacks');
     return response.data;
   },
+
+  // AI Symptom Checker
+  checkSymptoms: async (symptoms) => {
+    // Gọi endpoint mà chúng ta vừa test trên Postman
+    const response = await api.post('/patient/ai/check-symptoms', { symptoms });
+    return response.data;
+  },
 };
 

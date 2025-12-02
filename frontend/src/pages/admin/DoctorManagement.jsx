@@ -5,6 +5,7 @@ import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import DataTable from '../../components/common/DataTable';
 import DoctorForm from '../../components/admin/DoctorForm';
+import './adminPages.css';
 
 const DoctorManagement = () => {
   const [allDoctors, setAllDoctors] = useState([]);

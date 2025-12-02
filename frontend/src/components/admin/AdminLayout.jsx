@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import logoImage from '../../assets/DoctorBooking.png';
+import './AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -8,17 +10,24 @@ const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  useEffect(() => {
+    // Initialize Feather Icons
+    if (window.feather) {
+      window.feather.replace();
+    }
+  }, [location.pathname]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
   const menuItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
-    { path: '/admin/doctors', label: 'Doctors', icon: '👨‍⚕️' },
-    { path: '/admin/patients', label: 'Patients', icon: '👥' },
-    { path: '/admin/appointments', label: 'Appointments', icon: '📅' },
-    { path: '/admin/feedbacks', label: 'Feedbacks', icon: '💬' },
+    { path: '/admin/dashboard', label: 'Dashboard', icon: 'layout', route: '/admin/dashboard' },
+    { path: '/admin/doctors', label: 'Doctors', icon: 'user', route: '/admin/doctors' },
+    { path: '/admin/patients', label: 'Patients', icon: 'users', route: '/admin/patients' },
+    { path: '/admin/appointments', label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },
+    { path: '/admin/feedbacks', label: 'Feedbacks', icon: 'message-circle', route: '/admin/feedbacks' },
   ];
 
   const isActive = (path) => {
@@ -113,4 +122,3 @@ const AdminLayout = ({ children }) => {
 };
 
 export default AdminLayout;
-
