@@ -18,6 +18,8 @@ const HealthWallet = () => {
   });
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [topUpLoading, setTopUpLoading] = useState(false);
 
 
   // Load wallet data
@@ -64,6 +66,7 @@ const HealthWallet = () => {
   };
 
   const loadTransactions = async () => {
+    setTransactionsLoading(true);
     try {
       const data = await patientService.getTransactions(0, 50);
       // Sort by created date descending (newest first)
@@ -74,6 +77,8 @@ const HealthWallet = () => {
     } catch (error) {
       console.error('Error loading transactions:', error);
       setTransactions([]);
+    } finally {
+      setTransactionsLoading(false);
     }
   };
 
@@ -124,6 +129,18 @@ const HealthWallet = () => {
       window.feather.replace();
     }
   }, [showTopUpModal]);
+
+  // Show loading spinner when initially loading wallet data
+  if (loading) {
+    return (
+      <div className="health-wallet">
+        <div className="wallet-loading">
+          <div className="loading-spinner-large"></div>
+          <p>Đang tải thông tin ví...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="health-wallet">
@@ -314,12 +331,18 @@ const HealthWallet = () => {
 
         {activeTab === 'transactions' && (
           <div className="transactions-content">
-            <div className="transactions-list">
-              {transactions.length === 0 ? (
-                <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>
-                  Chưa có giao dịch nào
-                </p>
-              ) : (
+            {transactionsLoading ? (
+              <div className="transactions-loading">
+                <div className="loading-spinner-medium"></div>
+                <p>Đang tải lịch sử giao dịch...</p>
+              </div>
+            ) : (
+              <div className="transactions-list">
+                {transactions.length === 0 ? (
+                  <p style={{ textAlign: 'center', color: '#888', padding: '2rem' }}>
+                    Chưa có giao dịch nào
+                  </p>
+                ) : (
                 transactions.map((transaction) => (
                   <div key={transaction.id} className="transaction-item">
                     <div className="transaction-icon">
@@ -366,8 +389,9 @@ const HealthWallet = () => {
                     </div>
                   </div>
                 ))
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -380,6 +404,7 @@ const HealthWallet = () => {
           onAmountChange={setTopUpAmount}
           onPaymentMethodChange={setPaymentMethod}
           onConfirm={async () => {
+            setTopUpLoading(true);
             try {
               const numAmount = parseInt(topUpAmount.replace(/\./g, ''));
               const response = await patientService.topUp(numAmount, paymentMethod);
@@ -390,15 +415,21 @@ const HealthWallet = () => {
               
               // Redirect to VNPAY payment page
               if (response.paymentUrl) {
-                window.location.href = response.paymentUrl;
+                // Show loading for a moment before redirect
+                setTimeout(() => {
+                  window.location.href = response.paymentUrl;
+                }, 500);
               } else {
+                setTopUpLoading(false);
                 alert('Không thể tạo link thanh toán. Vui lòng thử lại.');
               }
             } catch (error) {
               console.error('Error creating top-up:', error);
+              setTopUpLoading(false);
               alert('Có lỗi xảy ra khi tạo yêu cầu nạp tiền. Vui lòng thử lại.');
             }
           }}
+          loading={topUpLoading}
           onClose={() => {
             setShowTopUpModal(false);
             setTopUpAmount('');
@@ -411,7 +442,7 @@ const HealthWallet = () => {
 };
 
 // Top-up Modal Component
-const TopUpModal = ({ amount, paymentMethod, onAmountChange, onPaymentMethodChange, onConfirm, onClose }) => {
+const TopUpModal = ({ amount, paymentMethod, onAmountChange, onPaymentMethodChange, onConfirm, onClose, loading = false }) => {
   const quickAmounts = [100000, 200000, 500000, 1000000, 2000000, 5000000];
   const minAmount = 10000;
   const maxAmount = 50000000;
@@ -545,15 +576,25 @@ const TopUpModal = ({ amount, paymentMethod, onAmountChange, onPaymentMethodChan
         </div>
 
         <div className="topup-modal-footer">
-          <button className="topup-btn-cancel" onClick={onClose}>
+          <button 
+            className="topup-btn-cancel" 
+            onClick={onClose}
+            disabled={loading}
+            style={{ opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}
+          >
             Hủy
           </button>
           <button
             className="topup-btn-confirm"
             onClick={handleConfirm}
-            disabled={!amount || parseInt(amount.replace(/\./g, '')) < minAmount || parseInt(amount.replace(/\./g, '')) > maxAmount}
+            disabled={loading || !amount || parseInt(amount.replace(/\./g, '')) < minAmount || parseInt(amount.replace(/\./g, '')) > maxAmount}
           >
-            Xác nhận
+            {loading ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+                <div className="loading-spinner-small"></div>
+                Đang chuyển sang VNPAY...
+              </span>
+            ) : 'Xác nhận'}
           </button>
         </div>
       </div>
