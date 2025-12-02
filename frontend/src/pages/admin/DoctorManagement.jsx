@@ -1,12 +1,16 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminService } from '../../services/adminService';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
-import DataTable from '../../components/common/DataTable';
 import DoctorForm from '../../components/admin/DoctorForm';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const DoctorManagement = () => {
+  const navigate = useNavigate();
+  const { id } = useParams();
   const [allDoctors, setAllDoctors] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +22,20 @@ const DoctorManagement = () => {
   useEffect(() => {
     loadAllDoctors();
   }, []);
+
+  // Load doctor data when editing from URL
+  useEffect(() => {
+    if (id && allDoctors.length > 0) {
+      const doctor = allDoctors.find(d => d.id === parseInt(id));
+      if (doctor) {
+        setEditingDoctor(doctor);
+        setShowForm(true);
+      }
+    } else if (!id) {
+      setShowForm(false);
+      setEditingDoctor(null);
+    }
+  }, [id, allDoctors]);
 
   const filteredDoctors = useMemo(() => {
     if (searchTerm.trim() === '') {
@@ -34,6 +52,13 @@ const DoctorManagement = () => {
   useEffect(() => {
     setDoctors(filteredDoctors);
   }, [filteredDoctors]);
+
+  // Replace feather icons after doctors data changes
+  useEffect(() => {
+    if (window.feather) {
+      window.feather.replace();
+    }
+  }, [doctors, showForm]);
 
   const loadAllDoctors = async () => {
     try {
@@ -55,8 +80,7 @@ const DoctorManagement = () => {
   };
 
   const handleEdit = (doctor) => {
-    setEditingDoctor(doctor);
-    setShowForm(true);
+    navigate(`/admin/doctors/edit/${doctor.id}`);
   };
 
   const handleDelete = async (id) => {
@@ -66,21 +90,25 @@ const DoctorManagement = () => {
 
     try {
       await adminService.deleteDoctor(id);
+      toast.success('Doctor deleted successfully!', { position: 'top-right', autoClose: 3000 });
       loadAllDoctors();
       setError('');
     } catch (err) {
-      setError('Failed to delete doctor');
+      const errorMsg = 'Failed to delete doctor';
+      setError(errorMsg);
+      toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
     }
   };
 
   const handleFormClose = () => {
+    navigate('/admin/doctors');
     setShowForm(false);
     setEditingDoctor(null);
     loadAllDoctors();
   };
 
-  if (loading && doctors.length === 0) {
+  if (loading && doctors.length === 0 && !id) {
     return (
       <AdminLayout>
         <Loading />
@@ -88,6 +116,49 @@ const DoctorManagement = () => {
     );
   }
 
+  // If showing form, render form layout
+  if (showForm) {
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          {/* Page Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {editingDoctor ? 'Edit Doctor' : 'Create New Doctor'}
+              </h1>
+              <p className="text-gray-600 mt-1">Update doctor information</p>
+            </div>
+            <button 
+              onClick={() => navigate('/admin/doctors')} 
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <i data-feather="arrow-left" className="w-5 h-5"></i>
+              Back to List
+            </button>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <ErrorMessage 
+              message={error} 
+              onClose={() => setError('')} 
+            />
+          )}
+
+          {/* Doctor Form */}
+          <DoctorForm
+            doctor={editingDoctor}
+            onClose={handleFormClose}
+            onSuccess={handleFormClose}
+          />
+        </div>
+        <ToastContainer />
+      </AdminLayout>
+    );
+  }
+
+  // Otherwise render list view
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -121,92 +192,85 @@ const DoctorManagement = () => {
         )}
 
         {/* Search Section */}
-        <div className="relative">
-          <div className="relative max-w-2xl">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔍</span>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="relative">
+            <i data-feather="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
             <input
               type="text"
-              className="w-full pl-12 pr-12 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
-              placeholder="Search doctors by name, specialization, or email..."
+              placeholder="Search by name, specialization, or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
-            {searchTerm && (
-              <button 
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 font-bold text-xl leading-none"
-                onClick={() => setSearchTerm('')}
-              >
-                ×
-              </button>
-            )}
           </div>
         </div>
 
-        {/* Doctor Form Modal */}
-        {showForm && (
-          <DoctorForm
-            doctor={editingDoctor}
-            onClose={handleFormClose}
-            onSuccess={handleFormClose}
-          />
-        )}
-
-        {/* Data Table */}
-        <DataTable
-          columns={[
-            { header: 'Name', accessor: 'fullName' },
-            { header: 'Specialization', accessor: 'specialization' },
-            { header: 'Email', accessor: 'email' },
-            { 
-              header: 'Phone', 
-              accessor: 'phone',
-              render: (doctor) => doctor.phone || '-'
-            },
-            {
-              header: 'Status',
-              accessor: 'status',
-              render: (doctor) => (
-                <span className={`px-3 py-1.5 rounded-md text-xs font-semibold ${
-                  doctor.status === 'ACTIVE' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {doctor.status}
-                </span>
-              )
-            },
-            {
-              header: 'Actions',
-              align: 'center',
-              render: (doctor) => (
-                <div className="flex gap-2 justify-center">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(doctor);
-                    }}
-                    className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(doctor.id);
-                    }}
-                    className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors duration-200 text-sm font-medium"
-                  >
-                    Delete
-                  </button>
-                </div>
-              )
-            }
-          ]}
-          data={doctors}
-          loading={loading && doctors.length === 0}
-          emptyMessage={searchTerm ? `No doctors found matching "${searchTerm}"` : 'No doctors found'}
-        />
+        {/* Doctors Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {doctors.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
+                      {searchTerm ? `No doctors found matching "${searchTerm}"` : 'No doctors found'}
+                    </td>
+                  </tr>
+                ) : (
+                  doctors.map((doctor) => (
+                    <tr key={doctor.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{doctor.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{doctor.fullName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{doctor.specialization}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{doctor.email}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{doctor.phone || '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          doctor.status === 'ACTIVE' 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {doctor.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEdit(doctor)}
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                            title="Edit"
+                          >
+                            <i data-feather="edit-2" className="w-4 h-4"></i>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(doctor.id)}
+                            className="text-red-600 hover:text-red-800 transition-colors"
+                            title="Delete"
+                          >
+                            <i data-feather="trash-2" className="w-4 h-4"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
+      <ToastContainer />
     </AdminLayout>
   );
 };

@@ -22,8 +22,9 @@ const AdminLayout = ({ children }) => {
 
   const menuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: 'layout', route: '/admin/dashboard' },
+    { path: '/admin/users', label: 'Users', icon: 'users', route: '/admin/users' },
     { path: '/admin/doctors', label: 'Doctors', icon: 'user', route: '/admin/doctors' },
-    { path: '/admin/patients', label: 'Patients', icon: 'users', route: '/admin/patients' },
+    { path: '/admin/patients', label: 'Patients', icon: 'user-check', route: '/admin/patients' },
     { path: '/admin/appointments', label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },
     { path: '/admin/feedbacks', label: 'Feedbacks', icon: 'message-circle', route: '/admin/feedbacks' },
   ];
@@ -39,7 +40,10 @@ const AdminLayout = ({ children }) => {
         {/* Header */}
         <div className="px-5 py-6 border-b border-gray-200">
           <div className="flex items-center gap-3 font-semibold text-gray-800">
-            <span className="text-2xl">🏥</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="currentColor" className="w-8 h-8 text-indigo-600">
+              <path d="M21 10h-4V6h-2v4h-4v2h4v4h2v-4h4v-2z"/>
+              <path d="M28 10h-2V4a2.002 2.002 0 0 0-2-2H8a2.002 2.002 0 0 0-2 2v6H4a2.002 2.002 0 0 0-2 2v18h28V12a2.002 2.002 0 0 0-2-2ZM14 28v-6h4v6Zm6 0v-7a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v7H4V12h4V4h16v8h4v16Z"/>
+            </svg>
             {sidebarOpen && <span className="text-lg bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Admin Panel</span>}
           </div>
         </div>

@@ -94,6 +94,38 @@ public class AdminController {
         }
     }
 
+    @PostMapping("/patients")
+    public ResponseEntity<?> createPatient(@Valid @RequestBody com.doctorbooking.backend.dto.request.PatientRequest request) {
+        try {
+            PatientResponse patient = adminService.createPatient(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(patient);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/patients/{id}")
+    public ResponseEntity<?> updatePatient(
+            @PathVariable Long id,
+            @Valid @RequestBody com.doctorbooking.backend.dto.request.AdminUpdatePatientRequest request) {
+        try {
+            PatientResponse patient = adminService.updatePatient(id, request);
+            return ResponseEntity.ok(patient);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/patients/{id}")
+    public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
+        try {
+            adminService.deletePatient(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // ========== Appointment Management ==========
 
     @GetMapping("/appointments")
