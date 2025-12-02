@@ -84,7 +84,12 @@ const PaymentResultPage = () => {
   }, [searchParams, navigate]);
 
   const handleBackToWallet = () => {
-    navigate('/patient/wallet');
+    // Navigate to wallet and force refresh
+    navigate('/patient/wallet?tab=transactions&refresh=true');
+    // Force reload to refresh transactions
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   // Format VNPAY pay date (format: yyyyMMddHHmmss)
@@ -199,7 +204,14 @@ const PaymentResultPage = () => {
               {result.success ? 'Quay về ví' : 'Thử lại'}
             </button>
             {result.success && (
-              <button className="btn-view-transactions" onClick={() => navigate('/patient/wallet?tab=transactions')}>
+              <button className="btn-view-transactions" onClick={() => {
+                // Navigate to wallet with transactions tab and force refresh
+                navigate('/patient/wallet?tab=transactions&refresh=true');
+                // Force page reload to refresh transactions
+                setTimeout(() => {
+                  window.location.reload();
+                }, 100);
+              }}>
                 Xem lịch sử giao dịch
               </button>
             )}

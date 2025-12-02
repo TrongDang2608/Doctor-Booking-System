@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/patient")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('PATIENT')")
 public class PaymentController {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
@@ -47,6 +46,7 @@ public class PaymentController {
      * Lấy thông tin ví
      */
     @GetMapping("/wallet")
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<WalletResponse> getWallet() {
         try {
             Long userId = getCurrentUserId();
@@ -69,6 +69,7 @@ public class PaymentController {
      * Tạo yêu cầu nạp tiền
      */
     @PostMapping("/wallet/top-up")
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<TopUpResponse> topUp(@Valid @RequestBody TopUpRequest request) {
         try {
             Long userId = getCurrentUserId();
@@ -115,26 +116,41 @@ public class PaymentController {
      */
     @GetMapping("/payments/vnpay/callback")
     public org.springframework.web.servlet.ModelAndView vnpayCallback(HttpServletRequest request) {
+        logger.info("=== VNPAY CALLBACK RECEIVED ===");
+        logger.info("Request URL: {}", request.getRequestURL());
+        logger.info("Query String: {}", request.getQueryString());
+        
         try {
             Map<String, String> vnpParams = new HashMap<>();
             for (String paramName : request.getParameterMap().keySet()) {
-                String paramValue = request.getParameter(paramName);
+                String[] paramValues = request.getParameterValues(paramName);
+                String paramValue = paramValues != null && paramValues.length > 0 ? paramValues[0] : null;
                 vnpParams.put(paramName, paramValue);
+                logger.debug("VNPAY Param: {} = {}", paramName, paramValue);
             }
 
-            logger.info("VNPAY Callback received: {}", vnpParams);
-
-            // Verify checksum
-            boolean isValid = vnPayService.verifyPayment(vnpParams);
-            if (!isValid) {
-                logger.warn("Invalid VNPAY checksum");
-                String redirectUrl = "http://localhost:5173/patient/wallet/payment/result?code=97&message=Invalid%20checksum";
-                return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
-            }
+            logger.info("VNPAY Callback received with {} params", vnpParams.size());
+            logger.info("VNPAY Params: {}", vnpParams);
 
             String vnp_ResponseCode = vnpParams.get("vnp_ResponseCode");
             String vnp_TxnRef = vnpParams.get("vnp_TxnRef");
             String vnp_TransactionNo = vnpParams.get("vnp_TransactionNo");
+
+            // Verify checksum
+            boolean isValid = vnPayService.verifyPayment(vnpParams);
+            if (!isValid) {
+                logger.warn("Invalid VNPAY checksum for transaction: {}", vnp_TxnRef);
+                // Cập nhật transaction thành FAILED khi checksum không hợp lệ
+                if (vnp_TxnRef != null && !vnp_TxnRef.isEmpty()) {
+                    try {
+                        walletService.failDepositTransaction(vnp_TxnRef, "Invalid checksum");
+                    } catch (Exception e) {
+                        logger.error("Error updating transaction status for invalid checksum", e);
+                    }
+                }
+                String redirectUrl = "http://localhost:5173/patient/wallet/payment/result?code=97&message=Invalid%20checksum&vnp_TxnRef=" + (vnp_TxnRef != null ? vnp_TxnRef : "");
+                return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
+            }
 
             String redirectUrl = "http://localhost:5173/patient/wallet/payment/result";
             
@@ -161,14 +177,37 @@ public class PaymentController {
                 queryString.append("&vnp_PayDate=").append(vnpParams.get("vnp_PayDate"));
             }
             
+            // Validate vnp_TxnRef
+            if (vnp_TxnRef == null || vnp_TxnRef.isEmpty()) {
+                logger.error("vnp_TxnRef is null or empty in callback");
+                String errorRedirectUrl = "http://localhost:5173/patient/wallet/payment/result?code=99&message=Missing%20transaction%20ID";
+                return new org.springframework.web.servlet.ModelAndView("redirect:" + errorRedirectUrl);
+            }
+
             if ("00".equals(vnp_ResponseCode)) {
                 // Thanh toán thành công
-                walletService.completeDepositTransaction(vnp_TxnRef, vnp_TransactionNo);
-                queryString.append("&message=Thanh%20toan%20thanh%20cong");
+                logger.info("Processing successful payment for transaction: {}", vnp_TxnRef);
+                try {
+                    WalletTransaction updated = walletService.completeDepositTransaction(vnp_TxnRef, vnp_TransactionNo);
+                    logger.info("Transaction completed successfully: {} -> Status: {}", vnp_TxnRef, updated.getStatus());
+                    queryString.append("&message=Thanh%20toan%20thanh%20cong");
+                } catch (Exception e) {
+                    logger.error("Error completing transaction: {}", vnp_TxnRef, e);
+                    e.printStackTrace();
+                    queryString.append("&message=Loi%20cap%20nhat%20giao%20dich");
+                }
             } else {
-                // Thanh toán thất bại
-                walletService.failDepositTransaction(vnp_TxnRef, "Payment failed: " + vnp_ResponseCode);
-                queryString.append("&message=Thanh%20toan%20that%20bai");
+                // Thanh toán thất bại - CẬP NHẬT STATUS THÀNH FAILED
+                logger.info("Processing failed payment for transaction: {}, ResponseCode: {}", vnp_TxnRef, vnp_ResponseCode);
+                try {
+                    WalletTransaction updated = walletService.failDepositTransaction(vnp_TxnRef, "Payment failed: ResponseCode=" + vnp_ResponseCode);
+                    logger.info("Transaction failed and updated to FAILED: {} -> Status: {}", vnp_TxnRef, updated.getStatus());
+                    queryString.append("&message=Thanh%20toan%20that%20bai");
+                } catch (Exception e) {
+                    logger.error("Error updating transaction to FAILED: {}", vnp_TxnRef, e);
+                    e.printStackTrace();
+                    queryString.append("&message=Loi%20cap%20nhat%20giao%20dich");
+                }
             }
             
             redirectUrl += queryString.toString();
@@ -176,6 +215,16 @@ public class PaymentController {
             return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
         } catch (Exception e) {
             logger.error("Error processing VNPAY callback", e);
+            // Cố gắng cập nhật transaction thành FAILED nếu có vnp_TxnRef
+            try {
+                String vnp_TxnRef = request.getParameter("vnp_TxnRef");
+                if (vnp_TxnRef != null && !vnp_TxnRef.isEmpty()) {
+                    walletService.failDepositTransaction(vnp_TxnRef, "System error: " + e.getMessage());
+                    logger.info("Transaction updated to FAILED due to system error: {}", vnp_TxnRef);
+                }
+            } catch (Exception updateEx) {
+                logger.error("Error updating transaction status in exception handler", updateEx);
+            }
             String redirectUrl = "http://localhost:5173/patient/wallet/payment/result?code=99&message=Loi%20he%20thong";
             return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
         }
@@ -185,6 +234,7 @@ public class PaymentController {
      * Lấy lịch sử giao dịch
      */
     @GetMapping("/wallet/transactions")
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Map<String, Object>> getTransactions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size

@@ -59,10 +59,15 @@ public class WalletService {
      */
     @Transactional
     public WalletTransaction completeDepositTransaction(String referenceId, String vnpTransactionNo) {
+        logger.info("Starting completeDepositTransaction: referenceId={}, vnpTransactionNo={}", referenceId, vnpTransactionNo);
+        
         WalletTransaction transaction = walletTransactionRepository.findByReferenceId(referenceId);
         if (transaction == null) {
-            throw new RuntimeException("Transaction not found");
+            logger.error("Transaction not found with referenceId: {}", referenceId);
+            throw new RuntimeException("Transaction not found with referenceId: " + referenceId);
         }
+
+        logger.info("Found transaction: id={}, status={}, amount={}", transaction.getId(), transaction.getStatus(), transaction.getAmount());
 
         if (transaction.getStatus() == WalletTransaction.TransactionStatus.COMPLETED) {
             logger.warn("Transaction already completed: {}", referenceId);
@@ -89,11 +94,17 @@ public class WalletService {
 
         // Cập nhật transaction
         transaction.setStatus(WalletTransaction.TransactionStatus.COMPLETED);
-        transaction.setReferenceId(vnpTransactionNo); // Lưu transaction ID từ VNPAY
+        // Giữ nguyên referenceId (đã dùng để tìm transaction), lưu VNPAY transaction no vào description hoặc field khác
+        if (vnpTransactionNo != null && !vnpTransactionNo.isEmpty()) {
+            transaction.setDescription(transaction.getDescription() + " | VNPAY: " + vnpTransactionNo);
+        }
         transaction.setUpdatedAt(LocalDateTime.now());
 
         patientRepository.save(patient);
-        return walletTransactionRepository.save(transaction);
+        WalletTransaction saved = walletTransactionRepository.save(transaction);
+        logger.info("Transaction completed and saved: id={}, status={}, newBalance={}, newPoints={}", 
+                saved.getId(), saved.getStatus(), patient.getWalletBalance(), patient.getLoyaltyPoints());
+        return saved;
     }
 
     /**
@@ -103,14 +114,25 @@ public class WalletService {
     public WalletTransaction failDepositTransaction(String referenceId, String reason) {
         WalletTransaction transaction = walletTransactionRepository.findByReferenceId(referenceId);
         if (transaction == null) {
-            throw new RuntimeException("Transaction not found");
+            logger.error("Transaction not found with referenceId: {}", referenceId);
+            throw new RuntimeException("Transaction not found with referenceId: " + referenceId);
         }
 
+        // Chỉ cập nhật nếu transaction chưa ở trạng thái COMPLETED
+        if (transaction.getStatus() == WalletTransaction.TransactionStatus.COMPLETED) {
+            logger.warn("Cannot update COMPLETED transaction to FAILED: {}", referenceId);
+            return transaction;
+        }
+
+        // Cập nhật status thành FAILED
         transaction.setStatus(WalletTransaction.TransactionStatus.FAILED);
-        transaction.setDescription(transaction.getDescription() + " - " + reason);
+        String originalDescription = transaction.getDescription() != null ? transaction.getDescription() : "";
+        transaction.setDescription(originalDescription + " - " + reason);
         transaction.setUpdatedAt(LocalDateTime.now());
 
-        return walletTransactionRepository.save(transaction);
+        WalletTransaction saved = walletTransactionRepository.save(transaction);
+        logger.info("Transaction updated to FAILED: referenceId={}, reason={}", referenceId, reason);
+        return saved;
     }
 
     /**

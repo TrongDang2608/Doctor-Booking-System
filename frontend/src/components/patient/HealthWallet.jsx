@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
 import { vouchers, loyaltyTiers } from '../../mockData/patient/healthWallet';
 import './HealthWallet.css';
 
 const HealthWallet = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('overview');
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState('');
@@ -23,7 +24,29 @@ const HealthWallet = () => {
   useEffect(() => {
     loadWalletData();
     loadTransactions();
+    
+    // Check if should open transactions tab from query param
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'transactions') {
+      setActiveTab('transactions');
+    }
+    
+    // Check if should refresh
+    const refreshParam = searchParams.get('refresh');
+    if (refreshParam === 'true') {
+      loadTransactions();
+      loadWalletData();
+      // Clear refresh param
+      navigate('/patient/wallet?tab=transactions', { replace: true });
+    }
   }, []);
+
+  // Refresh transactions when tab changes to transactions
+  useEffect(() => {
+    if (activeTab === 'transactions') {
+      loadTransactions();
+    }
+  }, [activeTab]);
 
   const loadWalletData = async () => {
     try {
@@ -43,9 +66,14 @@ const HealthWallet = () => {
   const loadTransactions = async () => {
     try {
       const data = await patientService.getTransactions(0, 50);
-      setTransactions(data.transactions || []);
+      // Sort by created date descending (newest first)
+      const sortedTransactions = (data.transactions || []).sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      setTransactions(sortedTransactions);
     } catch (error) {
       console.error('Error loading transactions:', error);
+      setTransactions([]);
     }
   };
 
@@ -268,7 +296,16 @@ const HealthWallet = () => {
                       {transaction.transactionType === 'WITHDRAWAL' && '💸'}
                     </div>
                     <div className="transaction-details">
-                      <h4>{transaction.description}</h4>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                        <h4 style={{ margin: 0 }}>{transaction.description}</h4>
+                        <span className={`transaction-status-badge status-${transaction.status?.toLowerCase() || 'pending'}`}>
+                          {transaction.status === 'COMPLETED' && '✓ Hoàn thành'}
+                          {transaction.status === 'PENDING' && '⏳ Đang xử lý'}
+                          {transaction.status === 'FAILED' && '✗ Thất bại'}
+                          {transaction.status === 'CANCELLED' && '✕ Đã hủy'}
+                          {!transaction.status && '⏳ Đang xử lý'}
+                        </span>
+                      </div>
                       <span className="transaction-date">
                         {new Date(transaction.createdAt).toLocaleDateString('vi-VN', {
                           year: 'numeric',
@@ -278,6 +315,11 @@ const HealthWallet = () => {
                           minute: '2-digit'
                         })}
                       </span>
+                      {transaction.paymentMethod && (
+                        <span className="transaction-method" style={{ fontSize: '0.85rem', color: '#888', marginLeft: '0.5rem' }}>
+                          • {transaction.paymentMethod}
+                        </span>
+                      )}
                       {transaction.pointsEarned > 0 && (
                         <span className="transaction-points">
                           +{transaction.pointsEarned} điểm
@@ -307,6 +349,10 @@ const HealthWallet = () => {
             try {
               const numAmount = parseInt(topUpAmount.replace(/\./g, ''));
               const response = await patientService.topUp(numAmount, paymentMethod);
+              
+              // Transaction đã được tạo với status PENDING ở backend
+              // Refresh transactions để hiển thị transaction mới
+              await loadTransactions();
               
               // Redirect to VNPAY payment page
               if (response.paymentUrl) {
