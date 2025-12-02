@@ -85,7 +85,7 @@ const Login = () => {
             <input
               type="text"
               name="username"
-              id="username"
+              id="linear-login-username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Nhập Tên Đăng Nhập"
@@ -101,7 +101,7 @@ const Login = () => {
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
-                id="password"
+                id="linear-login-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Nhập Mật Khẩu"
@@ -125,7 +125,7 @@ const Login = () => {
             className="linear-submit-button"
             disabled={loading}
           >
-            Đăng nhập
+            <span>Đăng nhập</span>
           </button>
         </form>
 
