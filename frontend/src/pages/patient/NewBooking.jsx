@@ -39,7 +39,7 @@ const NewBooking = () => {
       setDoctors(data);
       setError('');
     } catch (err) {
-      setError('Failed to load doctors');
+      setError('Không thể tải danh sách bác sĩ');
       console.error(err);
     } finally {
       setLoading(false);
@@ -67,12 +67,12 @@ const NewBooking = () => {
         appointmentTime: formData.appointmentTime + ':00',
         notes: formData.notes,
       });
-      setSuccess('Appointment booked successfully!');
+      setSuccess('Đặt lịch hẹn thành công!');
       setTimeout(() => {
         navigate('/patient/history');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to book appointment. Please try again.');
+      setError(err.response?.data?.message || 'Không thể đặt lịch hẹn. Vui lòng thử lại.');
     } finally {
       setSubmitting(false);
     }
@@ -89,7 +89,7 @@ const NewBooking = () => {
   return (
     <PatientLayout>
       <div className="patient-page">
-        <h1>Book New Appointment</h1>
+        <h1>Đặt Lịch Hẹn Mới</h1>
 
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
@@ -97,14 +97,14 @@ const NewBooking = () => {
         <div className="patient-card">
           <form onSubmit={handleSubmit} className="patient-form">
             <div className="form-group">
-              <label>Select Doctor *</label>
+              <label>Chọn Bác Sĩ *</label>
               <select
                 name="doctorId"
                 value={formData.doctorId}
                 onChange={handleChange}
                 required
               >
-                <option value="">Choose a doctor...</option>
+                <option value="">Chọn bác sĩ...</option>
                 {doctors.map((doctor) => (
                   <option key={doctor.id} value={doctor.id}>
                     Dr. {doctor.fullName} - {doctor.specialization}
@@ -115,7 +115,7 @@ const NewBooking = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.25rem' }}>
               <div className="form-group">
-                <label>Appointment Date *</label>
+                <label>Ngày Hẹn *</label>
                 <input
                   type="date"
                   name="appointmentDate"
@@ -127,14 +127,14 @@ const NewBooking = () => {
               </div>
 
               <div className="form-group">
-                <label>Appointment Time *</label>
+                <label>Giờ Hẹn *</label>
                 <select
                   name="appointmentTime"
                   value={formData.appointmentTime}
                   onChange={handleChange}
                   required
                 >
-                  <option value="">Select time...</option>
+                  <option value="">Chọn giờ...</option>
                   {availableTimeSlots.map((time) => (
                     <option key={time} value={time}>
                       {time}
@@ -145,13 +145,13 @@ const NewBooking = () => {
             </div>
 
             <div className="form-group">
-              <label>Notes (Optional)</label>
+              <label>Ghi Chú (Tùy chọn)</label>
               <textarea
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
                 rows="4"
-                placeholder="Any additional information or concerns..."
+                placeholder="Thông tin bổ sung hoặc mối quan tâm..."
               />
             </div>
 
@@ -161,14 +161,14 @@ const NewBooking = () => {
                 onClick={() => navigate('/patient/dashboard')}
                 className="btn btn-secondary"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 type="submit"
                 disabled={submitting}
                 className="btn btn-success"
               >
-                {submitting ? 'Booking...' : 'Book Appointment'}
+                {submitting ? 'Đang đặt lịch...' : 'Đặt Lịch Hẹn'}
               </button>
             </div>
           </form>

@@ -22,12 +22,12 @@ const AdminLayout = ({ children }) => {
   };
 
   const menuItems = [
-    { path: '/admin/dashboard', label: 'Dashboard', icon: 'layout', route: '/admin/dashboard' },
-    { path: '/admin/users', label: 'Users', icon: 'users', route: '/admin/users' },
-    { path: '/admin/doctors', label: 'Doctors', icon: 'user', route: '/admin/doctors' },
-    { path: '/admin/patients', label: 'Patients', icon: 'user-check', route: '/admin/patients' },
-    { path: '/admin/appointments', label: 'Appointments', icon: 'calendar', route: '/admin/appointments' },
-    { path: '/admin/feedbacks', label: 'Feedbacks', icon: 'message-circle', route: '/admin/feedbacks' },
+    { path: '/admin/dashboard', label: 'Bảng điều khiển', icon: 'layout', route: '/admin/dashboard' },
+    { path: '/admin/users', label: 'Người dùng', icon: 'users', route: '/admin/users' },
+    { path: '/admin/doctors', label: 'Bác sĩ', icon: 'user', route: '/admin/doctors' },
+    { path: '/admin/patients', label: 'Bệnh nhân', icon: 'user-check', route: '/admin/patients' },
+    { path: '/admin/appointments', label: 'Lịch hẹn', icon: 'calendar', route: '/admin/appointments' },
+    { path: '/admin/feedbacks', label: 'Phản hồi', icon: 'message-circle', route: '/admin/feedbacks' },
   ];
 
   const isActive = (path) => {
@@ -45,7 +45,7 @@ const AdminLayout = ({ children }) => {
               <path d="M21 10h-4V6h-2v4h-4v2h4v4h2v-4h4v-2z"/>
               <path d="M28 10h-2V4a2.002 2.002 0 0 0-2-2H8a2.002 2.002 0 0 0-2 2v6H4a2.002 2.002 0 0 0-2 2v18h28V12a2.002 2.002 0 0 0-2-2ZM14 28v-6h4v6Zm6 0v-7a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v7H4V12h4V4h16v8h4v16Z"/>
             </svg>
-            {sidebarOpen && <span className="text-lg bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Admin Panel</span>}
+            {sidebarOpen && <span className="text-lg bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">Quản Trị Viên</span>}
           </div>
         </div>
 
@@ -76,7 +76,7 @@ const AdminLayout = ({ children }) => {
               </div>
               <div className="flex-1 overflow-hidden">
                 <div className="text-sm font-semibold text-gray-800 truncate">{user?.fullName || user?.username}</div>
-                <div className="text-xs text-gray-500">Administrator</div>
+                <div className="text-xs text-gray-500">Quản trị viên</div>
               </div>
             </div>
           ) : (
@@ -111,7 +111,7 @@ const AdminLayout = ({ children }) => {
           <div className="flex items-center gap-4">
             <input 
               type="text" 
-              placeholder="Search..." 
+              placeholder="Tìm kiếm..." 
               className="w-80 px-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all duration-200"
             />
             <button className="relative w-9 h-9 rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 flex items-center justify-center">

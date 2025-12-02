@@ -42,12 +42,12 @@ const PatientLayout = ({ children }) => {
     };
 
     const menuItems = [
-        { path: '/patient/dashboard', label: 'Dashboard', icon: 'layout', route: '/patient/dashboard' },
-        { path: '/patient/booking', label: 'New Booking', icon: 'calendar', route: '/patient/booking' },
-        { path: '/patient/history', label: 'Booking History', icon: 'clock', route: '/patient/history' },
-        { path: '/patient/doctors', label: 'Find Doctors', icon: 'search', route: '/patient/doctors' },
+        { path: '/patient/dashboard', label: 'Bảng điều khiển', icon: 'layout', route: '/patient/dashboard' },
+        { path: '/patient/booking', label: 'Đặt lịch mới', icon: 'calendar', route: '/patient/booking' },
+        { path: '/patient/history', label: 'Lịch sử đặt lịch', icon: 'clock', route: '/patient/history' },
+        { path: '/patient/doctors', label: 'Tìm bác sĩ', icon: 'search', route: '/patient/doctors' },
         { path: '/patient/wallet', label: 'Ví Sức khỏe', icon: 'credit-card', route: '/patient/wallet' },
-        { path: '/patient/healthlyai', label: 'HealthAI', icon: 'message-circle', route: '/patient/healthlyai' },
+        { path: '/patient/healthlyai', label: 'Trợ lý AI', icon: 'message-circle', route: '/patient/healthlyai' },
     ];
 
     const isActive = (path) => {
@@ -80,7 +80,7 @@ const PatientLayout = ({ children }) => {
                         </div>
                         {sidebarOpen && (
                             <div className="logo-text-wrapper">
-                                <span className="logo-brand-name">Doctor Booking</span>
+                                <span className="logo-brand-name">Bệnh Nhân</span>
                             </div>
                         )}
                     </Link>
@@ -110,7 +110,7 @@ const PatientLayout = ({ children }) => {
                             </div>
                             <div className="user-details">
                                 <div className="user-name">{user?.fullName || user?.username}</div>
-                                <div className="user-role">My Profile</div>
+                                <div className="user-role">Hồ sơ</div>
                             </div>
                             <i data-feather="chevron-right" className="user-arrow"></i>
                         </Link>
