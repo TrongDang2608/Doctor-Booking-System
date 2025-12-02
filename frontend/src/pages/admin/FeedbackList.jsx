@@ -4,7 +4,6 @@ import { adminService } from '../../services/adminService';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import { formatDate } from '../../utils/formatDate';
-import './adminPages.css';
 
 const FeedbackList = () => {
   const [feedbacks, setFeedbacks] = useState([]);

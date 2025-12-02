@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import logoImage from '../../assets/DoctorBooking.png';
-import './AdminLayout.css';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -58,7 +56,7 @@ const AdminLayout = ({ children }) => {
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`}
             >
-              <span className="text-xl min-w-[24px]">{item.icon}</span>
+              <i data-feather={item.icon} className="w-5 h-5"></i>
               {sidebarOpen && <span className="text-sm">{item.label}</span>}
             </Link>
           ))}
@@ -66,7 +64,7 @@ const AdminLayout = ({ children }) => {
 
         {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          {sidebarOpen && (
+          {sidebarOpen ? (
             <div className="flex items-center gap-3 p-3 mb-3 bg-gray-50 rounded-lg">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
                 {(user?.fullName || user?.username || 'A').charAt(0).toUpperCase()}
@@ -76,12 +74,18 @@ const AdminLayout = ({ children }) => {
                 <div className="text-xs text-gray-500">Administrator</div>
               </div>
             </div>
+          ) : (
+            <div className="flex items-center justify-center p-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                {(user?.fullName || user?.username || 'A').charAt(0).toUpperCase()}
+              </div>
+            </div>
           )}
           <button 
             onClick={handleLogout} 
             className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-white border border-gray-200 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-300 transition-all duration-200 font-medium"
           >
-            <span className="text-lg">🚪</span>
+            <i data-feather="log-out" className="w-5 h-5"></i>
             {sidebarOpen && <span className="text-sm">Logout</span>}
           </button>
         </div>
