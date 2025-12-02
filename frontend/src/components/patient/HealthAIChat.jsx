@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
 import AISymptomChecker from './AISymptomChecker';
-import HealthWallet from './HealthWallet';
 import FamilyAccount from './FamilyAccount';
 import './HealthAIChat.css';
 
@@ -44,7 +43,9 @@ const HealthAIChat = ({ onClose, isFullPage = false }) => {
       // Logic điều hướng nhanh client-side
       const lowerInput = currentInput.toLowerCase();
       if (lowerInput.includes('ví') || lowerInput.includes('wallet')) {
-        setTimeout(() => { setActiveMode('wallet'); setIsTyping(false); }, 500);
+        setIsTyping(false);
+        navigate('/patient/wallet');
+        if (onClose) onClose();
         return;
       }
       if (lowerInput.includes('gia đình') || lowerInput.includes('family')) {
@@ -140,7 +141,7 @@ const HealthAIChat = ({ onClose, isFullPage = false }) => {
   const quickActions = [
     { id: 'symptom', label: 'Check Triệu chứng', icon: '🔍', action: () => setActiveMode('symptom') },
     { id: 'booking', label: 'Đặt lịch khám', icon: '📅', action: () => navigate('/patient/booking') },
-    { id: 'wallet', label: 'Ví Sức khỏe', icon: '💰', action: () => setActiveMode('wallet') },
+    { id: 'wallet', label: 'Ví Sức khỏe', icon: '💰', action: () => { navigate('/patient/wallet'); if (onClose) onClose(); } },
     { id: 'family', label: 'Gia đình', icon: '👨‍👩‍👧‍👦', action: () => setActiveMode('family') },
   ];
 
@@ -269,7 +270,6 @@ const HealthAIChat = ({ onClose, isFullPage = false }) => {
 
           {/* Giữ nguyên các mode con khác */}
           {activeMode === 'symptom' && <div style={{padding:'1rem'}}><AISymptomChecker /></div>}
-          {activeMode === 'wallet' && <div style={{padding:'1rem'}}><HealthWallet /></div>}
           {activeMode === 'family' && <div style={{padding:'1rem'}}><FamilyAccount /></div>}
         </div>
       </div>

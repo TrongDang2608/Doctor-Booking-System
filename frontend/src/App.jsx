@@ -40,6 +40,8 @@ import DoctorSearch from './pages/patient/DoctorSearch';
 import FeedbackForm from './pages/patient/FeedbackForm';
 import TreatmentHistory from './pages/patient/TreatmentHistory';
 import HealthAIPage from './pages/patient/HealthAIPage';
+import HealthWalletPage from './pages/patient/HealthWalletPage';
+import PaymentResultPage from './pages/patient/PaymentResultPage';
 const Unauthorized = () => <div><h1>Unauthorized</h1><p>You don't have permission to access this page.</p></div>;
 
 function App() {
@@ -128,6 +130,8 @@ function App() {
                   <Route path="doctors" element={<DoctorSearch />} />
                   <Route path="treatments" element={<TreatmentHistory />} />
                   <Route path="feedback" element={<FeedbackForm />} />
+                  <Route path="wallet" element={<HealthWalletPage />} />
+                  <Route path="wallet/payment/result" element={<PaymentResultPage />} />
                   <Route path="healthlyai" element={<HealthAIPage />} />
                   <Route path="*" element={<Navigate to="/patient/dashboard" replace />} />
                 </Routes>
