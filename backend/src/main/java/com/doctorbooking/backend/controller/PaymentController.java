@@ -1,0 +1,212 @@
+package com.doctorbooking.backend.controller;
+
+import com.doctorbooking.backend.dto.request.TopUpRequest;
+import com.doctorbooking.backend.dto.response.TopUpResponse;
+import com.doctorbooking.backend.dto.response.WalletResponse;
+import com.doctorbooking.backend.dto.response.WalletTransactionResponse;
+import com.doctorbooking.backend.model.Patient;
+import com.doctorbooking.backend.model.WalletTransaction;
+import com.doctorbooking.backend.model.User;
+import com.doctorbooking.backend.repository.PatientRepository;
+import com.doctorbooking.backend.service.PatientService;
+import com.doctorbooking.backend.service.UserService;
+import com.doctorbooking.backend.service.VNPayService;
+import com.doctorbooking.backend.service.WalletService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/patient")
+@RequiredArgsConstructor
+@PreAuthorize("hasRole('PATIENT')")
+public class PaymentController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+    private final WalletService walletService;
+    private final VNPayService vnPayService;
+    private final UserService userService;
+    private final PatientRepository patientRepository;
+
+    /**
+     * Lấy thông tin ví
+     */
+    @GetMapping("/wallet")
+    public ResponseEntity<WalletResponse> getWallet() {
+        try {
+            Long userId = getCurrentUserId();
+            Patient patient = patientRepository.findByUserId(userId)
+                    .orElseThrow(() -> new RuntimeException("Patient not found"));
+            
+            WalletResponse response = new WalletResponse(
+                    patient.getWalletBalance() != null ? patient.getWalletBalance() : BigDecimal.ZERO,
+                    patient.getLoyaltyPoints() != null ? patient.getLoyaltyPoints() : 0,
+                    patient.getLoyaltyTier() != null ? patient.getLoyaltyTier() : "BRONZE"
+            );
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error getting wallet", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Tạo yêu cầu nạp tiền
+     */
+    @PostMapping("/wallet/top-up")
+    public ResponseEntity<TopUpResponse> topUp(@Valid @RequestBody TopUpRequest request) {
+        try {
+            Long userId = getCurrentUserId();
+            Patient patient = patientRepository.findByUserId(userId)
+                    .orElseThrow(() -> new RuntimeException("Patient not found"));
+            Long patientId = patient.getId();
+
+            // Validate amount
+            if (request.getAmount().compareTo(new BigDecimal("10000")) < 0) {
+                return ResponseEntity.badRequest().build();
+            }
+            if (request.getAmount().compareTo(new BigDecimal("50000000")) > 0) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            // Tạo transaction
+            WalletTransaction transaction = walletService.createDepositTransaction(
+                    patientId,
+                    request.getAmount(),
+                    request.getPaymentMethod()
+            );
+
+            // Tạo payment URL
+            String orderInfo = "Nap tien vao vi - " + patient.getFullName();
+            String paymentUrl = vnPayService.createPaymentUrl(
+                    request.getAmount().longValue(),
+                    orderInfo,
+                    transaction.getReferenceId()
+            );
+
+            TopUpResponse response = new TopUpResponse();
+            response.setPaymentUrl(paymentUrl);
+            response.setTransactionId(transaction.getReferenceId());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error creating top-up request", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Callback từ VNPAY sau khi thanh toán
+     */
+    @GetMapping("/payments/vnpay/callback")
+    public org.springframework.web.servlet.ModelAndView vnpayCallback(HttpServletRequest request) {
+        try {
+            Map<String, String> vnpParams = new HashMap<>();
+            for (String paramName : request.getParameterMap().keySet()) {
+                String paramValue = request.getParameter(paramName);
+                vnpParams.put(paramName, paramValue);
+            }
+
+            logger.info("VNPAY Callback received: {}", vnpParams);
+
+            // Verify checksum
+            boolean isValid = vnPayService.verifyPayment(vnpParams);
+            if (!isValid) {
+                logger.warn("Invalid VNPAY checksum");
+                String redirectUrl = "http://localhost:5173/patient/wallet?code=97&message=Invalid%20checksum";
+                return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
+            }
+
+            String vnp_ResponseCode = vnpParams.get("vnp_ResponseCode");
+            String vnp_TxnRef = vnpParams.get("vnp_TxnRef");
+            String vnp_TransactionNo = vnpParams.get("vnp_TransactionNo");
+
+            String redirectUrl = "http://localhost:5173/patient/wallet";
+            
+            if ("00".equals(vnp_ResponseCode)) {
+                // Thanh toán thành công
+                walletService.completeDepositTransaction(vnp_TxnRef, vnp_TransactionNo);
+                redirectUrl += "?code=00&message=Thanh%20toan%20thanh%20cong";
+            } else {
+                // Thanh toán thất bại
+                walletService.failDepositTransaction(vnp_TxnRef, "Payment failed: " + vnp_ResponseCode);
+                redirectUrl += "?code=" + vnp_ResponseCode + "&message=Thanh%20toan%20that%20bai";
+            }
+
+            return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
+        } catch (Exception e) {
+            logger.error("Error processing VNPAY callback", e);
+            String redirectUrl = "http://localhost:5173/patient/wallet?code=99&message=Loi%20he%20thong";
+            return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
+        }
+    }
+
+    /**
+     * Lấy lịch sử giao dịch
+     */
+    @GetMapping("/wallet/transactions")
+    public ResponseEntity<Map<String, Object>> getTransactions(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        try {
+            Long userId = getCurrentUserId();
+            Patient patient = patientRepository.findByUserId(userId)
+                    .orElseThrow(() -> new RuntimeException("Patient not found"));
+            Long patientId = patient.getId();
+
+            Pageable pageable = PageRequest.of(page, size);
+            Page<WalletTransaction> transactions = walletService.getTransactions(patientId, pageable);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("transactions", transactions.getContent().stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList()));
+            response.put("totalPages", transactions.getTotalPages());
+            response.put("totalElements", transactions.getTotalElements());
+            response.put("currentPage", transactions.getNumber());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error getting transactions", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    private WalletTransactionResponse mapToResponse(WalletTransaction transaction) {
+        return new WalletTransactionResponse(
+                transaction.getId(),
+                transaction.getTransactionType().name(),
+                transaction.getAmount(),
+                transaction.getPointsEarned(),
+                transaction.getDescription(),
+                transaction.getStatus().name(),
+                transaction.getPaymentMethod(),
+                transaction.getCreatedAt()
+        );
+    }
+
+    private Long getCurrentUserId() {
+        org.springframework.security.core.Authentication authentication = 
+                SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        User user = userService.findByUsername(username);
+        return user.getId();
+    }
+}
+

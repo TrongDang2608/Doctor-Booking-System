@@ -81,5 +81,26 @@ export const patientService = {
     const response = await api.post('/patient/ai/check-symptoms', { symptoms });
     return response.data;
   },
+
+  // Wallet
+  getWallet: async () => {
+    const response = await api.get('/patient/wallet');
+    return response.data;
+  },
+
+  topUp: async (amount, paymentMethod) => {
+    const response = await api.post('/patient/wallet/top-up', {
+      amount,
+      paymentMethod
+    });
+    return response.data;
+  },
+
+  getTransactions: async (page = 0, size = 10) => {
+    const response = await api.get('/patient/wallet/transactions', {
+      params: { page, size }
+    });
+    return response.data;
+  },
 };
 

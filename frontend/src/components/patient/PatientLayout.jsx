@@ -25,6 +25,16 @@ const PatientLayout = ({ children }) => {
         }
     }, [location.pathname]);
 
+    // Initialize Feather Icons after render
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (window.feather) {
+                window.feather.replace();
+            }
+        }, 100);
+        return () => clearTimeout(timer);
+    });
+
     const handleLogout = () => {
         logout();
         navigate('/login');
@@ -35,7 +45,8 @@ const PatientLayout = ({ children }) => {
         { path: '/patient/booking', label: 'New Booking', icon: 'calendar', route: '/patient/booking' },
         { path: '/patient/history', label: 'Booking History', icon: 'clock', route: '/patient/history' },
         { path: '/patient/doctors', label: 'Find Doctors', icon: 'search', route: '/patient/doctors' },
-        { path: '/patient/healthlyai', label: 'HealthAI Chat', icon: 'message-circle', route: '/patient/healthlyai' },
+        { path: '/patient/wallet', label: 'Ví Sức khỏe', icon: 'credit-card', route: '/patient/wallet' },
+        { path: '/patient/healthlyai', label: 'HealthAI', icon: 'message-circle', route: '/patient/healthlyai' },
     ];
 
     const isActive = (path) => {
