@@ -621,18 +621,29 @@
   font-size: 1.375rem;
   font-weight: 700;
   white-space: nowrap;
+  color: #e0e0e0;
 }
 
-.transaction-amount.payment {
-  color: #f87171;
+/* Completed transactions */
+.transaction-amount.positive {
+  color: #4ade80; /* Green - money added */
 }
 
-.transaction-amount.refund {
-  color: #4ade80;
+.transaction-amount.negative {
+  color: #f87171; /* Red - money spent */
 }
 
-.transaction-amount.reward {
-  color: #60a5fa;
+/* Failed transactions */
+.transaction-amount.failed {
+  color: #ef4444; /* Red with opacity */
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+/* Pending transactions */
+.transaction-amount.pending {
+  color: #fbbf24; /* Yellow/Orange */
+  opacity: 0.8;
 }
 
 /* Top-up Modal */

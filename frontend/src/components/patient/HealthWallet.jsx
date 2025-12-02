@@ -85,6 +85,40 @@ const HealthWallet = () => {
   const availableVouchers = vouchers.filter(v => !v.isRedeemed);
   const redeemedVouchers = vouchers.filter(v => v.isRedeemed);
 
+  // Helper function to determine amount prefix based on transaction type and status
+  const getAmountPrefix = (transaction) => {
+    // Chỉ hiển thị dấu + khi giao dịch THÀNH CÔNG và là loại nạp tiền/hoàn tiền
+    if (transaction.status === 'COMPLETED') {
+      if (transaction.transactionType === 'DEPOSIT' || transaction.transactionType === 'REFUND') {
+        return '+';
+      }
+      if (transaction.transactionType === 'PAYMENT' || transaction.transactionType === 'WITHDRAWAL') {
+        return '-';
+      }
+    }
+    // Với PENDING hoặc FAILED, không hiển thị dấu +/-
+    return '';
+  };
+
+  // Helper function to determine CSS class for amount
+  const getAmountClass = (transaction) => {
+    if (transaction.status === 'COMPLETED') {
+      if (transaction.transactionType === 'DEPOSIT' || transaction.transactionType === 'REFUND') {
+        return 'positive';
+      }
+      if (transaction.transactionType === 'PAYMENT' || transaction.transactionType === 'WITHDRAWAL') {
+        return 'negative';
+      }
+    }
+    if (transaction.status === 'FAILED') {
+      return 'failed';
+    }
+    if (transaction.status === 'PENDING') {
+      return 'pending';
+    }
+    return '';
+  };
+
   useEffect(() => {
     if (showTopUpModal && window.feather) {
       window.feather.replace();
@@ -326,8 +360,8 @@ const HealthWallet = () => {
                         </span>
                       )}
                     </div>
-                    <div className={`transaction-amount ${transaction.transactionType === 'DEPOSIT' || transaction.transactionType === 'REFUND' ? 'positive' : ''}`}>
-                      {transaction.transactionType === 'DEPOSIT' || transaction.transactionType === 'REFUND' ? '+' : ''}
+                    <div className={`transaction-amount ${getAmountClass(transaction)}`}>
+                      {getAmountPrefix(transaction)}
                       {Number(transaction.amount).toLocaleString('vi-VN')} VNĐ
                     </div>
                   </div>
