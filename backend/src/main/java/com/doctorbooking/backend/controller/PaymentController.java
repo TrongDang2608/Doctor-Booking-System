@@ -128,7 +128,7 @@ public class PaymentController {
             boolean isValid = vnPayService.verifyPayment(vnpParams);
             if (!isValid) {
                 logger.warn("Invalid VNPAY checksum");
-                String redirectUrl = "http://localhost:5173/patient/wallet?code=97&message=Invalid%20checksum";
+                String redirectUrl = "http://localhost:5173/patient/wallet/payment/result?code=97&message=Invalid%20checksum";
                 return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
             }
 
@@ -136,22 +136,47 @@ public class PaymentController {
             String vnp_TxnRef = vnpParams.get("vnp_TxnRef");
             String vnp_TransactionNo = vnpParams.get("vnp_TransactionNo");
 
-            String redirectUrl = "http://localhost:5173/patient/wallet";
+            String redirectUrl = "http://localhost:5173/patient/wallet/payment/result";
+            
+            // Build query string with all VNPAY params
+            StringBuilder queryString = new StringBuilder();
+            queryString.append("?code=").append(vnp_ResponseCode);
+            queryString.append("&vnp_ResponseCode=").append(vnp_ResponseCode);
+            queryString.append("&vnp_TxnRef=").append(vnp_TxnRef);
+            queryString.append("&transactionId=").append(vnp_TxnRef);
+            
+            if (vnp_TransactionNo != null) {
+                queryString.append("&vnp_TransactionNo=").append(vnp_TransactionNo);
+            }
+            if (vnpParams.get("vnp_Amount") != null) {
+                queryString.append("&vnp_Amount=").append(vnpParams.get("vnp_Amount"));
+            }
+            if (vnpParams.get("vnp_OrderInfo") != null) {
+                queryString.append("&vnp_OrderInfo=").append(java.net.URLEncoder.encode(vnpParams.get("vnp_OrderInfo"), java.nio.charset.StandardCharsets.UTF_8));
+            }
+            if (vnpParams.get("vnp_BankCode") != null) {
+                queryString.append("&vnp_BankCode=").append(vnpParams.get("vnp_BankCode"));
+            }
+            if (vnpParams.get("vnp_PayDate") != null) {
+                queryString.append("&vnp_PayDate=").append(vnpParams.get("vnp_PayDate"));
+            }
             
             if ("00".equals(vnp_ResponseCode)) {
                 // Thanh toán thành công
                 walletService.completeDepositTransaction(vnp_TxnRef, vnp_TransactionNo);
-                redirectUrl += "?code=00&message=Thanh%20toan%20thanh%20cong";
+                queryString.append("&message=Thanh%20toan%20thanh%20cong");
             } else {
                 // Thanh toán thất bại
                 walletService.failDepositTransaction(vnp_TxnRef, "Payment failed: " + vnp_ResponseCode);
-                redirectUrl += "?code=" + vnp_ResponseCode + "&message=Thanh%20toan%20that%20bai";
+                queryString.append("&message=Thanh%20toan%20that%20bai");
             }
+            
+            redirectUrl += queryString.toString();
 
             return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
         } catch (Exception e) {
             logger.error("Error processing VNPAY callback", e);
-            String redirectUrl = "http://localhost:5173/patient/wallet?code=99&message=Loi%20he%20thong";
+            String redirectUrl = "http://localhost:5173/patient/wallet/payment/result?code=99&message=Loi%20he%20thong";
             return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
         }
     }

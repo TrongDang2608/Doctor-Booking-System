@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { patientService } from '../../services/patientService';
 import { vouchers, loyaltyTiers } from '../../mockData/patient/healthWallet';
 import './HealthWallet.css';
 
 const HealthWallet = () => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [showTopUpModal, setShowTopUpModal] = useState(false);
@@ -19,22 +18,6 @@ const HealthWallet = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Check payment callback
-  useEffect(() => {
-    const code = searchParams.get('code');
-    const message = searchParams.get('message');
-    if (code) {
-      if (code === '00') {
-        alert('Thanh toán thành công! Số dư ví đã được cập nhật.');
-        loadWalletData();
-        loadTransactions();
-      } else {
-        alert(`Thanh toán thất bại: ${message || 'Lỗi không xác định'}`);
-      }
-      // Clear URL params
-      navigate('/patient/wallet', { replace: true });
-    }
-  }, [searchParams, navigate]);
 
   // Load wallet data
   useEffect(() => {
