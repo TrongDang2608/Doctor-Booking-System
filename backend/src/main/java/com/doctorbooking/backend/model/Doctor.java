@@ -47,6 +47,9 @@ public class Doctor {
     @Column(nullable = false)
     private DoctorStatus status = DoctorStatus.ACTIVE;
 
+    @Column(name = "consultation_fee", precision = 10, scale = 2)
+    private java.math.BigDecimal consultationFee = java.math.BigDecimal.ZERO;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

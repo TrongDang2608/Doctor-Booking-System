@@ -29,16 +29,33 @@ public class VNPayService {
 
     @Value("${vnpay.returnUrl}")
     private String returnUrl;
+    
+    @Value("${vnpay.appointmentReturnUrl}")
+    private String appointmentReturnUrl;
 
     /**
-     * Tạo payment URL cho VNPAY
+     * Tạo payment URL cho VNPAY (wallet top-up)
      */
     public String createPaymentUrl(Long amount, String orderInfo, String orderId) {
+        return createPaymentUrl(amount, orderInfo, orderId, returnUrl);
+    }
+
+    /**
+     * Tạo payment URL cho VNPAY với custom return URL (appointment payment)
+     */
+    public String createPaymentUrlForAppointment(Long amount, String orderInfo, String orderId) {
+        return createPaymentUrl(amount, orderInfo, orderId, appointmentReturnUrl);
+    }
+
+    /**
+     * Tạo payment URL cho VNPAY (internal method)
+     */
+    private String createPaymentUrl(Long amount, String orderInfo, String orderId, String customReturnUrl) {
         try {
             String vnp_TmnCode = tmnCode;
             String vnp_HashSecret = hashSecret;
             String vnp_Url = vnpUrl;
-            String vnp_ReturnUrl = returnUrl;
+            String vnp_ReturnUrl = customReturnUrl;
 
             Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", "2.1.0");

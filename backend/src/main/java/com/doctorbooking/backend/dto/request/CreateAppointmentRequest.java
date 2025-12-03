@@ -22,5 +22,7 @@ public class CreateAppointmentRequest {
     private LocalTime appointmentTime;
 
     private String notes;
+    
+    private String paymentMethod; // CASH, WALLET, VNPAY
 }
 
