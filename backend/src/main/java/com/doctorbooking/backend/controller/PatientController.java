@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/patient")
@@ -35,6 +38,7 @@ public class PatientController {
     private final FeedbackService feedbackService;
     private final UserService userService;
     private final AISymptomService aiSymptomService;
+    private final com.doctorbooking.backend.service.VNPayService vnPayService;
 
     // ========== Profile Management ==========
 
@@ -74,12 +78,40 @@ public class PatientController {
     // ========== Appointment Booking ==========
 
     @PostMapping("/appointments")
-    public ResponseEntity<AppointmentResponse> createAppointment(@Valid @RequestBody CreateAppointmentRequest request) {
+    public ResponseEntity<?> createAppointment(@Valid @RequestBody CreateAppointmentRequest request) {
         try {
             Long patientId = getCurrentPatientId();
             AppointmentResponse appointment = appointmentService.createAppointment(patientId, request);
+            
+            // Nếu chọn VNPAY, tạo payment URL
+            if ("VNPAY".equals(request.getPaymentMethod()) && appointment.getPrice().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                try {
+                    String orderInfo = "Thanh toan phi kham benh - Dr. " + appointment.getDoctorName();
+                    String referenceId = "APT" + appointment.getId() + "_" + System.currentTimeMillis();
+                    
+                    String paymentUrl = vnPayService.createPaymentUrlForAppointment(
+                        appointment.getPrice().longValue(),
+                        orderInfo,
+                        referenceId
+                    );
+                    
+                    // Trả về response với paymentUrl
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("appointment", appointment);
+                    response.put("paymentUrl", paymentUrl);
+                    response.put("referenceId", referenceId);
+                    
+                    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                } catch (Exception e) {
+                    logger.error("Error creating VNPAY payment URL", e);
+                    return ResponseEntity.badRequest().build();
+                }
+            }
+            
+            // CASH hoặc WALLET: Trả về appointment bình thường
             return ResponseEntity.status(HttpStatus.CREATED).body(appointment);
         } catch (RuntimeException e) {
+            logger.error("Error creating appointment: ", e);
             return ResponseEntity.badRequest().build();
         }
     }
@@ -119,6 +151,23 @@ public class PatientController {
             appointmentService.cancelAppointment(id, patientId);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ========== Available Time Slots ==========
+
+    @GetMapping("/appointments/available-slots")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<List<String>> getAvailableTimeSlots(
+            @RequestParam Long doctorId,
+            @RequestParam String date) {
+        try {
+            LocalDate appointmentDate = LocalDate.parse(date);
+            List<String> availableSlots = appointmentService.getAvailableTimeSlots(doctorId, appointmentDate);
+            return ResponseEntity.ok(availableSlots);
+        } catch (Exception e) {
+            logger.error("Error getting available slots", e);
             return ResponseEntity.badRequest().build();
         }
     }

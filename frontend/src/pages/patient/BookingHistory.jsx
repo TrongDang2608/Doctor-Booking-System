@@ -1,13 +1,12 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PatientLayout from '../../components/patient/PatientLayout';
 import { patientService } from '../../services/patientService';
 import Loading from '../../components/common/Loading';
-import ErrorMessage from '../../components/common/ErrorMessage';
-import DataTable from '../../components/common/DataTable';
-import { formatDate, formatDateTime } from '../../utils/formatDate';
+import { formatDate } from '../../utils/formatDate';
 import { formatTime } from '../../utils/formatTime';
 import '../patient/patientPages.css';
+import './BookingHistory.css';
 
 const BookingHistory = () => {
     const [appointments, setAppointments] = useState([]);
@@ -22,7 +21,18 @@ const BookingHistory = () => {
 
     useEffect(() => {
         loadAppointments();
+        // Initialize Feather Icons
+        if (window.feather) {
+            window.feather.replace();
+        }
     }, []);
+
+    useEffect(() => {
+        // Replace icons when appointments change
+        if (window.feather) {
+            setTimeout(() => window.feather.replace(), 100);
+        }
+    }, [appointments]);
 
     const loadAppointments = async () => {
         try {
@@ -78,6 +88,7 @@ const BookingHistory = () => {
     const handleSendFeedback = (appointment) => {
         setSelectedAppointment(appointment);
         setShowFeedbackModal(true);
+        setError(''); // Clear any existing errors
     };
 
     const handleFeedbackSuccess = () => {
@@ -87,21 +98,6 @@ const BookingHistory = () => {
         setTimeout(() => setSuccess(''), 3000);
         loadAppointments();
     };
-
-    const getStatusColor = useMemo(() => (status) => {
-        switch (status) {
-            case 'PENDING':
-                return '#f39c12';
-            case 'CONFIRMED':
-                return '#3498db';
-            case 'COMPLETED':
-                return '#2ecc71';
-            case 'CANCELLED':
-                return '#e74c3c';
-            default:
-                return '#95a5a6';
-        }
-    }, []);
 
     const canCancel = (appointment) => {
         return appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED';
@@ -115,175 +111,149 @@ const BookingHistory = () => {
         );
     }
 
+    const getPaymentMethodIcon = (method) => {
+        switch (method) {
+            case 'CASH': return '💵';
+            case 'VNPAY': return '🏦';
+            case 'WALLET': return '💰';
+            default: return '💳';
+        }
+    };
+
+    const getPaymentMethodName = (method) => {
+        switch (method) {
+            case 'CASH': return 'Tiền mặt';
+            case 'VNPAY': return 'VNPAY';
+            case 'WALLET': return 'Ví Sức khỏe';
+            default: return method || 'Chưa xác định';
+        }
+    };
+
     return (
         <PatientLayout>
-            <div className="patient-page">
-                <h1>Lịch Sử Đặt Lịch</h1>
+            <div className="booking-history-page">
+                <div className="history-header">
+                    <h1>Lịch Sử Đặt Lịch</h1>
+                </div>
 
                 {error && <div className="alert alert-error">{error}</div>}
                 {success && <div className="alert alert-success">{success}</div>}
 
-                <DataTable
-                    columns={[
-                        {
-                            header: 'Doctor',
-                            accessor: 'doctorName',
-                            render: (appointment) => (
-                                <div>
-                                    <div style={{ fontWeight: '500' }}>{appointment.doctorName}</div>
-                                    <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                                        {appointment.doctorSpecialization}
+                {appointments.length === 0 ? (
+                    <div className="empty-state">
+                        <div className="empty-state-icon">📅</div>
+                        <h3>Chưa có lịch hẹn nào</h3>
+                        <p>Bắt đầu đặt lịch khám bệnh với bác sĩ ngay bây giờ</p>
+                        <Link to="/patient/booking" className="empty-state-btn">
+                            <i data-feather="calendar"></i>
+                            Đặt lịch mới
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="appointments-list">
+                        {appointments.map(appointment => (
+                            <div 
+                                key={appointment.id} 
+                                className={`appointment-card status-${appointment.status.toLowerCase()}`}
+                            >
+                                {/* Header */}
+                                <div className="appointment-card-header">
+                                    <div className="appointment-doctor">
+                                        <div className="doctor-name">
+                                            <i data-feather="user"></i>
+                                            Dr. {appointment.doctorName}
+                                        </div>
+                                        <div className="doctor-specialty">
+                                            <i data-feather="heart"></i>
+                                            {appointment.doctorSpecialization}
+                                        </div>
+                                    </div>
+                                    <span className={`status-badge ${appointment.status.toLowerCase()}`}>
+                                        {appointment.status}
+                                    </span>
+                                </div>
+
+                                {/* Info Grid */}
+                                <div className="appointment-info-grid">
+                                    <div className="info-item">
+                                        <div className="info-label">
+                                            <i data-feather="calendar"></i>
+                                            Ngày khám
+                                        </div>
+                                        <div className="info-value">{formatDate(appointment.appointmentDate)}</div>
+                                    </div>
+                                    
+                                    <div className="info-item">
+                                        <div className="info-label">
+                                            <i data-feather="clock"></i>
+                                            Giờ khám
+                                        </div>
+                                        <div className="info-value">{formatTime(appointment.appointmentTime)}</div>
                                     </div>
                                 </div>
-                            )
-                        },
-                        {
-                            header: 'Date',
-                            accessor: 'appointmentDate',
-                            render: (appointment) => formatDate(appointment.appointmentDate)
-                        },
-                        {
-                            header: 'Time',
-                            accessor: 'appointmentTime',
-                            render: (appointment) => formatTime(appointment.appointmentTime)
-                        },
-                        {
-                            header: 'Status',
-                            accessor: 'status',
-                            render: (appointment) => {
-                                const color = getStatusColor(appointment.status);
-                                return (
-                                    <span style={{
-                                        padding: '6px 12px',
-                                        borderRadius: '4px',
-                                        backgroundColor: color + '20',
-                                        color: color,
-                                        fontSize: '12px',
-                                        fontWeight: '500',
-                                    }}>
-                    {appointment.status}
-                  </span>
-                                );
-                            }
-                        },
-                        {
-                            header: 'Notes',
-                            accessor: 'notes',
-                            render: (appointment) => (
-                                <div style={{ maxWidth: '200px', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {appointment.notes || '-'}
-                                </div>
-                            )
-                        },
-                        {
-                            header: 'Actions',
-                            align: 'center',
-                            render: (appointment) => (
-                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+
+                                {/* Payment Info */}
+                                {appointment.price > 0 && (
+                                    <div className="payment-info">
+                                        <div className="payment-amount">
+                                            {Number(appointment.price).toLocaleString('vi-VN')} VNĐ
+                                        </div>
+                                        <div className="payment-details">
+                                            <span className={`payment-method-badge ${appointment.paymentMethod?.toLowerCase() || ''}`}>
+                                                <span>{getPaymentMethodIcon(appointment.paymentMethod)}</span>
+                                                {getPaymentMethodName(appointment.paymentMethod)}
+                                            </span>
+                                            <span className={`payment-status-badge ${appointment.paymentStatus?.toLowerCase() || 'pending'}`}>
+                                                <i data-feather={appointment.paymentStatus === 'PAID' ? 'check-circle' : 'clock'}></i>
+                                                {appointment.paymentStatus || 'PENDING'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Notes */}
+                                {appointment.notes && (
+                                    <div className="appointment-notes">
+                                        <i data-feather="message-circle"></i> {appointment.notes}
+                                    </div>
+                                )}
+
+                                {/* Actions */}
+                                <div className="appointment-actions">
                                     {canCancel(appointment) && (
                                         <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleCancel(appointment.id);
-                                            }}
-                                            style={{
-                                                padding: '6px 12px',
-                                                backgroundColor: '#e74c3c',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                fontSize: '13px',
-                                                transition: 'background-color 0.2s',
-                                            }}
-                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#c0392b'}
-                                            onMouseLeave={(e) => e.target.style.backgroundColor = '#e74c3c'}
+                                            onClick={() => handleCancel(appointment.id)}
+                                            className="action-btn cancel"
                                         >
-                                            Hủy
+                                            <i data-feather="x-circle"></i>
+                                            Hủy lịch hẹn
                                         </button>
                                     )}
+                                    
                                     {appointment.status === 'COMPLETED' && (
                                         <>
                                             <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleViewDetails(appointment);
-                                                }}
-                                                style={{
-                                                    padding: '6px 12px',
-                                                    backgroundColor: '#3498db',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                    fontSize: '13px',
-                                                    transition: 'background-color 0.2s',
-                                                }}
-                                                onMouseEnter={(e) => e.target.style.backgroundColor = '#2980b9'}
-                                                onMouseLeave={(e) => e.target.style.backgroundColor = '#3498db'}
+                                                onClick={() => handleViewDetails(appointment)}
+                                                className="action-btn view"
                                             >
-                                                Xem Chi Tiết
+                                                <i data-feather="file-text"></i>
+                                                Xem kết quả khám
                                             </button>
                                             <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleSendFeedback(appointment);
-                                                }}
-                                                style={{
-                                                    padding: '6px 12px',
-                                                    backgroundColor: '#2ecc71',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                    fontSize: '13px',
-                                                    transition: 'background-color 0.2s',
-                                                }}
-                                                onMouseEnter={(e) => e.target.style.backgroundColor = '#27ae60'}
-                                                onMouseLeave={(e) => e.target.style.backgroundColor = '#2ecc71'}
+                                                onClick={() => handleSendFeedback(appointment)}
+                                                className="action-btn feedback"
                                             >
-                                                Gửi Phản Hồi
+                                                <i data-feather="star"></i>
+                                                Gửi đánh giá
                                             </button>
                                         </>
                                     )}
-                                    {appointment.status !== 'COMPLETED' && !canCancel(appointment) && (
-                                        <span style={{ fontSize: '12px', color: '#666' }}>-</span>
-                                    )}
                                 </div>
-                            )
-                        }
-                    ]}
-                    data={appointments}
-                    loading={loading && appointments.length === 0}
-                    emptyMessage={
-                        <div style={{ textAlign: 'center', padding: '20px' }}>
-                            <p style={{ marginBottom: '15px' }}>No appointments found</p>
-                            <Link
-                                to="/patient/booking"
-                                style={{
-                                    display: 'inline-block',
-                                    padding: '12px 24px',
-                                    backgroundColor: '#2ecc71',
-                                    color: 'white',
-                                    textDecoration: 'none',
-                                    borderRadius: '6px',
-                                    fontWeight: '500',
-                                    transition: 'all 0.2s',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.backgroundColor = '#27ae60';
-                                    e.target.style.transform = 'translateY(-2px)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.backgroundColor = '#2ecc71';
-                                    e.target.style.transform = 'translateY(0)';
-                                }}
-                            >
-                                Book New Appointment
-                            </Link>
-                        </div>
-                    }
-                />
+                            </div>
+                        ))}
+                    </div>
+                )}
+
 
                 {/* Appointment Details Modal */}
                 {showDetailsModal && selectedAppointment && (
@@ -324,61 +294,67 @@ const AppointmentDetailsModal = ({ appointment, treatment, loadingTreatment, onC
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: 'rgba(0,0,0,0.8)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 1000,
+            backdropFilter: 'blur(4px)',
         }}>
             <div style={{
-                backgroundColor: 'white',
-                padding: '30px',
-                borderRadius: '8px',
+                backgroundColor: 'rgba(20, 20, 20, 0.98)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                padding: '2rem',
+                borderRadius: '16px',
                 width: '90%',
                 maxWidth: '700px',
                 maxHeight: '90vh',
                 overflowY: 'auto',
+                color: '#e0e0e0',
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2>Chi Tiết Lịch Hẹn</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h2 style={{ margin: 0, color: '#e0e0e0', fontSize: '1.5rem' }}>Chi Tiết Lịch Hẹn</h2>
                     <button
                         onClick={onClose}
                         style={{
-                            background: 'none',
-                            border: 'none',
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
                             fontSize: '24px',
                             cursor: 'pointer',
+                            color: '#e0e0e0',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s',
                         }}
+                        onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'}
+                        onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
                     >
                         ×
                     </button>
                 </div>
 
-                <div style={{ display: 'grid', gap: '20px' }}>
+                <div style={{ display: 'grid', gap: '1.5rem' }}>
                     {/* Appointment Info */}
-                    <div style={{ padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '4px' }}>
-                        <h3 style={{ marginBottom: '15px', color: '#2c3e50' }}>Appointment Information</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                            <div><strong>Doctor:</strong> {appointment.doctorName}</div>
-                            <div><strong>Specialization:</strong> {appointment.doctorSpecialization}</div>
-                            <div><strong>Date:</strong> {formatDate(appointment.appointmentDate)}</div>
-                            <div><strong>Time:</strong> {formatTime(appointment.appointmentTime)}</div>
-                            <div><strong>Status:</strong>
-                                <span style={{
-                                    padding: '4px 8px',
-                                    borderRadius: '4px',
-                                    backgroundColor: appointment.status === 'COMPLETED' ? '#2ecc7120' : '#3498db20',
-                                    color: appointment.status === 'COMPLETED' ? '#2ecc71' : '#3498db',
-                                    marginLeft: '10px',
-                                    fontSize: '12px',
-                                    fontWeight: '500',
-                                }}>
-                  {appointment.status}
-                </span>
+                    <div style={{ padding: '1.25rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                        <h3 style={{ marginBottom: '1rem', color: '#e0e0e0', fontSize: '1.1rem' }}>Thông tin lịch hẹn</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', color: '#aaa' }}>
+                            <div><strong style={{ color: '#e0e0e0' }}>Bác sĩ:</strong> {appointment.doctorName}</div>
+                            <div><strong style={{ color: '#e0e0e0' }}>Chuyên khoa:</strong> {appointment.doctorSpecialization}</div>
+                            <div><strong style={{ color: '#e0e0e0' }}>Ngày:</strong> {formatDate(appointment.appointmentDate)}</div>
+                            <div><strong style={{ color: '#e0e0e0' }}>Giờ:</strong> {formatTime(appointment.appointmentTime)}</div>
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <strong style={{ color: '#e0e0e0' }}>Trạng thái:</strong>
+                                <span className={`status-badge ${appointment.status.toLowerCase()}`} style={{ marginLeft: '0.75rem' }}>
+                                    {appointment.status}
+                                </span>
                             </div>
                             {appointment.notes && (
                                 <div style={{ gridColumn: '1 / -1' }}>
-                                    <strong>Notes:</strong> {appointment.notes}
+                                    <strong style={{ color: '#e0e0e0' }}>Ghi chú:</strong> {appointment.notes}
                                 </div>
                             )}
                         </div>
@@ -386,42 +362,45 @@ const AppointmentDetailsModal = ({ appointment, treatment, loadingTreatment, onC
 
                     {/* Treatment Info */}
                     {loadingTreatment ? (
-                        <div style={{ padding: '20px', textAlign: 'center' }}>Loading treatment details...</div>
+                        <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>
+                            <div className="loading-spinner-medium" style={{ margin: '0 auto 1rem' }}></div>
+                            Đang tải thông tin điều trị...
+                        </div>
                     ) : treatment ? (
-                        <div style={{ padding: '15px', backgroundColor: '#e8f5e9', borderRadius: '4px' }}>
-                            <h3 style={{ marginBottom: '15px', color: '#2c3e50' }}>Treatment Information</h3>
-                            <div style={{ display: 'grid', gap: '10px' }}>
+                        <div style={{ padding: '1.25rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                            <h3 style={{ marginBottom: '1rem', color: '#10b981', fontSize: '1.1rem' }}>Thông tin điều trị</h3>
+                            <div style={{ display: 'grid', gap: '1rem', color: '#aaa' }}>
                                 {treatment.diagnosis && (
                                     <div>
-                                        <strong>Diagnosis:</strong>
-                                        <div style={{ marginTop: '5px', padding: '10px', backgroundColor: 'white', borderRadius: '4px' }}>
+                                        <strong style={{ color: '#e0e0e0' }}>Chẩn đoán:</strong>
+                                        <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', color: '#e0e0e0' }}>
                                             {treatment.diagnosis}
                                         </div>
                                     </div>
                                 )}
                                 {treatment.prescription && (
                                     <div>
-                                        <strong>Prescription:</strong>
-                                        <div style={{ marginTop: '5px', padding: '10px', backgroundColor: 'white', borderRadius: '4px' }}>
+                                        <strong style={{ color: '#e0e0e0' }}>Đơn thuốc:</strong>
+                                        <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', color: '#e0e0e0' }}>
                                             {treatment.prescription}
                                         </div>
                                     </div>
                                 )}
                                 {treatment.treatmentNotes && (
                                     <div>
-                                        <strong>Treatment Notes:</strong>
-                                        <div style={{ marginTop: '5px', padding: '10px', backgroundColor: 'white', borderRadius: '4px' }}>
+                                        <strong style={{ color: '#e0e0e0' }}>Ghi chú điều trị:</strong>
+                                        <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', color: '#e0e0e0' }}>
                                             {treatment.treatmentNotes}
                                         </div>
                                     </div>
                                 )}
                                 {treatment.followUpDate && (
                                     <div>
-                                        <strong>Follow-up Date:</strong> {formatDate(treatment.followUpDate)}
+                                        <strong style={{ color: '#e0e0e0' }}>Ngày tái khám:</strong> {formatDate(treatment.followUpDate)}
                                     </div>
                                 )}
-                                <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
-                                    Created: {new Date(treatment.createdAt).toLocaleString('en-US', {
+                                <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
+                                    Tạo lúc: {new Date(treatment.createdAt).toLocaleString('vi-VN', {
                                     year: 'numeric',
                                     month: 'long',
                                     day: 'numeric',
@@ -432,8 +411,8 @@ const AppointmentDetailsModal = ({ appointment, treatment, loadingTreatment, onC
                             </div>
                         </div>
                     ) : (
-                        <div style={{ padding: '15px', backgroundColor: '#fff3cd', borderRadius: '4px', color: '#856404' }}>
-                            No treatment information available for this appointment yet.
+                        <div style={{ padding: '1.25rem', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.2)', color: '#f59e0b' }}>
+                            Chưa có thông tin điều trị cho lịch hẹn này.
                         </div>
                     )}
                 </div>
@@ -441,17 +420,21 @@ const AppointmentDetailsModal = ({ appointment, treatment, loadingTreatment, onC
                 <button
                     onClick={onClose}
                     style={{
-                        marginTop: '20px',
-                        padding: '10px 20px',
-                        backgroundColor: '#95a5a6',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
+                        marginTop: '1.5rem',
+                        padding: '0.75rem 1.5rem',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#e0e0e0',
+                        borderRadius: '8px',
                         cursor: 'pointer',
                         width: '100%',
+                        fontWeight: '500',
+                        transition: 'all 0.2s',
                     }}
+                    onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'}
+                    onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
                 >
-                    Close
+                    Đóng
                 </button>
             </div>
         </div>
@@ -488,7 +471,7 @@ const FeedbackModal = ({ appointment, onClose, onSuccess }) => {
             });
             onSuccess();
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to submit feedback. Please try again.');
+            setError(err.response?.data?.message || 'Không thể gửi đánh giá. Vui lòng thử lại.');
         } finally {
             setSubmitting(false);
         }
@@ -501,122 +484,146 @@ const FeedbackModal = ({ appointment, onClose, onSuccess }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: 'rgba(0,0,0,0.8)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 1000,
+            backdropFilter: 'blur(4px)',
         }}>
             <div style={{
-                backgroundColor: 'white',
-                padding: '30px',
-                borderRadius: '8px',
+                backgroundColor: 'rgba(20, 20, 20, 0.98)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                padding: '2rem',
+                borderRadius: '16px',
                 width: '90%',
                 maxWidth: '600px',
                 maxHeight: '90vh',
                 overflowY: 'auto',
+                color: '#e0e0e0',
             }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2>Gửi Phản Hồi</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Gửi Đánh Giá</h2>
                     <button
                         onClick={onClose}
                         style={{
-                            background: 'none',
-                            border: 'none',
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
                             fontSize: '24px',
                             cursor: 'pointer',
+                            color: '#e0e0e0',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s',
                         }}
+                        onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'}
+                        onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
                     >
                         ×
                     </button>
                 </div>
 
-                <div style={{ marginBottom: '15px', padding: '15px', backgroundColor: '#e8f5e9', borderRadius: '4px' }}>
-                    <div><strong>Doctor:</strong> {appointment.doctorName}</div>
-                    <div><strong>Date:</strong> {formatDate(appointment.appointmentDate)}</div>
-                    <div><strong>Time:</strong> {formatTime(appointment.appointmentTime)}</div>
+                <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '10px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                    <div style={{ marginBottom: '0.5rem' }}><strong>Bác sĩ:</strong> {appointment.doctorName}</div>
+                    <div style={{ marginBottom: '0.5rem' }}><strong>Ngày:</strong> {formatDate(appointment.appointmentDate)}</div>
+                    <div><strong>Giờ:</strong> {formatTime(appointment.appointmentTime)}</div>
                 </div>
 
-                <ErrorMessage message={error} onClose={() => setError('')} />
+
+                {error && <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>{error}</div>}
 
                 <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                            Rating *
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '500', color: '#e0e0e0' }}>
+                            Đánh giá *
                         </label>
-                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '1rem' }}>
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <button
                                     key={star}
                                     type="button"
                                     onClick={() => setFormData({ ...formData, rating: star })}
                                     style={{
-                                        fontSize: '30px',
+                                        fontSize: '2rem',
                                         background: 'none',
                                         border: 'none',
                                         cursor: 'pointer',
-                                        color: star <= formData.rating ? '#f39c12' : '#ddd',
+                                        color: star <= formData.rating ? '#f59e0b' : '#444',
+                                        transition: 'all 0.2s',
+                                        transform: star <= formData.rating ? 'scale(1.1)' : 'scale(1)',
                                     }}
                                 >
                                     ⭐
                                 </button>
                             ))}
-                            <span style={{ marginLeft: '10px' }}>({formData.rating}/5)</span>
+                            <span style={{ marginLeft: '1rem', color: '#888' }}>({formData.rating}/5)</span>
                         </div>
-                        <input
-                            type="range"
-                            name="rating"
-                            min="1"
-                            max="5"
-                            value={formData.rating}
-                            onChange={handleChange}
-                            style={{ width: '100%', marginTop: '10px' }}
-                        />
                     </div>
 
-                    <div style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                            Comment (Optional)
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '500', color: '#e0e0e0' }}>
+                            Nhận xét (Tùy chọn)
                         </label>
                         <textarea
                             name="comment"
                             value={formData.comment}
                             onChange={handleChange}
                             rows="6"
-                            placeholder="Chia sẻ trải nghiệm, đề xuất hoặc mối quan tâm của bạn..."
-                            style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit', fontSize: '16px' }}
+                            placeholder="Chia sẻ trải nghiệm của bạn..."
+                            style={{ 
+                                width: '100%', 
+                                padding: '0.75rem', 
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)', 
+                                borderRadius: '8px', 
+                                fontFamily: 'inherit', 
+                                fontSize: '0.95rem',
+                                color: '#e0e0e0',
+                                resize: 'vertical',
+                            }}
                         />
                     </div>
 
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
                         <button
                             type="button"
                             onClick={onClose}
                             style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#95a5a6',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
+                                padding: '0.75rem 1.5rem',
+                                background: 'rgba(255, 255, 255, 0.05)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                color: '#e0e0e0',
+                                borderRadius: '8px',
                                 cursor: 'pointer',
+                                fontWeight: '500',
+                                transition: 'all 0.2s',
                             }}
+                            onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+                            onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.05)'}
                         >
-                            Cancel
+                            Hủy
                         </button>
                         <button
                             type="submit"
                             disabled={submitting}
                             style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#2ecc71',
+                                padding: '0.75rem 1.5rem',
+                                background: submitting ? 'rgba(16, 185, 129, 0.5)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                                 color: 'white',
                                 border: 'none',
-                                borderRadius: '4px',
+                                borderRadius: '8px',
                                 cursor: submitting ? 'not-allowed' : 'pointer',
-                                opacity: submitting ? 0.6 : 1,
+                                fontWeight: '500',
+                                transition: 'all 0.2s',
                             }}
+                            onMouseEnter={(e) => !submitting && (e.target.style.transform = 'translateY(-2px)')}
+                            onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                         >
-                            {submitting ? 'Submitting...' : 'Submit Feedback'}
+                            {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
                         </button>
                     </div>
                 </form>
