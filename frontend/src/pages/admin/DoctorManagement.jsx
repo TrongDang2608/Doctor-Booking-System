@@ -7,6 +7,7 @@ import ErrorMessage from '../../components/common/ErrorMessage';
 import DoctorForm from '../../components/admin/DoctorForm';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import feather from 'feather-icons';
 
 const DoctorManagement = () => {
   const navigate = useNavigate();
@@ -22,6 +23,11 @@ const DoctorManagement = () => {
   useEffect(() => {
     loadAllDoctors();
   }, []);
+
+  // Initialize Feather Icons
+  useEffect(() => {
+    feather.replace();
+  }, [doctors, showForm]);
 
   // Load doctor data when editing from URL
   useEffect(() => {
