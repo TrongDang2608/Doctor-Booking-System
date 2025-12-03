@@ -33,19 +33,22 @@ const NewBooking = () => {
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     setFormData(prev => ({ ...prev, appointmentDate: today }));
-    
-    // Initialize Feather Icons
-    if (window.feather) {
-      window.feather.replace();
-    }
   }, []);
 
   useEffect(() => {
-    // Replace Feather Icons when payment method changes or doctor selection changes
-    if (window.feather) {
-      setTimeout(() => window.feather.replace(), 100);
+    // Initialize Feather Icons ONCE sau khi doctors load xong
+    if (!loading && doctors.length > 0 && window.feather) {
+      const timer = setTimeout(() => {
+        try {
+          window.feather.replace();
+          console.log('✅ Feather icons initialized');
+        } catch (e) {
+          console.log('⚠️ Feather icons error (ignored):', e.message);
+        }
+      }, 300);
+      return () => clearTimeout(timer);
     }
-  }, [formData.paymentMethod, formData.doctorId]);
+  }, [loading, doctors.length]);
 
   const loadWalletBalance = async () => {
     try {
@@ -81,6 +84,7 @@ const NewBooking = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('🚀 Form submitted');
     setError('');
     setSuccess('');
     setSubmitting(true);
@@ -89,14 +93,19 @@ const NewBooking = () => {
       // Get selected doctor info
       const selectedDoctor = doctors.find(d => d.id === parseInt(formData.doctorId));
       const consultationFee = selectedDoctor?.consultationFee || 0;
+      console.log('💰 Consultation fee:', consultationFee);
+      console.log('💳 Payment method:', formData.paymentMethod);
 
       // Validate payment method với wallet balance
       if (formData.paymentMethod === 'WALLET' && walletBalance < consultationFee) {
-        setError(`Số dư ví không đủ. Bạn cần ${consultationFee.toLocaleString('vi-VN')} VNĐ nhưng chỉ có ${walletBalance.toLocaleString('vi-VN')} VNĐ`);
+        const errorMsg = `Số dư ví không đủ. Bạn cần ${consultationFee.toLocaleString('vi-VN')} VNĐ nhưng chỉ có ${walletBalance.toLocaleString('vi-VN')} VNĐ`;
+        console.error('❌ Wallet validation failed:', errorMsg);
+        setError(errorMsg);
         setSubmitting(false);
         return;
       }
 
+      console.log('📤 Calling API to create appointment...');
       const response = await patientService.createAppointment({
         doctorId: parseInt(formData.doctorId),
         appointmentDate: formData.appointmentDate,
@@ -105,20 +114,30 @@ const NewBooking = () => {
         paymentMethod: formData.paymentMethod,
       });
 
+      console.log('✅ API response received:', response);
+
       // Nếu chọn VNPAY, redirect sang trang thanh toán
       if (formData.paymentMethod === 'VNPAY' && response.paymentUrl) {
+        console.log('🏦 VNPAY payment URL received, redirecting...');
+        console.log('🔗 Payment URL:', response.paymentUrl);
+        // Redirect NGAY LẬP TỨC - không delay
         window.location.href = response.paymentUrl;
         return;
       }
 
+      console.log('✅ Appointment created successfully (non-VNPAY)');
       setSuccess('Đặt lịch hẹn thành công!');
       setTimeout(() => {
         navigate('/patient/history');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Không thể đặt lịch hẹn. Vui lòng thử lại.');
+      console.error('❌ Error creating appointment:', err);
+      console.error('❌ Error response:', err.response);
+      const errorMessage = err.response?.data?.message || err.message || 'Không thể đặt lịch hẹn. Vui lòng thử lại.';
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
+      console.log('🏁 Submit process finished');
     }
   };
 
@@ -371,8 +390,9 @@ const NewBooking = () => {
                 type="button"
                 onClick={() => navigate('/patient/dashboard')}
                 className="btn-cancel"
+                disabled={submitting}
               >
-                <i data-feather="x"></i>
+                <span style={{ fontSize: '1.2rem' }}>✕</span>
                 Hủy bỏ
               </button>
               <button
@@ -383,11 +403,11 @@ const NewBooking = () => {
                 {submitting ? (
                   <>
                     <div className="loading-spinner-small"></div>
-                    Đang xử lý...
+                    {formData.paymentMethod === 'VNPAY' ? 'Đang chuyển sang VNPAY...' : 'Đang xử lý...'}
                   </>
                 ) : (
                   <>
-                    <i data-feather="check"></i>
+                    <span style={{ fontSize: '1.2rem' }}>✓</span>
                     Xác nhận đặt lịch
                   </>
                 )}
@@ -396,6 +416,7 @@ const NewBooking = () => {
           </form>
         </div>
       </div>
+
     </PatientLayout>
   );
 };
