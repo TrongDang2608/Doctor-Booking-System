@@ -67,6 +67,7 @@ public class SecurityConfig {
                         // Cho phép các endpoint authentication không cần xác thực
                         .requestMatchers("/api/auth/**").permitAll()
                         // VNPAY callback endpoints - không cần authentication
+                        .requestMatchers("/api/patient/payments/vnpay/callback").permitAll()
                         .requestMatchers("/api/patient/payments/vnpay/wallet-callback").permitAll()
                         .requestMatchers("/api/patient/payments/vnpay/appointment-callback").permitAll()
                         // Test endpoints để debug (không cần auth)
