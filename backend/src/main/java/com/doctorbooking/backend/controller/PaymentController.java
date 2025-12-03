@@ -41,6 +41,8 @@ public class PaymentController {
     private final VNPayService vnPayService;
     private final UserService userService;
     private final PatientRepository patientRepository;
+    private final com.doctorbooking.backend.service.AppointmentService appointmentService;
+    private final com.doctorbooking.backend.repository.AppointmentRepository appointmentRepository;
 
     /**
      * Lấy thông tin ví
@@ -226,6 +228,101 @@ public class PaymentController {
                 logger.error("Error updating transaction status in exception handler", updateEx);
             }
             String redirectUrl = "http://localhost:5173/patient/wallet/payment/result?code=99&message=Loi%20he%20thong";
+            return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
+        }
+    }
+
+    /**
+     * Callback từ VNPAY sau khi thanh toán APPOINTMENT
+     */
+    @GetMapping("/payments/vnpay/appointment-callback")
+    public org.springframework.web.servlet.ModelAndView vnpayAppointmentCallback(HttpServletRequest request) {
+        logger.info("=== VNPAY APPOINTMENT CALLBACK RECEIVED ===");
+        logger.info("Request URL: {}", request.getRequestURL());
+        logger.info("Query String: {}", request.getQueryString());
+        
+        try {
+            Map<String, String> vnpParams = new HashMap<>();
+            for (String paramName : request.getParameterMap().keySet()) {
+                String[] paramValues = request.getParameterValues(paramName);
+                String paramValue = paramValues != null && paramValues.length > 0 ? paramValues[0] : null;
+                vnpParams.put(paramName, paramValue);
+                logger.debug("VNPAY Param: {} = {}", paramName, paramValue);
+            }
+
+            String vnp_ResponseCode = vnpParams.get("vnp_ResponseCode");
+            String vnp_TxnRef = vnpParams.get("vnp_TxnRef"); // Format: APT{appointmentId}_{timestamp}
+            String vnp_TransactionNo = vnpParams.get("vnp_TransactionNo");
+
+            // Verify checksum
+            boolean isValid = vnPayService.verifyPayment(vnpParams);
+            if (!isValid) {
+                logger.warn("Invalid VNPAY checksum for appointment payment: {}", vnp_TxnRef);
+                String redirectUrl = "http://localhost:5173/patient/appointment/payment/result?code=97&message=Invalid%20checksum";
+                return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
+            }
+
+            // Extract appointmentId from vnp_TxnRef (Format: APT{id}_{timestamp})
+            Long appointmentId = null;
+            try {
+                String idStr = vnp_TxnRef.substring(3, vnp_TxnRef.indexOf("_"));
+                appointmentId = Long.parseLong(idStr);
+            } catch (Exception e) {
+                logger.error("Cannot extract appointmentId from vnp_TxnRef: {}", vnp_TxnRef, e);
+            }
+
+            String redirectUrl = "http://localhost:5173/patient/appointment/payment/result";
+            StringBuilder queryString = new StringBuilder();
+            queryString.append("?code=").append(vnp_ResponseCode);
+            queryString.append("&appointmentId=").append(appointmentId != null ? appointmentId : "");
+            
+            if (vnp_TransactionNo != null) {
+                queryString.append("&vnp_TransactionNo=").append(vnp_TransactionNo);
+            }
+            if (vnpParams.get("vnp_Amount") != null) {
+                queryString.append("&vnp_Amount=").append(vnpParams.get("vnp_Amount"));
+            }
+
+            if ("00".equals(vnp_ResponseCode)) {
+                // Thanh toán thành công
+                logger.info("Processing successful appointment payment: appointmentId={}", appointmentId);
+                try {
+                    if (appointmentId != null) {
+                        appointmentService.updatePaymentStatus(appointmentId, com.doctorbooking.backend.model.Appointment.PaymentStatus.PAID);
+                        logger.info("Appointment payment completed: appointmentId={}", appointmentId);
+                        queryString.append("&message=Thanh%20toan%20thanh%20cong");
+                    } else {
+                        queryString.append("&message=Thanh%20toan%20thanh%20cong%20nhung%20khong%20tim%20thay%20lich%20hen");
+                    }
+                } catch (Exception e) {
+                    logger.error("Error updating appointment payment status", e);
+                    queryString.append("&message=Loi%20cap%20nhat%20trang%20thai");
+                }
+            } else {
+                // Thanh toán thất bại
+                logger.info("Processing failed appointment payment: appointmentId={}, ResponseCode: {}", appointmentId, vnp_ResponseCode);
+                try {
+                    if (appointmentId != null) {
+                        // Cập nhật payment_status = UNPAID và status = CANCELLED
+                        appointmentService.cancelAppointmentDueToPaymentFailure(appointmentId);
+                        logger.info("Appointment cancelled due to payment failure: appointmentId={}", appointmentId);
+                        queryString.append("&message=Thanh%20toan%20that%20bai");
+                    } else {
+                        queryString.append("&message=Thanh%20toan%20that%20bai");
+                    }
+                } catch (Exception e) {
+                    logger.error("Error cancelling appointment", e);
+                    queryString.append("&message=Thanh%20toan%20that%20bai");
+                }
+            }
+            
+            redirectUrl += queryString.toString();
+            logger.info("Redirecting to: {}", redirectUrl);
+
+            return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
+        } catch (Exception e) {
+            logger.error("Error processing VNPAY appointment callback", e);
+            String redirectUrl = "http://localhost:5173/patient/appointment/payment/result?code=99&message=Loi%20he%20thong";
             return new org.springframework.web.servlet.ModelAndView("redirect:" + redirectUrl);
         }
     }

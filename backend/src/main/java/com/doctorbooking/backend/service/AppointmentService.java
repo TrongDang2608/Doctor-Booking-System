@@ -124,13 +124,41 @@ public class AppointmentService {
                 appointment.setPaymentStatus(Appointment.PaymentStatus.PAID);
                 appointment = appointmentRepository.save(appointment);
             }
+        } else if ("VNPAY".equals(paymentMethod)) {
+            // VNPAY: Save appointment với PENDING, Frontend sẽ redirect sang VNPAY
+            appointment.setPaymentStatus(Appointment.PaymentStatus.PENDING);
+            appointment = appointmentRepository.save(appointment);
+            // Note: Payment URL sẽ được tạo ở controller layer
         } else {
-            // CASH hoặc VNPAY: Payment status = PENDING
+            // CASH: Payment status = PENDING
             appointment.setPaymentStatus(Appointment.PaymentStatus.PENDING);
             appointment = appointmentRepository.save(appointment);
         }
         
         return AppointmentResponse.fromEntity(appointment);
+    }
+
+    /**
+     * Cập nhật payment status của appointment
+     */
+    @Transactional
+    public void updatePaymentStatus(Long appointmentId, Appointment.PaymentStatus paymentStatus) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+        appointment.setPaymentStatus(paymentStatus);
+        appointmentRepository.save(appointment);
+    }
+
+    /**
+     * Hủy appointment khi thanh toán thất bại
+     */
+    @Transactional
+    public void cancelAppointmentDueToPaymentFailure(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+        appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
+        appointment.setPaymentStatus(Appointment.PaymentStatus.UNPAID);
+        appointmentRepository.save(appointment);
     }
 
     public List<AppointmentResponse> getPatientAppointments(Long patientId) {
