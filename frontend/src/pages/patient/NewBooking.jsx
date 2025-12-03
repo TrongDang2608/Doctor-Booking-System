@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import PatientLayout from '../../components/patient/PatientLayout';
 import { patientService } from '../../services/patientService';
 import Loading from '../../components/common/Loading';
-import ErrorMessage from '../../components/common/ErrorMessage';
 import { useNavigate } from 'react-router-dom';
 import '../patient/patientPages.css';
+import './NewBooking.css';
 
 const NewBooking = () => {
   const [doctors, setDoctors] = useState([]);
@@ -17,7 +17,9 @@ const NewBooking = () => {
     appointmentDate: '',
     appointmentTime: '',
     notes: '',
+    paymentMethod: 'CASH', // CASH, VNPAY, WALLET
   });
+  const [walletBalance, setWalletBalance] = useState(0);
   const [availableTimeSlots] = useState([
     '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
     '11:00', '11:30', '13:00', '13:30', '14:00', '14:30',
@@ -27,10 +29,33 @@ const NewBooking = () => {
 
   useEffect(() => {
     loadDoctors();
+    loadWalletBalance();
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     setFormData(prev => ({ ...prev, appointmentDate: today }));
+    
+    // Initialize Feather Icons
+    if (window.feather) {
+      window.feather.replace();
+    }
   }, []);
+
+  useEffect(() => {
+    // Replace Feather Icons when payment method changes or doctor selection changes
+    if (window.feather) {
+      setTimeout(() => window.feather.replace(), 100);
+    }
+  }, [formData.paymentMethod, formData.doctorId]);
+
+  const loadWalletBalance = async () => {
+    try {
+      const wallet = await patientService.getWallet();
+      setWalletBalance(wallet.balance || 0);
+    } catch (err) {
+      console.error('Error loading wallet:', err);
+      setWalletBalance(0);
+    }
+  };
 
   const loadDoctors = async () => {
     try {
@@ -61,12 +86,31 @@ const NewBooking = () => {
     setSubmitting(true);
 
     try {
-      await patientService.createAppointment({
+      // Get selected doctor info
+      const selectedDoctor = doctors.find(d => d.id === parseInt(formData.doctorId));
+      const consultationFee = selectedDoctor?.consultationFee || 0;
+
+      // Validate payment method với wallet balance
+      if (formData.paymentMethod === 'WALLET' && walletBalance < consultationFee) {
+        setError(`Số dư ví không đủ. Bạn cần ${consultationFee.toLocaleString('vi-VN')} VNĐ nhưng chỉ có ${walletBalance.toLocaleString('vi-VN')} VNĐ`);
+        setSubmitting(false);
+        return;
+      }
+
+      const response = await patientService.createAppointment({
         doctorId: parseInt(formData.doctorId),
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime + ':00',
         notes: formData.notes,
+        paymentMethod: formData.paymentMethod,
       });
+
+      // Nếu chọn VNPAY, redirect sang trang thanh toán
+      if (formData.paymentMethod === 'VNPAY' && response.paymentUrl) {
+        window.location.href = response.paymentUrl;
+        return;
+      }
+
       setSuccess('Đặt lịch hẹn thành công!');
       setTimeout(() => {
         navigate('/patient/history');
@@ -78,6 +122,10 @@ const NewBooking = () => {
     }
   };
 
+  // Get selected doctor info for rendering
+  const selectedDoctor = doctors.find(d => d.id === parseInt(formData.doctorId));
+  const consultationFee = selectedDoctor?.consultationFee || 0;
+
   if (loading) {
     return (
       <PatientLayout>
@@ -86,36 +134,94 @@ const NewBooking = () => {
     );
   }
 
+  // Calculate current step based on form completion
+  const getCurrentStep = () => {
+    if (!formData.doctorId) return 1;
+    if (!formData.appointmentDate || !formData.appointmentTime) return 2;
+    if (consultationFee > 0 && !formData.paymentMethod) return 3;
+    return 4;
+  };
+
   return (
     <PatientLayout>
-      <div className="patient-page">
-        <h1>Đặt Lịch Hẹn Mới</h1>
+      <div className="new-booking-page">
+        <div className="booking-header">
+          <h1>Đặt Lịch Khám Mới</h1>
+          <p className="booking-subtitle">Chọn bác sĩ, thời gian và phương thức thanh toán</p>
+        </div>
 
-        {error && <div className="alert alert-error">{error}</div>}
-        {success && <div className="alert alert-success">{success}</div>}
+        {error && (
+          <div className="booking-alert error">
+            <i data-feather="alert-circle"></i>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="booking-alert success">
+            <i data-feather="check-circle"></i>
+            {success}
+          </div>
+        )}
 
-        <div className="patient-card">
-          <form onSubmit={handleSubmit} className="patient-form">
-            <div className="form-group">
-              <label>Chọn Bác Sĩ *</label>
-              <select
-                name="doctorId"
-                value={formData.doctorId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Chọn bác sĩ...</option>
-                {doctors.map((doctor) => (
-                  <option key={doctor.id} value={doctor.id}>
-                    Dr. {doctor.fullName} - {doctor.specialization}
-                  </option>
-                ))}
-              </select>
+        <div className="booking-form-card">
+          {/* Progress Steps */}
+          <div className="form-steps">
+            <div className={`form-step ${getCurrentStep() >= 1 ? 'active' : ''} ${getCurrentStep() > 1 ? 'completed' : ''}`}>
+              <div className="step-circle">
+                {getCurrentStep() > 1 ? '✓' : '1'}
+              </div>
+              <div className="step-label">Chọn bác sĩ</div>
+            </div>
+            <div className={`form-step ${getCurrentStep() >= 2 ? 'active' : ''} ${getCurrentStep() > 2 ? 'completed' : ''}`}>
+              <div className="step-circle">
+                {getCurrentStep() > 2 ? '✓' : '2'}
+              </div>
+              <div className="step-label">Chọn thời gian</div>
+            </div>
+            <div className={`form-step ${getCurrentStep() >= 3 ? 'active' : ''} ${getCurrentStep() > 3 ? 'completed' : ''}`}>
+              <div className="step-circle">
+                {getCurrentStep() > 3 ? '✓' : '3'}
+              </div>
+              <div className="step-label">Thanh toán</div>
+            </div>
+            <div className={`form-step ${getCurrentStep() >= 4 ? 'active' : ''}`}>
+              <div className="step-circle">4</div>
+              <div className="step-label">Xác nhận</div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '2rem' }}>
+            {/* Doctor Selection */}
+            <div>
+              <label className="form-label">
+                Chọn Bác Sĩ
+                <span className="required">*</span>
+              </label>
+              <div className="doctor-select-wrapper">
+                <select
+                  name="doctorId"
+                  value={formData.doctorId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Chọn bác sĩ chuyên khoa...</option>
+                  {doctors.map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      Dr. {doctor.fullName} - {doctor.specialization} 
+                      {doctor.consultationFee > 0 ? ` • ${Number(doctor.consultationFee).toLocaleString('vi-VN')} VNĐ` : ' • Miễn phí'}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.25rem' }}>
-              <div className="form-group">
-                <label>Ngày Hẹn *</label>
+            {/* Date & Time Selection */}
+            <div className="datetime-grid">
+              <div>
+                <label className="form-label">
+                  Ngày Hẹn
+                  <span className="required">*</span>
+                </label>
                 <input
                   type="date"
                   name="appointmentDate"
@@ -126,15 +232,18 @@ const NewBooking = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label>Giờ Hẹn *</label>
+              <div>
+                <label className="form-label">
+                  Giờ Hẹn
+                  <span className="required">*</span>
+                </label>
                 <select
                   name="appointmentTime"
                   value={formData.appointmentTime}
                   onChange={handleChange}
                   required
                 >
-                  <option value="">Chọn giờ...</option>
+                  <option value="">Chọn giờ khám...</option>
                   {availableTimeSlots.map((time) => (
                     <option key={time} value={time}>
                       {time}
@@ -144,31 +253,144 @@ const NewBooking = () => {
               </div>
             </div>
 
-            <div className="form-group">
-              <label>Ghi Chú (Tùy chọn)</label>
+            {/* Consultation Fee Display */}
+            {selectedDoctor && consultationFee > 0 && (
+              <div className="consultation-fee-display">
+                <div className="fee-info">
+                  <div className="fee-icon-wrapper">
+                    <i data-feather="credit-card"></i>
+                  </div>
+                  <div className="fee-text">
+                    <div className="fee-label-text">Phí khám bệnh</div>
+                    <div className="fee-amount-display">
+                      {consultationFee.toLocaleString('vi-VN')} VNĐ
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Method Selection */}
+            {selectedDoctor && consultationFee > 0 && (
+              <div className="payment-section">
+                <div className="payment-section-label">
+                  Phương thức thanh toán
+                  <span className="required">*</span>
+                </div>
+                <div className="payment-options-grid">
+                  
+                  {/* CASH */}
+                  <label className={`payment-option-card ${formData.paymentMethod === 'CASH' ? 'selected' : ''}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="CASH"
+                      checked={formData.paymentMethod === 'CASH'}
+                      onChange={handleChange}
+                    />
+                    <div className="payment-option-content">
+                      <div className="payment-option-icon">💵</div>
+                      <div className="payment-option-info">
+                        <div className="payment-option-name">Tiền mặt</div>
+                        <div className="payment-option-desc">Thanh toán trực tiếp tại phòng khám</div>
+                      </div>
+                    </div>
+                    <div className="payment-check-icon">
+                      <i data-feather="check-circle"></i>
+                    </div>
+                  </label>
+
+                  {/* VNPAY */}
+                  <label className={`payment-option-card ${formData.paymentMethod === 'VNPAY' ? 'selected' : ''}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="VNPAY"
+                      checked={formData.paymentMethod === 'VNPAY'}
+                      onChange={handleChange}
+                    />
+                    <div className="payment-option-content">
+                      <div className="payment-option-icon">🏦</div>
+                      <div className="payment-option-info">
+                        <div className="payment-option-name">VNPAY</div>
+                        <div className="payment-option-desc">Thanh toán online qua thẻ ATM / QR Code ngân hàng</div>
+                      </div>
+                    </div>
+                    <div className="payment-check-icon">
+                      <i data-feather="check-circle"></i>
+                    </div>
+                  </label>
+
+                  {/* WALLET */}
+                  <label className={`payment-option-card ${formData.paymentMethod === 'WALLET' ? 'selected' : ''} ${walletBalance < consultationFee ? 'disabled' : ''}`}>
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="WALLET"
+                      checked={formData.paymentMethod === 'WALLET'}
+                      onChange={handleChange}
+                      disabled={walletBalance < consultationFee}
+                    />
+                    <div className="payment-option-content">
+                      <div className="payment-option-icon">💰</div>
+                      <div className="payment-option-info">
+                        <div className="payment-option-name">Ví Sức khỏe</div>
+                        <div className="payment-option-desc">
+                          Số dư: <strong>{walletBalance.toLocaleString('vi-VN')} VNĐ</strong>
+                          {walletBalance < consultationFee && (
+                            <span className="insufficient-funds">(Không đủ số dư)</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="payment-check-icon">
+                      <i data-feather="check-circle"></i>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
+            <div>
+              <label className="form-label">
+                Ghi Chú (Tùy chọn)
+              </label>
               <textarea
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
-                rows="4"
-                placeholder="Thông tin bổ sung hoặc mối quan tâm..."
+                className="notes-textarea"
+                placeholder="💬 Mô tả triệu chứng, yêu cầu đặc biệt hoặc thông tin bổ sung..."
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+            {/* Form Actions */}
+            <div className="form-actions">
               <button
                 type="button"
                 onClick={() => navigate('/patient/dashboard')}
-                className="btn btn-secondary"
+                className="btn-cancel"
               >
-                Hủy
+                <i data-feather="x"></i>
+                Hủy bỏ
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="btn btn-success"
+                className="btn-submit"
               >
-                {submitting ? 'Đang đặt lịch...' : 'Đặt Lịch Hẹn'}
+                {submitting ? (
+                  <>
+                    <div className="loading-spinner-small"></div>
+                    Đang xử lý...
+                  </>
+                ) : (
+                  <>
+                    <i data-feather="check"></i>
+                    Xác nhận đặt lịch
+                  </>
+                )}
               </button>
             </div>
           </form>
