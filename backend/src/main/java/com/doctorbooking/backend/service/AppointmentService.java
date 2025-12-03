@@ -24,6 +24,7 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
+    private final WalletService walletService;
 
     public List<AppointmentResponse> getAllAppointments() {
         // Use custom query to fetch all with relationships
@@ -77,6 +78,10 @@ public class AppointmentService {
             throw new RuntimeException("Cannot book appointment in the past");
         }
 
+        // Get consultation fee
+        java.math.BigDecimal consultationFee = doctor.getConsultationFee() != null ? 
+                doctor.getConsultationFee() : java.math.BigDecimal.ZERO;
+
         // Create appointment
         Appointment appointment = new Appointment();
         appointment.setPatient(patient);
@@ -85,8 +90,46 @@ public class AppointmentService {
         appointment.setAppointmentTime(request.getAppointmentTime());
         appointment.setStatus(Appointment.AppointmentStatus.PENDING);
         appointment.setNotes(request.getNotes());
-
-        appointment = appointmentRepository.save(appointment);
+        appointment.setPrice(consultationFee);
+        
+        // Xử lý payment method
+        String paymentMethod = request.getPaymentMethod() != null ? request.getPaymentMethod() : "CASH";
+        appointment.setPaymentMethod(paymentMethod);
+        
+        // Xử lý thanh toán theo phương thức
+        if ("WALLET".equals(paymentMethod)) {
+            // Thanh toán bằng ví: Trừ tiền ngay
+            if (consultationFee.compareTo(java.math.BigDecimal.ZERO) > 0) {
+                try {
+                    // Save appointment first to get ID
+                    appointment.setPaymentStatus(Appointment.PaymentStatus.PENDING);
+                    appointment = appointmentRepository.save(appointment);
+                    
+                    // Process wallet payment
+                    walletService.payForAppointment(
+                        patientId, 
+                        appointment.getId(), 
+                        consultationFee, 
+                        "Thanh toán phí khám bệnh - Dr. " + doctor.getFullName()
+                    );
+                    
+                    // Update payment status to PAID
+                    appointment.setPaymentStatus(Appointment.PaymentStatus.PAID);
+                    appointment = appointmentRepository.save(appointment);
+                } catch (Exception e) {
+                    throw new RuntimeException("Payment failed: " + e.getMessage());
+                }
+            } else {
+                // Miễn phí
+                appointment.setPaymentStatus(Appointment.PaymentStatus.PAID);
+                appointment = appointmentRepository.save(appointment);
+            }
+        } else {
+            // CASH hoặc VNPAY: Payment status = PENDING
+            appointment.setPaymentStatus(Appointment.PaymentStatus.PENDING);
+            appointment = appointmentRepository.save(appointment);
+        }
+        
         return AppointmentResponse.fromEntity(appointment);
     }
 

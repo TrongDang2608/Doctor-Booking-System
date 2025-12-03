@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,6 +25,9 @@ public class AppointmentResponse {
     private LocalTime appointmentTime;
     private String status;
     private String notes;
+    private BigDecimal price;
+    private String paymentStatus;
+    private String paymentMethod;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -40,6 +44,9 @@ public class AppointmentResponse {
         response.setAppointmentTime(appointment.getAppointmentTime());
         response.setStatus(appointment.getStatus().name());
         response.setNotes(appointment.getNotes());
+        response.setPrice(appointment.getPrice() != null ? appointment.getPrice() : BigDecimal.ZERO);
+        response.setPaymentStatus(appointment.getPaymentStatus() != null ? appointment.getPaymentStatus().name() : "PENDING");
+        response.setPaymentMethod(appointment.getPaymentMethod());
         response.setCreatedAt(appointment.getCreatedAt());
         response.setUpdatedAt(appointment.getUpdatedAt());
         return response;

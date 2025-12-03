@@ -147,6 +147,55 @@ public class WalletService {
     }
 
     /**
+     * Thanh toán cho appointment bằng ví
+     */
+    @Transactional
+    public WalletTransaction payForAppointment(Long patientId, Long appointmentId, BigDecimal amount, String description) {
+        logger.info("Processing wallet payment: patientId={}, appointmentId={}, amount={}", patientId, appointmentId, amount);
+        
+        Patient patient = getWalletByPatientId(patientId);
+        
+        // Kiểm tra số dư
+        BigDecimal currentBalance = patient.getWalletBalance() != null ? patient.getWalletBalance() : BigDecimal.ZERO;
+        if (currentBalance.compareTo(amount) < 0) {
+            logger.error("Insufficient balance: required={}, available={}", amount, currentBalance);
+            throw new RuntimeException("Insufficient wallet balance. Required: " + amount + ", Available: " + currentBalance);
+        }
+        
+        // Trừ tiền từ ví
+        patient.setWalletBalance(currentBalance.subtract(amount));
+        logger.info("Deducted amount from wallet. New balance: {}", patient.getWalletBalance());
+        
+        // Tạo transaction PAYMENT
+        WalletTransaction transaction = new WalletTransaction();
+        transaction.setPatient(patient);
+        transaction.setTransactionType(WalletTransaction.TransactionType.PAYMENT);
+        transaction.setAmount(amount);
+        transaction.setStatus(WalletTransaction.TransactionStatus.COMPLETED);
+        transaction.setPaymentMethod("WALLET");
+        transaction.setDescription(description);
+        transaction.setReferenceId("APT" + appointmentId + "_" + System.currentTimeMillis());
+        transaction.setCreatedAt(LocalDateTime.now());
+        transaction.setUpdatedAt(LocalDateTime.now());
+        
+        // Tích điểm (ví dụ: 1% số tiền thanh toán)
+        int pointsEarned = amount.divide(new BigDecimal("100"), 0, java.math.RoundingMode.DOWN).intValue();
+        transaction.setPointsEarned(pointsEarned);
+        
+        int currentPoints = patient.getLoyaltyPoints() != null ? patient.getLoyaltyPoints() : 0;
+        patient.setLoyaltyPoints(currentPoints + pointsEarned);
+        logger.info("Points earned: {}. Total points: {}", pointsEarned, patient.getLoyaltyPoints());
+        
+        // Cập nhật hạng thành viên
+        updateLoyaltyTier(patient);
+        
+        patientRepository.save(patient);
+        WalletTransaction saved = walletTransactionRepository.save(transaction);
+        logger.info("Wallet payment completed successfully: transactionId={}", saved.getId());
+        return saved;
+    }
+
+    /**
      * Cập nhật hạng thành viên dựa trên điểm tích lũy
      */
     private void updateLoyaltyTier(Patient patient) {

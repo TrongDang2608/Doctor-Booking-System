@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -23,6 +24,7 @@ public class DoctorResponse {
     private String address;
     private String bio;
     private String status;
+    private BigDecimal consultationFee; // Phí khám bệnh
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -40,6 +42,7 @@ public class DoctorResponse {
         response.setAddress(doctor.getAddress());
         response.setBio(doctor.getBio());
         response.setStatus(doctor.getStatus().name());
+        response.setConsultationFee(doctor.getConsultationFee() != null ? doctor.getConsultationFee() : BigDecimal.ZERO);
         response.setCreatedAt(doctor.getCreatedAt());
         response.setUpdatedAt(doctor.getUpdatedAt());
         return response;

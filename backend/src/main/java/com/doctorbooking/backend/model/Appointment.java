@@ -44,6 +44,16 @@ public class Appointment {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(precision = 10, scale = 2)
+    private java.math.BigDecimal price = java.math.BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    @Column(name = "payment_method", length = 50)
+    private String paymentMethod; // CASH, WALLET, VNPAY
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -63,6 +73,10 @@ public class Appointment {
 
     public enum AppointmentStatus {
         PENDING, CONFIRMED, COMPLETED, CANCELLED
+    }
+
+    public enum PaymentStatus {
+        PENDING, PAID, REFUNDED
     }
 }
 
