@@ -1,10 +1,9 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PatientLayout from '../../components/patient/PatientLayout';
 import { patientService } from '../../services/patientService';
 import Loading from '../../components/common/Loading';
-import ErrorMessage from '../../components/common/ErrorMessage';
-import { formatDate, formatDateTime } from '../../utils/formatDate';
+import { formatDate } from '../../utils/formatDate';
 import { formatTime } from '../../utils/formatTime';
 import '../patient/patientPages.css';
 import './BookingHistory.css';
@@ -89,6 +88,7 @@ const BookingHistory = () => {
     const handleSendFeedback = (appointment) => {
         setSelectedAppointment(appointment);
         setShowFeedbackModal(true);
+        setError(''); // Clear any existing errors
     };
 
     const handleFeedbackSuccess = () => {
@@ -98,21 +98,6 @@ const BookingHistory = () => {
         setTimeout(() => setSuccess(''), 3000);
         loadAppointments();
     };
-
-    const getStatusColor = useMemo(() => (status) => {
-        switch (status) {
-            case 'PENDING':
-                return '#f39c12';
-            case 'CONFIRMED':
-                return '#3498db';
-            case 'COMPLETED':
-                return '#2ecc71';
-            case 'CANCELLED':
-                return '#e74c3c';
-            default:
-                return '#95a5a6';
-        }
-    }, []);
 
     const canCancel = (appointment) => {
         return appointment.status !== 'CANCELLED' && appointment.status !== 'COMPLETED';
