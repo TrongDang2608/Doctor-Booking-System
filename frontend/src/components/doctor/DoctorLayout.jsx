@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import logoImage from '../../assets/DoctorBooking.png';
+import AnimatedLogoutButton from '../common/AnimatedLogoutButton';
 import './DoctorLayout.css';
 
 const DoctorLayout = ({ children }) => {
@@ -23,10 +24,10 @@ const DoctorLayout = ({ children }) => {
     };
 
     const menuItems = [
-        { path: '/doctor/dashboard', label: 'Dashboard', icon: 'layout', route: '/doctor/dashboard' },
-        { path: '/doctor/profile', label: 'My Profile', icon: 'user', route: '/doctor/profile' },
-        { path: '/doctor/appointments', label: 'Appointments', icon: 'calendar', route: '/doctor/appointments' },
-        { path: '/doctor/patients', label: 'Search Patients', icon: 'search', route: '/doctor/patients' },
+        { path: '/doctor/dashboard', label: 'Bảng điều khiển', icon: 'layout', route: '/doctor/dashboard' },
+        { path: '/doctor/profile', label: 'Hồ sơ của tôi', icon: 'user', route: '/doctor/profile' },
+        { path: '/doctor/appointments', label: 'Lịch hẹn', icon: 'calendar', route: '/doctor/appointments' },
+        { path: '/doctor/patients', label: 'Tìm bệnh nhân', icon: 'search', route: '/doctor/patients' },
     ];
 
     const isActive = (path) => {
@@ -59,7 +60,7 @@ const DoctorLayout = ({ children }) => {
                         </div>
                         {sidebarOpen && (
                             <div className="logo-text-wrapper">
-                                <span className="logo-brand-name">Doctor Panel</span>
+                                <span className="logo-brand-name">Bác Sĩ</span>
                             </div>
                         )}
                     </Link>
@@ -89,7 +90,7 @@ const DoctorLayout = ({ children }) => {
                             </div>
                             <div className="user-details">
                                 <div className="user-name">{user?.fullName || user?.username}</div>
-                                <div className="user-role">My Profile</div>
+                                <div className="user-role">Hồ sơ</div>
                             </div>
                             <i data-feather="chevron-right" className="user-arrow"></i>
                         </Link>
@@ -103,10 +104,13 @@ const DoctorLayout = ({ children }) => {
                             <i data-feather="user"></i>
                         </Link>
                     )}
-                    <button className="logout-btn" onClick={handleLogout}>
-                        <i data-feather="log-out"></i>
-                        {sidebarOpen && <span>Logout</span>}
-                    </button>
+                    <div className="animated-logout-wrapper">
+                        <AnimatedLogoutButton 
+                            onLogout={handleLogout} 
+                            variant="transparent"
+                            showText={sidebarOpen}
+                        />
+                    </div>
                 </div>
             </aside>
 

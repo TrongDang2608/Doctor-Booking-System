@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import ErrorMessage from '../components/common/ErrorMessage';
 import Loading from '../components/common/Loading';
 import videoBg from '../assets/625148e1956a6a29189fca52d43d74f576029421.mp4';
 import './AuthUnified.css';
@@ -24,15 +23,10 @@ const AuthUnified = () => {
 
   useEffect(() => {
     // Initialize Feather Icons
-    const initIcons = () => {
-      if (window.feather) {
-        window.feather.replace();
-      }
-    };
+    if (window.feather) {
+      window.feather.replace();
+    }
     
-    initIcons();
-    
-    // Set body background to prevent white flash
     document.body.style.background = '#0f172a';
     document.body.style.overflow = 'hidden';
     
@@ -43,296 +37,218 @@ const AuthUnified = () => {
   }, []);
 
   useEffect(() => {
-    // Sync isSignUp with URL
     const shouldBeSignUp = location.pathname === '/register';
     if (shouldBeSignUp !== isSignUp) {
       setIsSignUp(shouldBeSignUp);
     }
-  }, [location.pathname]);
+  }, [location.pathname, isSignUp]);
 
   useEffect(() => {
-    // Reinitialize icons when form expands/collapses
     if (window.feather) {
       window.feather.replace();
     }
   }, [isSignUp]);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const response = await login(email, password);
-      
-      // Redirect to homepage after login
-      navigate('/');
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
-      setLoading(false);
-    }
-  };
-
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Validation
-    if (password !== confirmPassword) {
-      setError('Mật khẩu xác nhận không khớp');
-      return;
-    }
+    if (isSignUp) {
+      // Register validation
+      if (password !== confirmPassword) {
+        setError('Mật khẩu xác nhận không khớp');
+        return;
+      }
+      if (password.length < 6) {
+        setError('Mật khẩu phải có ít nhất 6 ký tự');
+        return;
+      }
 
-    if (password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const userData = {
-        username: username || email,
-        email: email,
-        password: password,
-        fullName: fullName,
-        phone: phone,
-        role: 'PATIENT'
-      };
-
-      const response = await register(userData);
-      
-      // Redirect to homepage after registration
-      navigate('/');
-    } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
-      setLoading(false);
+      setLoading(true);
+      try {
+        const userData = {
+          username: username || email,
+          email: email,
+          password: password,
+          fullName: fullName,
+          phone: phone,
+          role: 'PATIENT'
+        };
+        await register(userData);
+        navigate('/patient/dashboard');
+      } catch (err) {
+        setError(err.response?.data?.message || err.message || 'Đăng ký thất bại');
+        setLoading(false);
+      }
+    } else {
+      // Login
+      setLoading(true);
+      try {
+        await login(email, password);
+        navigate('/');
+      } catch (err) {
+        setError(err.response?.data?.message || err.message || 'Đăng nhập thất bại');
+        setLoading(false);
+      }
     }
   };
 
   const toggleMode = () => {
-    const newMode = !isSignUp;
+    setIsSignUp(!isSignUp);
     setError('');
-    // Clear form when switching
-    if (newMode) {
-      setFullName('');
-      setUsername('');
-      setPhone('');
-      setConfirmPassword('');
-    }
-    // Navigate to update URL
-    navigate(newMode ? '/register' : '/login', { replace: true });
+    navigate(isSignUp ? '/login' : '/register', { replace: true });
   };
 
   if (loading) {
-    return <Loading message={isSignUp ? "Đang đăng ký..." : "Đang đăng nhập..."} />;
+    return <Loading message={isSignUp ? 'Đang đăng ký...' : 'Đang đăng nhập...'} />;
   }
 
   return (
-    <div className="auth-unified-page">
+    <div className="auth-unified-wrapper">
       {/* Video Background */}
       <div className="auth-video-wrapper">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="auth-video"
-        >
+        <video className="auth-video" autoPlay loop muted playsInline>
           <source src={videoBg} type="video/mp4" />
         </video>
         <div className="auth-video-overlay"></div>
       </div>
 
-      {/* Back to Home Button */}
-      <Link to="/" className="linear-back-home">
+      {/* Back to Home */}
+      <Link to="/" className="auth-back-home">
         <i data-feather="arrow-left"></i>
       </Link>
 
-      <div className="auth-unified-container">
-        <div className={`auth-unified-card ${isSignUp ? 'expanded' : ''}`}>
-          {/* Heading */}
-          <h1 className="auth-unified-heading">
-            <span className={`heading-text ${isSignUp ? 'hide' : 'show'}`}>
-              Log In To Doctor Booking
-            </span>
-            <span className={`heading-text ${isSignUp ? 'show' : 'hide'}`}>
-              Sign Up For Doctor Booking
-            </span>
-          </h1>
+      {/* Login/Register Box */}
+      <div className={`login-box ${isSignUp ? 'expanded' : ''}`}>
+        <form onSubmit={handleSubmit}>
+          <h2>{isSignUp ? 'Đăng Ký' : 'Đăng Nhập'}</h2>
 
           {/* Error Message */}
           {error && (
-            <div className="linear-error-message">
-              <ErrorMessage message={error} />
+            <div className="auth-error-message">
+              {error}
             </div>
           )}
 
-          {/* Login Form */}
-          <form 
-            onSubmit={isSignUp ? handleRegister : handleLogin} 
-            className="auth-unified-form"
-            autoComplete="on"
-          >
-            {/* Full Name - Only in Sign Up */}
-            <div className={`auth-form-field ${isSignUp ? 'expanded' : 'collapsed'}`}>
-              <input
-                type="text"
-                name="fullName"
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Họ và tên"
-                required={isSignUp}
-                autoComplete="name"
-                className="linear-input"
-              />
-            </div>
+          {/* Full Name - Signup Only */}
+          <div className={`input-box ${isSignUp ? 'expanded' : 'collapsed'}`}>
+            <span className="icon">
+              <i data-feather="user"></i>
+            </span>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required={isSignUp}
+              placeholder=" "
+            />
+            <label>Họ và tên</label>
+          </div>
 
-            {/* Username - Only in Sign Up */}
-            <div className={`auth-form-field ${isSignUp ? 'expanded' : 'collapsed'}`}>
-              <input
-                type="text"
-                name="username"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Tên đăng nhập"
-                required={isSignUp}
-                autoComplete="username"
-                className="linear-input"
-              />
-            </div>
+          {/* Username - Signup Only */}
+          <div className={`input-box ${isSignUp ? 'expanded' : 'collapsed'}`}>
+            <span className="icon">
+              <i data-feather="at-sign"></i>
+            </span>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required={isSignUp}
+              placeholder=" "
+            />
+            <label>Tên đăng nhập</label>
+          </div>
 
-            {/* Email */}
-            <div className="auth-form-field">
-              <input
-                type={isSignUp ? 'email' : 'text'}
-                name={isSignUp ? 'email' : 'username'}
-                id={isSignUp ? 'email' : 'username'}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={isSignUp ? 'Email' : 'Nhập Tên Đăng Nhập'}
-                required
-                autoFocus={!isSignUp}
-                autoComplete={isSignUp ? 'email' : 'username'}
-                className="linear-input"
-              />
-            </div>
+          {/* Email/Username */}
+          <div className="input-box">
+            <span className="icon">
+              <i data-feather="mail"></i>
+            </span>
+            <input
+              type={isSignUp ? 'email' : 'text'}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+              placeholder=" "
+            />
+            <label>{isSignUp ? 'Email' : 'Email hoặc Tên đăng nhập'}</label>
+          </div>
 
-            {/* Phone - Only in Sign Up */}
-            <div className={`auth-form-field ${isSignUp ? 'expanded' : 'collapsed'}`}>
-              <input
-                type="tel"
-                name="phone"
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Số điện thoại"
-                required={isSignUp}
-                autoComplete="tel"
-                className="linear-input"
-              />
-            </div>
+          {/* Phone - Signup Only */}
+          <div className={`input-box ${isSignUp ? 'expanded' : 'collapsed'}`}>
+            <span className="icon">
+              <i data-feather="phone"></i>
+            </span>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required={isSignUp}
+              placeholder=" "
+            />
+            <label>Số điện thoại</label>
+          </div>
 
-            {/* Password */}
-            <div className="auth-form-field">
-              <div className="linear-password-wrapper">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Nhập Mật Khẩu"
-                  required
-                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                  className="linear-input"
-                />
-                <button
-                  type="button"
-                  className="linear-password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                >
-                  <i data-feather={showPassword ? 'eye-off' : 'eye'}></i>
-                </button>
-              </div>
-            </div>
-
-            {/* Confirm Password - Only in Sign Up */}
-            <div className={`auth-form-field ${isSignUp ? 'expanded' : 'collapsed'}`}>
-              <div className="linear-password-wrapper">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  name="confirmPassword"
-                  id="confirmPassword"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Xác nhận mật khẩu"
-                  required={isSignUp}
-                  autoComplete="new-password"
-                  className="linear-input"
-                />
-                <button
-                  type="button"
-                  className="linear-password-toggle"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  tabIndex={-1}
-                >
-                  <i data-feather={showConfirmPassword ? 'eye-off' : 'eye'}></i>
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button 
-              type="submit" 
-              className="linear-submit-button"
-              disabled={loading}
+          {/* Password */}
+          <div className="input-box">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder=" "
+            />
+            <label>Mật khẩu</label>
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
             >
-              <span className={`button-text ${isSignUp ? 'hide' : 'show'}`}>
-                Đăng nhập
-              </span>
-              <span className={`button-text ${isSignUp ? 'show' : 'hide'}`}>
-                Đăng ký
-              </span>
+              <i data-feather={showPassword ? 'eye-off' : 'eye'}></i>
             </button>
-          </form>
+          </div>
 
-          {/* Toggle Link */}
-          <div className="auth-unified-footer">
-            <p className="linear-footer-text">
-              {!isSignUp ? (
-                <>
-                  Chưa có tài khoản?{' '}
-                  <button 
-                    type="button"
-                    onClick={toggleMode}
-                    className="linear-footer-link auth-toggle-btn"
-                  >
-                    Đăng ký
-                  </button>
-                </>
-              ) : (
-                <>
-                  Đã có tài khoản?{' '}
-                  <button 
-                    type="button"
-                    onClick={toggleMode}
-                    className="linear-footer-link auth-toggle-btn"
-                  >
-                    Đăng nhập
-                  </button>
-                </>
-              )}
+          {/* Confirm Password - Signup Only */}
+          <div className={`input-box ${isSignUp ? 'expanded' : 'collapsed'}`}>
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required={isSignUp}
+              placeholder=" "
+            />
+            <label>Xác nhận mật khẩu</label>
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              tabIndex={-1}
+            >
+              <i data-feather={showConfirmPassword ? 'eye-off' : 'eye'}></i>
+            </button>
+          </div>
+
+          {/* Submit Button */}
+          <button type="submit">
+            {isSignUp ? 'Đăng ký' : 'Đăng nhập'}
+          </button>
+
+          {/* Toggle Login/Register */}
+          <div className="register-link">
+            <p>
+              {isSignUp ? 'Đã có tài khoản? ' : 'Chưa có tài khoản? '}
+              <button type="button" onClick={toggleMode}>
+                {isSignUp ? 'Đăng nhập' : 'Đăng ký'}
+              </button>
             </p>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
 };
 
 export default AuthUnified;
-

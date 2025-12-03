@@ -1,5 +1,7 @@
 .user-info-container {
   position: relative;
+  overflow: visible;  /* Allow animations to show outside */
+  z-index: 1002;  /* Higher than dropdown and navbar */
 }
 
 .user-info-trigger {
@@ -84,8 +86,9 @@
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   padding: 1.5rem;
-  z-index: 1000;
+  z-index: 1001;  /* Higher than navbar to show animation */
   animation: dropdownFadeIn 0.2s ease;
+  overflow: visible;  /* Allow animation to show outside dropdown */
 }
 
 @keyframes dropdownFadeIn {
@@ -151,6 +154,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  overflow: visible;  /* Allow animations to show */
 }
 
 .user-info-menu-item {
@@ -210,6 +214,38 @@
   width: 18px;
   height: 18px;
 }
+
+/* Animated Logout Button in UserInfo Dropdown */
+.user-info-logout-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0;
+  overflow: visible;  /* Allow falling animation to show */
+  position: relative;
+  min-height: 60px;  /* Extra space for animation */
+}
+
+.user-info-logout-wrapper .logoutButton {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  min-height: 44px;
+  justify-content: center;  /* Center text */
+  padding: 0 20px;
+  overflow: visible;  /* Allow falling animation to show */
+}
+
+/* Center the text visually */
+.user-info-logout-wrapper .logoutButton .button-text {
+  padding-left: 0 !important;  /* Remove default padding */
+  text-align: center;
+}
+
+/* DON'T override SVG positions - let the animation classes handle it naturally */
+/* The default styles and .falling animation will work correctly */
 
 /* Responsive */
 @media (max-width: 768px) {

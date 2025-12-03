@@ -47,7 +47,7 @@ const AdminDashboard = () => {
       });
     } catch (err) {
       console.error('Error loading stats:', err);
-      setError('Failed to load dashboard statistics');
+      setError('Không thể tải thống kê bảng điều khiển');
     } finally {
       setLoading(false);
     }
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
 
   const statCards = useMemo(() => [
     { 
-      label: 'Total Doctors', 
+      label: 'Tổng bác sĩ', 
       value: stats.totalDoctors, 
       icon: '👨‍⚕️',
       gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -63,7 +63,7 @@ const AdminDashboard = () => {
       trend: 'up'
     },
     { 
-      label: 'Total Patients', 
+      label: 'Tổng bệnh nhân', 
       value: stats.totalPatients, 
       icon: '👥',
       gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
@@ -71,7 +71,7 @@ const AdminDashboard = () => {
       trend: 'up'
     },
     { 
-      label: 'Total Appointments', 
+      label: 'Tổng lịch hẹn', 
       value: stats.totalAppointments, 
       icon: '📅',
       gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
@@ -79,20 +79,20 @@ const AdminDashboard = () => {
       trend: 'up'
     },
     { 
-      label: 'Pending Feedbacks', 
+      label: 'Phản hồi chờ xử lý', 
       value: stats.pendingFeedbacks, 
       icon: '💬',
       gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-      change: stats.pendingFeedbacks > 0 ? 'Action needed' : 'All clear',
+      change: stats.pendingFeedbacks > 0 ? 'Cần xử lý' : 'Đã xong',
       trend: stats.pendingFeedbacks > 0 ? 'warning' : 'good'
     },
   ], [stats]);
 
   const quickActions = [
-    { label: 'Manage Doctors', icon: '👨‍⚕️', path: '/admin/doctors', color: '#667eea' },
-    { label: 'View Patients', icon: '👥', path: '/admin/patients', color: '#f5576c' },
-    { label: 'Appointments', icon: '📅', path: '/admin/appointments', color: '#00f2fe' },
-    { label: 'Feedbacks', icon: '💬', path: '/admin/feedbacks', color: '#fee140' },
+    { label: 'Quản lý bác sĩ', icon: '👨‍⚕️', path: '/admin/doctors', color: '#667eea' },
+    { label: 'Xem bệnh nhân', icon: '👥', path: '/admin/patients', color: '#f5576c' },
+    { label: 'Lịch hẹn', icon: '📅', path: '/admin/appointments', color: '#00f2fe' },
+    { label: 'Phản hồi', icon: '💬', path: '/admin/feedbacks', color: '#fee140' },
   ];
 
   if (loading) {

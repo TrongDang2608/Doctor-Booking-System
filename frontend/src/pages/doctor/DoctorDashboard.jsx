@@ -45,17 +45,17 @@ const DoctorDashboard = () => {
       });
     } catch (err) {
       console.error('Error loading stats:', err);
-      setError('Failed to load dashboard statistics');
+      setError('Không thể tải thống kê bảng điều khiển');
     } finally {
       setLoading(false);
     }
   };
 
   const statCards = useMemo(() => [
-    { label: "Today's Appointments", value: stats.todayAppointments, color: '#3498db', icon: '📅' },
-    { label: 'Pending Appointments', value: stats.pendingAppointments, color: '#f39c12', icon: '⏳' },
-    { label: 'Total Treatments', value: stats.totalTreatments, color: '#2ecc71', icon: '💊' },
-    { label: 'Upcoming Appointments', value: stats.upcomingAppointments, color: '#9b59b6', icon: '📋' },
+    { label: "Lịch hẹn hôm nay", value: stats.todayAppointments, color: '#3498db', icon: '📅' },
+    { label: 'Lịch hẹn đang chờ', value: stats.pendingAppointments, color: '#f39c12', icon: '⏳' },
+    { label: 'Tổng điều trị', value: stats.totalTreatments, color: '#2ecc71', icon: '💊' },
+    { label: 'Lịch hẹn sắp tới', value: stats.upcomingAppointments, color: '#9b59b6', icon: '📋' },
   ], [stats]);
 
   if (loading) {
@@ -70,7 +70,7 @@ const DoctorDashboard = () => {
     <DoctorLayout>
       <div className="doctor-dashboard">
         <h1 className="dashboard-title">
-          Doctor Dashboard
+          Bảng Điều Khiển Bác Sĩ
         </h1>
         
         {error && (
@@ -87,17 +87,17 @@ const DoctorDashboard = () => {
 
         <div className="quick-actions-card">
           <h2 className="quick-actions-title">
-            Quick Actions
+            Thao Tác Nhanh
           </h2>
           <div className="actions-container">
             <ActionButton to="/doctor/appointments" color="#3498db">
-              View Appointments
+              Xem Lịch Hẹn
             </ActionButton>
             <ActionButton to="/doctor/treatments" color="#2ecc71">
-              Manage Treatments
+              Quản Lý Điều Trị
             </ActionButton>
             <ActionButton to="/doctor/patients" color="#9b59b6">
-              Search Patients
+              Tìm Bệnh Nhân
             </ActionButton>
             <ActionButton to="/doctor/profile" color="#f39c12">
               Edit Profile
