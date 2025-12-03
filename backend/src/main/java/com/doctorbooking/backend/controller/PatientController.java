@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,6 +151,23 @@ public class PatientController {
             appointmentService.cancelAppointment(id, patientId);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ========== Available Time Slots ==========
+
+    @GetMapping("/appointments/available-slots")
+    @PreAuthorize("hasRole('PATIENT')")
+    public ResponseEntity<List<String>> getAvailableTimeSlots(
+            @RequestParam Long doctorId,
+            @RequestParam String date) {
+        try {
+            LocalDate appointmentDate = LocalDate.parse(date);
+            List<String> availableSlots = appointmentService.getAvailableTimeSlots(doctorId, appointmentDate);
+            return ResponseEntity.ok(availableSlots);
+        } catch (Exception e) {
+            logger.error("Error getting available slots", e);
             return ResponseEntity.badRequest().build();
         }
     }

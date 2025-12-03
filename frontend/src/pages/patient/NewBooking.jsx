@@ -20,11 +20,8 @@ const NewBooking = () => {
     paymentMethod: 'CASH', // CASH, VNPAY, WALLET
   });
   const [walletBalance, setWalletBalance] = useState(0);
-  const [availableTimeSlots] = useState([
-    '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-    '11:00', '11:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00'
-  ]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,12 +71,40 @@ const NewBooking = () => {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
     });
+
+    // Khi chọn bác sĩ hoặc đổi ngày, load available slots
+    if ((name === 'doctorId' || name === 'appointmentDate') && value) {
+      const doctorId = name === 'doctorId' ? value : formData.doctorId;
+      const date = name === 'appointmentDate' ? value : formData.appointmentDate;
+      
+      if (doctorId && date) {
+        await loadAvailableSlots(doctorId, date);
+      }
+    }
+  };
+
+  const loadAvailableSlots = async (doctorId, date) => {
+    console.log('🔍 Loading available slots for doctor:', doctorId, 'date:', date);
+    setLoadingSlots(true);
+    setAvailableTimeSlots([]);
+    setFormData(prev => ({ ...prev, appointmentTime: '' })); // Reset time selection
+    
+    try {
+      const slots = await patientService.getAvailableTimeSlots(doctorId, date);
+      console.log('✅ Available slots loaded:', slots);
+      setAvailableTimeSlots(slots);
+    } catch (error) {
+      console.error('❌ Error loading slots:', error);
+      setAvailableTimeSlots([]);
+    } finally {
+      setLoadingSlots(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -261,14 +286,37 @@ const NewBooking = () => {
                   value={formData.appointmentTime}
                   onChange={handleChange}
                   required
+                  disabled={!formData.doctorId || !formData.appointmentDate || loadingSlots}
                 >
-                  <option value="">Chọn giờ khám...</option>
-                  {availableTimeSlots.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
+                  {loadingSlots ? (
+                    <option value="">Đang tải khung giờ...</option>
+                  ) : availableTimeSlots.length === 0 ? (
+                    formData.doctorId && formData.appointmentDate ? (
+                      <option value="">Lịch bác sĩ đã full trong ngày này</option>
+                    ) : (
+                      <option value="">Chọn bác sĩ và ngày trước...</option>
+                    )
+                  ) : (
+                    <>
+                      <option value="">Chọn giờ khám...</option>
+                      {availableTimeSlots.map((time) => (
+                        <option key={time} value={time}>
+                          {time}
+                        </option>
+                      ))}
+                    </>
+                  )}
                 </select>
+                {formData.doctorId && formData.appointmentDate && availableTimeSlots.length > 0 && (
+                  <div style={{ fontSize: '0.85rem', color: '#10b981', marginTop: '0.5rem' }}>
+                    ✓ Có {availableTimeSlots.length} khung giờ trống
+                  </div>
+                )}
+                {formData.doctorId && formData.appointmentDate && availableTimeSlots.length === 0 && !loadingSlots && (
+                  <div style={{ fontSize: '0.85rem', color: '#ef4444', marginTop: '0.5rem' }}>
+                    ✗ Không còn khung giờ trống. Vui lòng chọn ngày khác.
+                  </div>
+                )}
               </div>
             </div>
 

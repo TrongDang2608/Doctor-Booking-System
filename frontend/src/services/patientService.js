@@ -102,5 +102,13 @@ export const patientService = {
     });
     return response.data;
   },
+
+  // Available Time Slots
+  getAvailableTimeSlots: async (doctorId, date) => {
+    const response = await api.get('/patient/appointments/available-slots', {
+      params: { doctorId, date }
+    });
+    return response.data;
+  }
 };
 
