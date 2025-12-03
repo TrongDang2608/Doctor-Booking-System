@@ -246,8 +246,43 @@ public class AppointmentService {
             throw new RuntimeException("Appointment is already cancelled");
         }
 
+        // Xử lý hoàn tiền nếu đã thanh toán bằng WALLET
+        if ("WALLET".equals(appointment.getPaymentMethod()) && 
+            appointment.getPaymentStatus() == Appointment.PaymentStatus.PAID &&
+            appointment.getPrice() != null && 
+            appointment.getPrice().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            
+            logger.info("Processing refund for cancelled appointment: appointmentId={}, amount={}", 
+                        appointmentId, appointment.getPrice());
+            
+            try {
+                String refundDescription = String.format(
+                    "Hoàn tiền hủy lịch khám - Dr. %s (Ngày: %s, Giờ: %s)",
+                    appointment.getDoctor().getFullName(),
+                    appointment.getAppointmentDate(),
+                    appointment.getAppointmentTime()
+                );
+                
+                walletService.refundAppointment(
+                    patientId,
+                    appointmentId,
+                    appointment.getPrice(),
+                    refundDescription
+                );
+                
+                // Cập nhật payment status thành REFUNDED
+                appointment.setPaymentStatus(Appointment.PaymentStatus.REFUNDED);
+                logger.info("Refund processed successfully for appointment: {}", appointmentId);
+            } catch (Exception e) {
+                logger.error("Error processing refund for appointment: {}", appointmentId, e);
+                throw new RuntimeException("Failed to process refund: " + e.getMessage());
+            }
+        }
+
+        // Cập nhật status thành CANCELLED
         appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
+        logger.info("Appointment cancelled successfully: appointmentId={}", appointmentId);
     }
 
     // Doctor confirms appointment (PENDING -> CONFIRMED)
