@@ -156,7 +156,7 @@ const AdminDashboard = () => {
                     <span>{card.change}</span>
                   </div>
                 </div>
-                <div className="text-5xl opacity-20">{card.icon}</div>
+                <div className="text-5xl opacity-30">{card.icon}</div>
               </div>
             </div>
           ))}
