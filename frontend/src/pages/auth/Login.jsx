@@ -155,9 +155,9 @@ const Login = () => {
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="auth-form" autoComplete="on">
             <div className="form-group">
-              <label htmlFor="username">Tên đăng nhập hoặc Email</label>
+              <label htmlFor="auth-login-username">Tên đăng nhập hoặc Email</label>
               <input
-                id="username"
+                id="auth-login-username"
                 type="text"
                 name="username"
                 value={loginData.username}
@@ -169,9 +169,9 @@ const Login = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Mật khẩu</label>
+              <label htmlFor="auth-login-password">Mật khẩu</label>
               <input
-                id="password"
+                id="auth-login-password"
                 type="password"
                 name="password"
                 value={loginData.password}

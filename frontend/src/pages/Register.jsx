@@ -134,7 +134,7 @@ const Register = () => {
             <input
               type="text"
               name="username"
-              id="username"
+              id="linear-register-username"
               value={formData.username}
               onChange={handleChange}
               placeholder="Tên đăng nhập"
@@ -177,7 +177,7 @@ const Register = () => {
               <input
                 type={showPassword ? 'text' : 'password'}
                 name="password"
-                id="password"
+                id="linear-register-password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Mật khẩu"
@@ -201,7 +201,7 @@ const Register = () => {
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmPassword"
-                id="confirmPassword"
+                id="linear-register-confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="Xác nhận mật khẩu"
@@ -225,7 +225,7 @@ const Register = () => {
             className="linear-submit-button"
             disabled={loading}
           >
-            Đăng ký
+            <span>Đăng ký</span>
           </button>
         </form>
 

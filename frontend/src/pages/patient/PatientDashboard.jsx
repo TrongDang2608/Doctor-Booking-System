@@ -61,7 +61,7 @@ const PatientDashboard = () => {
       });
     } catch (err) {
       console.error('Error loading stats:', err);
-      setError('Failed to load dashboard statistics');
+      setError('Không thể tải thống kê bảng điều khiển');
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,7 @@ const PatientDashboard = () => {
 
   const kpiCards = useMemo(() => [
     { 
-      label: 'Upcoming Appointments', 
+      label: 'Lịch hẹn sắp tới', 
       value: stats.upcomingAppointments, 
       color: '#3B82F6',
       gradient: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
@@ -105,7 +105,7 @@ const PatientDashboard = () => {
       trendUp: true
     },
     { 
-      label: 'Total Appointments', 
+      label: 'Tổng lịch hẹn', 
       value: stats.totalAppointments, 
       color: '#10B981',
       gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
@@ -114,7 +114,7 @@ const PatientDashboard = () => {
       trendUp: true
     },
     { 
-      label: 'My Treatments', 
+      label: 'Điều trị của tôi', 
       value: stats.totalTreatments, 
       color: '#8B5CF6',
       gradient: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
@@ -123,7 +123,7 @@ const PatientDashboard = () => {
       trendUp: true
     },
     { 
-      label: 'Pending', 
+      label: 'Đang chờ', 
       value: stats.pendingAppointments, 
       color: '#F59E0B',
       gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
@@ -148,6 +148,21 @@ const PatientDashboard = () => {
     }
   };
 
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'CONFIRMED':
+        return 'Đã xác nhận';
+      case 'PENDING':
+        return 'Đang chờ';
+      case 'COMPLETED':
+        return 'Hoàn thành';
+      case 'CANCELLED':
+        return 'Đã hủy';
+      default:
+        return status;
+    }
+  };
+
   if (loading) {
     return (
       <PatientLayout>
@@ -162,15 +177,15 @@ const PatientDashboard = () => {
         {/* Header Section */}
         <div className="dashboard-header">
           <div className="header-left">
-            <h1 className="dashboard-title">Dashboard</h1>
-            <p className="dashboard-subtitle">Health Analytics & Insights</p>
+            <h1 className="dashboard-title">Bảng điều khiển</h1>
+            <p className="dashboard-subtitle">Phân tích & Thông tin Sức khỏe</p>
           </div>
           <div className="header-right">
             <div className="search-container">
               <i data-feather="search" className="search-icon"></i>
               <input 
                 type="text" 
-                placeholder="Search appointments, doctors..." 
+                placeholder="Tìm lịch hẹn, bác sĩ..." 
                 className="global-search"
               />
             </div>
@@ -245,8 +260,8 @@ const PatientDashboard = () => {
           <div className="chart-card">
             <div className="card-header">
               <div>
-                <h3 className="card-title">Appointment Trends</h3>
-                <p className="card-subtitle">Last 7 days</p>
+                <h3 className="card-title">Xu hướng lịch hẹn</h3>
+                <p className="card-subtitle">7 ngày qua</p>
               </div>
               <div className="card-actions">
                 <button className="icon-btn">
@@ -330,8 +345,8 @@ const PatientDashboard = () => {
           <div className="activity-card">
             <div className="card-header">
               <div>
-                <h3 className="card-title">Recent Activity</h3>
-                <p className="card-subtitle">Latest appointments</p>
+                <h3 className="card-title">Hoạt động gần đây</h3>
+                <p className="card-subtitle">Lịch hẹn mới nhất</p>
               </div>
             </div>
             <div className="activity-list">
@@ -355,7 +370,7 @@ const PatientDashboard = () => {
                       </div>
                     </div>
                     <div className="activity-status" style={{ color: getStatusColor(activity.status) }}>
-                      {activity.status}
+                      {getStatusLabel(activity.status)}
                     </div>
                   </div>
                 ))

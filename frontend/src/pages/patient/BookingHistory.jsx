@@ -31,7 +31,7 @@ const BookingHistory = () => {
             setAppointments(data);
             setError('');
         } catch (err) {
-            setError('Failed to load appointments');
+            setError('Không thể tải lịch hẹn');
             console.error(err);
         } finally {
             setLoading(false);
@@ -39,17 +39,17 @@ const BookingHistory = () => {
     };
 
     const handleCancel = async (id) => {
-        if (!window.confirm('Are you sure you want to cancel this appointment?')) {
+        if (!window.confirm('Bạn có chắc chắn muốn hủy lịch hẹn này?')) {
             return;
         }
 
         try {
             await patientService.cancelAppointment(id);
-            setSuccess('Appointment cancelled successfully');
+            setSuccess('Hủy lịch hẹn thành công');
             setTimeout(() => setSuccess(''), 3000);
             loadAppointments();
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to cancel appointment');
+            setError(err.response?.data?.message || 'Không thể hủy lịch hẹn');
         }
     };
 
@@ -118,7 +118,7 @@ const BookingHistory = () => {
     return (
         <PatientLayout>
             <div className="patient-page">
-                <h1>Booking History</h1>
+                <h1>Lịch Sử Đặt Lịch</h1>
 
                 {error && <div className="alert alert-error">{error}</div>}
                 {success && <div className="alert alert-success">{success}</div>}
@@ -199,7 +199,7 @@ const BookingHistory = () => {
                                             onMouseEnter={(e) => e.target.style.backgroundColor = '#c0392b'}
                                             onMouseLeave={(e) => e.target.style.backgroundColor = '#e74c3c'}
                                         >
-                                            Cancel
+                                            Hủy
                                         </button>
                                     )}
                                     {appointment.status === 'COMPLETED' && (
@@ -222,7 +222,7 @@ const BookingHistory = () => {
                                                 onMouseEnter={(e) => e.target.style.backgroundColor = '#2980b9'}
                                                 onMouseLeave={(e) => e.target.style.backgroundColor = '#3498db'}
                                             >
-                                                View Details
+                                                Xem Chi Tiết
                                             </button>
                                             <button
                                                 onClick={(e) => {
@@ -242,7 +242,7 @@ const BookingHistory = () => {
                                                 onMouseEnter={(e) => e.target.style.backgroundColor = '#27ae60'}
                                                 onMouseLeave={(e) => e.target.style.backgroundColor = '#2ecc71'}
                                             >
-                                                Send Feedback
+                                                Gửi Phản Hồi
                                             </button>
                                         </>
                                     )}
@@ -340,7 +340,7 @@ const AppointmentDetailsModal = ({ appointment, treatment, loadingTreatment, onC
                 overflowY: 'auto',
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2>Appointment Details</h2>
+                    <h2>Chi Tiết Lịch Hẹn</h2>
                     <button
                         onClick={onClose}
                         style={{
@@ -517,7 +517,7 @@ const FeedbackModal = ({ appointment, onClose, onSuccess }) => {
                 overflowY: 'auto',
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                    <h2>Send Feedback</h2>
+                    <h2>Gửi Phản Hồi</h2>
                     <button
                         onClick={onClose}
                         style={{
@@ -583,7 +583,7 @@ const FeedbackModal = ({ appointment, onClose, onSuccess }) => {
                             value={formData.comment}
                             onChange={handleChange}
                             rows="6"
-                            placeholder="Share your experience, suggestions, or concerns..."
+                            placeholder="Chia sẻ trải nghiệm, đề xuất hoặc mối quan tâm của bạn..."
                             style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit', fontSize: '16px' }}
                         />
                     </div>

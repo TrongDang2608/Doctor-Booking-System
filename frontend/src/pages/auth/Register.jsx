@@ -146,9 +146,9 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="username">Tên đăng nhập *</label>
+              <label htmlFor="auth-register-username">Tên đăng nhập *</label>
               <input
-                id="username"
+                id="auth-register-username"
                 type="text"
                 name="username"
                 value={formData.username}
@@ -173,9 +173,9 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="password">Mật khẩu *</label>
+              <label htmlFor="auth-register-password">Mật khẩu *</label>
               <input
-                id="password"
+                id="auth-register-password"
                 type="password"
                 name="password"
                 value={formData.password}

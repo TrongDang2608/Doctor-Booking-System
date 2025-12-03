@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import logoImage from '../../assets/DoctorBooking.png';
 import HealthAIChat from './HealthAIChat';
+import AnimatedLogoutButton from '../common/AnimatedLogoutButton';
 import './PatientLayout.css';
 
 const PatientLayout = ({ children }) => {
@@ -25,17 +26,28 @@ const PatientLayout = ({ children }) => {
         }
     }, [location.pathname]);
 
+    // Initialize Feather Icons after render
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (window.feather) {
+                window.feather.replace();
+            }
+        }, 100);
+        return () => clearTimeout(timer);
+    });
+
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
     const menuItems = [
-        { path: '/patient/dashboard', label: 'Dashboard', icon: 'layout', route: '/patient/dashboard' },
-        { path: '/patient/booking', label: 'New Booking', icon: 'calendar', route: '/patient/booking' },
-        { path: '/patient/history', label: 'Booking History', icon: 'clock', route: '/patient/history' },
-        { path: '/patient/doctors', label: 'Find Doctors', icon: 'search', route: '/patient/doctors' },
-        { path: '/patient/healthlyai', label: 'HealthAI Chat', icon: 'message-circle', route: '/patient/healthlyai' },
+        { path: '/patient/dashboard', label: 'Bảng điều khiển', icon: 'layout', route: '/patient/dashboard' },
+        { path: '/patient/booking', label: 'Đặt lịch mới', icon: 'calendar', route: '/patient/booking' },
+        { path: '/patient/history', label: 'Lịch sử đặt lịch', icon: 'clock', route: '/patient/history' },
+        { path: '/patient/doctors', label: 'Tìm bác sĩ', icon: 'search', route: '/patient/doctors' },
+        { path: '/patient/wallet', label: 'Ví Sức khỏe', icon: 'credit-card', route: '/patient/wallet' },
+        { path: '/patient/healthlyai', label: 'Trợ lý AI', icon: 'message-circle', route: '/patient/healthlyai' },
     ];
 
     const isActive = (path) => {
@@ -68,7 +80,7 @@ const PatientLayout = ({ children }) => {
                         </div>
                         {sidebarOpen && (
                             <div className="logo-text-wrapper">
-                                <span className="logo-brand-name">Doctor Booking</span>
+                                <span className="logo-brand-name">Bệnh Nhân</span>
                             </div>
                         )}
                     </Link>
@@ -98,7 +110,7 @@ const PatientLayout = ({ children }) => {
                             </div>
                             <div className="user-details">
                                 <div className="user-name">{user?.fullName || user?.username}</div>
-                                <div className="user-role">My Profile</div>
+                                <div className="user-role">Hồ sơ</div>
                             </div>
                             <i data-feather="chevron-right" className="user-arrow"></i>
                         </Link>
@@ -112,10 +124,13 @@ const PatientLayout = ({ children }) => {
                             <i data-feather="user"></i>
                         </Link>
                     )}
-                    <button className="logout-btn" onClick={handleLogout}>
-                        <i data-feather="log-out"></i>
-                        {sidebarOpen && <span>Logout</span>}
-                    </button>
+                    <div className="animated-logout-wrapper">
+                        <AnimatedLogoutButton 
+                            onLogout={handleLogout} 
+                            variant="transparent"
+                            showText={sidebarOpen}
+                        />
+                    </div>
                 </div>
             </aside>
 

@@ -44,6 +44,15 @@ public class Patient {
     @Column(name = "emergency_phone", length = 20)
     private String emergencyPhone;
 
+    @Column(name = "wallet_balance", precision = 10, scale = 2)
+    private java.math.BigDecimal walletBalance = java.math.BigDecimal.ZERO;
+
+    @Column(name = "loyalty_points")
+    private Integer loyaltyPoints = 0;
+
+    @Column(name = "loyalty_tier", length = 20)
+    private String loyaltyTier = "BRONZE";
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

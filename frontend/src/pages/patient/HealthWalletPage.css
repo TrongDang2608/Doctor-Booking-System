@@ -1,0 +1,16 @@
+/* Health Wallet Page - Dark Theme */
+.health-wallet-page {
+  width: 100%;
+  min-height: calc(100vh - 80px);
+  padding: 2rem;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .health-wallet-page {
+    padding: 1rem;
+  }
+}

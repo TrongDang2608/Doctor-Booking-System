@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import AnimatedLogoutButton from './AnimatedLogoutButton';
 import './UserInfo.css';
 
 const UserInfo = () => {
@@ -138,10 +139,13 @@ const UserInfo = () => {
 
           <div className="user-info-divider"></div>
 
-          <button className="user-info-logout" onClick={handleLogout}>
-            <i data-feather="log-out"></i>
-            <span>Đăng xuất</span>
-          </button>
+          <div className="user-info-logout-wrapper">
+            <AnimatedLogoutButton 
+              onLogout={handleLogout}
+              variant="danger"
+              showText={true}
+            />
+          </div>
         </div>
       )}
     </div>
