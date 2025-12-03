@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import AnimatedLogoutButton from '../common/AnimatedLogoutButton';
+import feather from 'feather-icons';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -11,10 +12,8 @@ const AdminLayout = ({ children }) => {
 
   useEffect(() => {
     // Initialize Feather Icons
-    if (window.feather) {
-      window.feather.replace();
-    }
-  }, [location.pathname]);
+    feather.replace();
+  }, [location.pathname, sidebarOpen]);
 
   const handleLogout = () => {
     logout();
@@ -86,7 +85,7 @@ const AdminLayout = ({ children }) => {
               </div>
             </div>
           )}
-          <div className="w-full flex items-center justify-center">
+          <div className="w-full flex items-center justify-center px-2">
             <AnimatedLogoutButton 
               onLogout={handleLogout} 
               variant="light"
