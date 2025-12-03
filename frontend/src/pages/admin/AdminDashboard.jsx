@@ -90,9 +90,9 @@ const AdminDashboard = () => {
 
   const quickActions = [
     { label: 'Quản lý bác sĩ', icon: '👨‍⚕️', path: '/admin/doctors', color: '#667eea' },
-    { label: 'Xem bệnh nhân', icon: '👥', path: '/admin/patients', color: '#f5576c' },
-    { label: 'Lịch hẹn', icon: '📅', path: '/admin/appointments', color: '#00f2fe' },
-    { label: 'Phản hồi', icon: '💬', path: '/admin/feedbacks', color: '#fee140' },
+    { label: 'Quản lý bệnh nhân', icon: '👥', path: '/admin/patients', color: '#f5576c' },
+    { label: 'Quản lý lịch hẹn', icon: '📅', path: '/admin/appointments', color: '#00f2fe' },
+    { label: 'Quản lý phản hồi', icon: '💬', path: '/admin/feedbacks', color: '#fee140' },
   ];
 
   if (loading) {
@@ -112,14 +112,14 @@ const AdminDashboard = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-            <p className="text-gray-600 mt-1">Welcome back! Here's what's happening today.</p>
+            <p className="text-gray-600 mt-1">Chào mừng trở lại! Đây là những gì đang diễn ra hôm nay.</p>
           </div>
           <button 
             className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium text-gray-700"
             onClick={loadStats}
           >
             <span>🔄</span>
-            Refresh
+            Làm mới
           </button>
         </div>
 
@@ -248,7 +248,7 @@ const AdminDashboard = () => {
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                 <span className="text-5xl mb-3">📭</span>
-                <p>No recent appointments</p>
+                <p>Không có lịch hẹn gần đây</p>
               </div>
             )}
           </div>

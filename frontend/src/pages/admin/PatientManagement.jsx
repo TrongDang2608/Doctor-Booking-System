@@ -104,7 +104,7 @@ const PatientManagement = () => {
       setAllPatients(data);
       setError('');
     } catch (err) {
-      setError('Failed to load patients');
+      setError('Không thể tải danh sách bệnh nhân');
       console.error(err);
     } finally {
       setLoading(false);
@@ -134,17 +134,17 @@ const PatientManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this patient? This will also delete their user account.')) {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa bệnh nhân này? Hành động này cũng sẽ xóa tài khoản người dùng của họ.')) {
       return;
     }
 
     try {
       await adminService.deletePatient(id);
-      toast.success('Patient deleted successfully!', { position: 'top-right', autoClose: 3000 });
+      toast.success('Xóa bệnh nhân thành công!', { position: 'top-right', autoClose: 3000 });
       loadAllPatients();
       setError('');
     } catch (err) {
-      const errorMsg = typeof err === 'string' ? err : 'Failed to delete patient';
+      const errorMsg = typeof err === 'string' ? err : 'Không thể xóa bệnh nhân';
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
@@ -156,26 +156,26 @@ const PatientManagement = () => {
 
     if (!editingPatient) {
       if (!formData.username?.trim()) {
-        errors.username = 'Username is required';
+        errors.username = 'Tên đăng nhập không được để trống';
       } else if (formData.username.length < 3) {
-        errors.username = 'Username must be at least 3 characters';
+        errors.username = 'Tên đăng nhập phải có ít nhất 3 ký tự';
       }
 
       if (!formData.password) {
-        errors.password = 'Password is required';
+        errors.password = 'Mật khẩu không được để trống';
       } else if (formData.password.length < 6) {
-        errors.password = 'Password must be at least 6 characters';
+        errors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
       }
     }
 
     if (!formData.fullName?.trim()) {
-      errors.fullName = 'Full name is required';
+      errors.fullName = 'Họ và tên không được để trống';
     }
 
     if (!formData.email?.trim()) {
-      errors.email = 'Email is required';
+      errors.email = 'Email không được để trống';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email format';
+      errors.email = 'Định dạng email không hợp lệ';
     }
 
     setFormErrors(errors);
@@ -203,11 +203,11 @@ const PatientManagement = () => {
           emergencyContact: formData.emergencyContact,
           emergencyPhone: formData.emergencyPhone
         });
-        toast.success('Patient updated successfully!', { position: 'top-right', autoClose: 3000 });
+        toast.success('Cập nhật bệnh nhân thành công!', { position: 'top-right', autoClose: 3000 });
       } else {
         // Create new patient
         await adminService.createPatient(formData);
-        toast.success('Patient created successfully!', { position: 'top-right', autoClose: 3000 });
+        toast.success('Tạo bệnh nhân thành công!', { position: 'top-right', autoClose: 3000 });
       }
 
       setShowForm(false);
@@ -215,7 +215,7 @@ const PatientManagement = () => {
       loadAllPatients();
       setError('');
     } catch (err) {
-      const errorMsg = typeof err === 'string' ? err : `Failed to ${editingPatient ? 'update' : 'create'} patient`;
+      const errorMsg = typeof err === 'string' ? err : `Không thể ${editingPatient ? 'cập nhật' : 'tạo'} bệnh nhân`;
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
@@ -241,16 +241,16 @@ const PatientManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {editingPatient ? 'Edit Patient' : 'Create New Patient'}
+                {editingPatient ? 'Chỉnh Sửa Bệnh Nhân' : 'Tạo Bệnh Nhân Mới'}
               </h1>
-              <p className="text-gray-600 mt-1">Update patient information</p>
+              <p className="text-gray-600 mt-1">Cập nhật thông tin bệnh nhân</p>
             </div>
             <button 
               onClick={() => navigate('/admin/patients')} 
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <i data-feather="arrow-left" className="w-5 h-5"></i>
-              Back to List
+              Quay lại danh sách
             </button>
           </div>
 
@@ -270,7 +270,7 @@ const PatientManagement = () => {
                 {!editingPatient && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Username *
+                      Tên đăng nhập *
                     </label>
                     <input
                       type="text"
@@ -279,7 +279,7 @@ const PatientManagement = () => {
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                         formErrors.username ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="Enter username"
+                      placeholder="Nhập tên đăng nhập"
                     />
                     {formErrors.username && (
                       <p className="text-red-500 text-sm mt-1">{formErrors.username}</p>
@@ -291,7 +291,7 @@ const PatientManagement = () => {
                 {!editingPatient && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Password *
+                      Mật khẩu *
                     </label>
                     <input
                       type="password"
@@ -300,7 +300,7 @@ const PatientManagement = () => {
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                         formErrors.password ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="Enter password (min 6 characters)"
+                      placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
                     />
                     {formErrors.password && (
                       <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>
@@ -311,7 +311,7 @@ const PatientManagement = () => {
                 {/* Full Name */}
                 <div className={!editingPatient ? 'md:col-span-2' : ''}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name *
+                    Họ và Tên *
                   </label>
                   <input
                     type="text"
@@ -320,7 +320,7 @@ const PatientManagement = () => {
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                       formErrors.fullName ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    placeholder="Enter full name"
+                    placeholder="Nhập họ và tên"
                   />
                   {formErrors.fullName && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.fullName}</p>
@@ -339,7 +339,7 @@ const PatientManagement = () => {
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                       formErrors.email ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    placeholder="Enter email"
+                    placeholder="Nhập email"
                   />
                   {formErrors.email && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
@@ -349,21 +349,21 @@ const PatientManagement = () => {
                 {/* Phone */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone
+                    Số điện thoại
                   </label>
                   <input
                     type="text"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Enter phone number"
+                    placeholder="Nhập số điện thoại"
                   />
                 </div>
 
                 {/* Date of Birth */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of Birth
+                    Ngày sinh
                   </label>
                   <input
                     type="date"
@@ -376,29 +376,29 @@ const PatientManagement = () => {
                 {/* Gender */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Gender
+                    Giới tính
                   </label>
                   <select
                     value={formData.gender}
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
+                    <option value="MALE">Nam</option>
+                    <option value="FEMALE">Nữ</option>
+                    <option value="OTHER">Khác</option>
                   </select>
                 </div>
 
                 {/* Address */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Address
+                    Địa chỉ
                   </label>
                   <textarea
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Enter address"
+                    placeholder="Nhập địa chỉ"
                     rows="2"
                   />
                 </div>
@@ -406,28 +406,28 @@ const PatientManagement = () => {
                 {/* Emergency Contact */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Emergency Contact Name
+                    Người liên hệ khẩn cấp
                   </label>
                   <input
                     type="text"
                     value={formData.emergencyContact}
                     onChange={(e) => setFormData({ ...formData, emergencyContact: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Enter emergency contact name"
+                    placeholder="Nhập tên người liên hệ"
                   />
                 </div>
 
                 {/* Emergency Phone */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Emergency Contact Phone
+                    SĐT người liên hệ khẩn cấp
                   </label>
                   <input
                     type="text"
                     value={formData.emergencyPhone}
                     onChange={(e) => setFormData({ ...formData, emergencyPhone: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Enter emergency contact phone"
+                    placeholder="Nhập số điện thoại khẩn cấp"
                   />
                 </div>
               </div>
@@ -441,7 +441,7 @@ const PatientManagement = () => {
                   style={{ borderRadius: '0.5rem', minHeight: '44px', height: '44px', margin: 0 }}
                   className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
-                  Cancel
+                  Hủy
                 </button>
                 <button
                   type="submit"
@@ -455,9 +455,9 @@ const PatientManagement = () => {
                     <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  )}
-                  {submitting ? (editingPatient ? 'Updating...' : 'Creating...') : (editingPatient ? 'Update Patient' : 'Create Patient')}
+                  </svg>
+                )}
+                  {submitting ? (editingPatient ? 'Đang cập nhật...' : 'Đang tạo...') : (editingPatient ? 'Cập nhật' : 'Tạo mới')}
                 </button>
               </div>
             </form>
@@ -475,11 +475,11 @@ const PatientManagement = () => {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {showForm ? (editingPatient ? 'Edit Patient' : 'Create New Patient') : 'Patient Management'}
+            <h1 className="text-3xl font-bold text-gray-900 mb-1">
+              {showForm ? (editingPatient ? 'Chỉnh Sửa Bệnh Nhân' : 'Tạo Bệnh Nhân Mới') : 'Quản Lý Bệnh Nhân'}
             </h1>
-            <p className="text-gray-600 mt-1">
-              {showForm ? 'Update patient information' : `${patients.length} total patients`}
+            <p className="text-gray-600 text-sm mt-1">
+              {showForm ? 'Cập nhật thông tin bệnh nhân' : `Tổng số ${patients.length} bệnh nhân`}
             </p>
           </div>
           {!showForm && (
@@ -488,7 +488,7 @@ const PatientManagement = () => {
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
             >
               <i data-feather="user-plus" className="w-5 h-5"></i>
-              Add New Patient
+              Thêm Bệnh Nhân Mới
             </button>
           )}
           {showForm && (
@@ -497,7 +497,7 @@ const PatientManagement = () => {
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <i data-feather="arrow-left" className="w-5 h-5"></i>
-              Back to List
+              Quay lại danh sách
             </button>
           )}
         </div>
@@ -524,7 +524,7 @@ const PatientManagement = () => {
                   <i data-feather="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
                   <input
                     type="text"
-                    placeholder="Search by name, email, or phone..."
+                    placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -538,10 +538,10 @@ const PatientManagement = () => {
                     onChange={(e) => setFilterGender(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none bg-white"
                   >
-                    <option value="ALL">All Genders</option>
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
+                    <option value="ALL">Tất cả giới tính</option>
+                    <option value="MALE">Nam</option>
+                    <option value="FEMALE">Nữ</option>
+                    <option value="OTHER">Khác</option>
                   </select>
                   <i data-feather="chevron-down" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none"></i>
                 </div>
@@ -550,10 +550,10 @@ const PatientManagement = () => {
               {/* Active Filters Display */}
               {(searchTerm || filterGender !== 'ALL') && (
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <span className="text-sm text-gray-600">Active filters:</span>
+                  <span className="text-sm text-gray-600">Bộ lọc đang áp dụng:</span>
                   {searchTerm && (
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
-                      Search: "{searchTerm}"
+                      Tìm kiếm: "{searchTerm}"
                       <button onClick={() => setSearchTerm('')} className="hover:text-blue-900">
                         <i data-feather="x" className="w-3 h-3"></i>
                       </button>
@@ -561,7 +561,7 @@ const PatientManagement = () => {
                   )}
                   {filterGender !== 'ALL' && (
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
-                      Gender: {filterGender}
+                      Giới tính: {filterGender === 'MALE' ? 'Nam' : filterGender === 'FEMALE' ? 'Nữ' : 'Khác'}
                       <button onClick={() => setFilterGender('ALL')} className="hover:text-purple-900">
                         <i data-feather="x" className="w-3 h-3"></i>
                   </button>
@@ -574,7 +574,7 @@ const PatientManagement = () => {
                 }}
                 className="text-sm text-red-600 hover:text-red-800 font-medium"
               >
-                Clear all
+                Xóa tất cả
               </button>
             </div>
           )}
@@ -587,19 +587,19 @@ const PatientManagement = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ và Tên</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Birth</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số Điện Thoại</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giới Tính</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày Sinh</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {patients.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                      No patients found
+                      Không tìm thấy bệnh nhân
                     </td>
                   </tr>
                 ) : (

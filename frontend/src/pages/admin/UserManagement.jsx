@@ -131,17 +131,17 @@ const UserManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
       return;
     }
 
     try {
       await userService.deleteUser(id);
-      toast.success('User deleted successfully!', { position: 'top-right', autoClose: 3000 });
+      toast.success('Xóa người dùng thành công!', { position: 'top-right', autoClose: 3000 });
       loadAllUsers();
       setError('');
     } catch (err) {
-      const errorMsg = typeof err === 'string' ? err : 'Failed to delete user';
+      const errorMsg = typeof err === 'string' ? err : 'Không thể xóa người dùng';
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
@@ -151,11 +151,11 @@ const UserManagement = () => {
   const handleToggleStatus = async (id) => {
     try {
       await userService.toggleUserStatus(id);
-      toast.success('User status updated successfully!', { position: 'top-right', autoClose: 2500 });
+      toast.success('Cập nhật trạng thái thành công!', { position: 'top-right', autoClose: 2500 });
       loadAllUsers();
       setError('');
     } catch (err) {
-      const errorMsg = typeof err === 'string' ? err : 'Failed to toggle user status';
+      const errorMsg = typeof err === 'string' ? err : 'Không thể cập nhật trạng thái';
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
@@ -170,7 +170,7 @@ const UserManagement = () => {
 
   const handlePasswordSubmit = async () => {
     if (newPassword.length < 6) {
-      toast.error('Password must be at least 6 characters', { position: 'top-right', autoClose: 4000 });
+      toast.error('Mật khẩu phải có ít nhất 6 ký tự', { position: 'top-right', autoClose: 4000 });
       return;
     }
 
@@ -180,9 +180,9 @@ const UserManagement = () => {
       setPasswordChangeId(null);
       setNewPassword('');
       setError('');
-      toast.success('Password changed successfully!', { position: 'top-right', autoClose: 3000 });
+      toast.success('Đổi mật khẩu thành công!', { position: 'top-right', autoClose: 3000 });
     } catch (err) {
-      const errorMsg = typeof err === 'string' ? err : 'Failed to change password';
+      const errorMsg = typeof err === 'string' ? err : 'Không thể đổi mật khẩu';
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
@@ -193,25 +193,25 @@ const UserManagement = () => {
     const errors = {};
 
     if (!formData.username.trim()) {
-      errors.username = 'Username is required';
+      errors.username = 'Tên đăng nhập không được để trống';
     } else if (formData.username.length < 3) {
-      errors.username = 'Username must be at least 3 characters';
+      errors.username = 'Tên đăng nhập phải có ít nhất 3 ký tự';
     }
 
     if (!formData.email.trim()) {
-      errors.email = 'Email is required';
+      errors.email = 'Email không được để trống';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email format';
+      errors.email = 'Định dạng email không hợp lệ';
     }
 
     if (!editingUser && !formData.password) {
-      errors.password = 'Password is required';
+      errors.password = 'Mật khẩu không được để trống';
     } else if (!editingUser && formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+      errors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     }
 
     if (!formData.role) {
-      errors.role = 'Role is required';
+      errors.role = 'Vai trò không được để trống';
     }
 
     setFormErrors(errors);
@@ -235,11 +235,11 @@ const UserManagement = () => {
           role: formData.role,
           enabled: formData.enabled
         });
-        toast.success('User updated successfully!', { position: 'top-right', autoClose: 3000 });
+        toast.success('Cập nhật người dùng thành công!', { position: 'top-right', autoClose: 3000 });
       } else {
         // Create new user
         await userService.createUser(formData);
-        toast.success('User created successfully!', { position: 'top-right', autoClose: 3000 });
+        toast.success('Tạo người dùng thành công!', { position: 'top-right', autoClose: 3000 });
       }
 
       setShowForm(false);
@@ -247,7 +247,7 @@ const UserManagement = () => {
       loadAllUsers();
       setError('');
     } catch (err) {
-      const errorMsg = typeof err === 'string' ? err : `Failed to ${editingUser ? 'update' : 'create'} user`;
+      const errorMsg = typeof err === 'string' ? err : `Không thể ${editingUser ? 'cập nhật' : 'tạo'} người dùng`;
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
@@ -274,17 +274,17 @@ const UserManagement = () => {
           {/* Page Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                {editingUser ? 'Edit User' : 'Create New User'}
-              </h1>
-              <p className="text-gray-600 mt-1">Update user information</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {editingUser ? 'Chỉnh Sửa Người Dùng' : 'Tạo Người Dùng Mới'}
+            </h1>
+            <p className="text-gray-600 mt-1">Cập nhật thông tin người dùng</p>
             </div>
             <button 
               onClick={() => navigate('/admin/users')} 
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <i data-feather="arrow-left" className="w-5 h-5"></i>
-              Back to List
+              Quay lại danh sách
             </button>
           </div>
 
@@ -303,7 +303,7 @@ const UserManagement = () => {
                 {/* Username */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Username *
+                    Tên đăng nhập *
                   </label>
                   <input
                     type="text"
@@ -312,7 +312,7 @@ const UserManagement = () => {
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                       formErrors.username ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    placeholder="Enter username"
+                    placeholder="Nhập tên đăng nhập"
                   />
                   {formErrors.username && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.username}</p>
@@ -331,7 +331,7 @@ const UserManagement = () => {
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                       formErrors.email ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    placeholder="Enter email"
+                    placeholder="Nhập email"
                   />
                   {formErrors.email && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
@@ -342,7 +342,7 @@ const UserManagement = () => {
                 {!editingUser && (
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Password *
+                      Mật khẩu *
                     </label>
                     <input
                       type="password"
@@ -351,7 +351,7 @@ const UserManagement = () => {
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
                         formErrors.password ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="Enter password (min 6 characters)"
+                      placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
                     />
                     {formErrors.password && (
                       <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>
@@ -362,7 +362,7 @@ const UserManagement = () => {
                 {/* Role */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Role *
+                    Vai trò *
                   </label>
                   <select
                     value={formData.role}
@@ -371,9 +371,9 @@ const UserManagement = () => {
                       formErrors.role ? 'border-red-500' : 'border-gray-300'
                     }`}
                   >
-                    <option value="PATIENT">Patient</option>
-                    <option value="DOCTOR">Doctor</option>
-                    <option value="ADMIN">Admin</option>
+                    <option value="PATIENT">Bệnh nhân</option>
+                    <option value="DOCTOR">Bác sĩ</option>
+                    <option value="ADMIN">Quản trị viên</option>
                   </select>
                   {formErrors.role && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.role}</p>
@@ -383,15 +383,15 @@ const UserManagement = () => {
                 {/* Status */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
+                    Trạng thái
                   </label>
                   <select
                     value={formData.enabled ? 'active' : 'inactive'}
                     onChange={(e) => setFormData({ ...formData, enabled: e.target.value === 'active' })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Không hoạt động</option>
                   </select>
                 </div>
               </div>
@@ -405,7 +405,7 @@ const UserManagement = () => {
                   style={{ borderRadius: '0.5rem', minHeight: '44px', height: '44px', margin: 0 }}
                   className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
-                  Cancel
+                  Hủy
                 </button>
                 <button
                   type="submit"
@@ -421,7 +421,7 @@ const UserManagement = () => {
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                   )}
-                  {submitting ? (editingUser ? 'Updating...' : 'Creating...') : (editingUser ? 'Update User' : 'Create User')}
+                  {submitting ? (editingUser ? 'Đang cập nhật...' : 'Đang tạo...') : (editingUser ? 'Cập nhật' : 'Tạo mới')}
                 </button>
               </div>
             </form>
@@ -439,15 +439,15 @@ const UserManagement = () => {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600 mt-1">{users.length} total users</p>
+            <h1 className="text-3xl font-bold text-gray-900">Quản Lý Người Dùng</h1>
+            <p className="text-gray-600 mt-1">Tổng số {users.length} người dùng</p>
           </div>
           <button 
             onClick={handleCreate} 
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
           >
             <i data-feather="user-plus" className="w-5 h-5"></i>
-            Add New User
+            Thêm người dùng
           </button>
         </div>
 
@@ -467,7 +467,7 @@ const UserManagement = () => {
               <i data-feather="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
               <input
                 type="text"
-                placeholder="Search by username, email..."
+                placeholder="Tìm kiếm theo tên, email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -481,10 +481,10 @@ const UserManagement = () => {
                 onChange={(e) => setFilterRole(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none bg-white"
               >
-                <option value="ALL">All Roles</option>
-                <option value="ADMIN">Admin</option>
-                <option value="DOCTOR">Doctor</option>
-                <option value="PATIENT">Patient</option>
+                <option value="ALL">Tất cả vai trò</option>
+                <option value="ADMIN">Quản trị viên</option>
+                <option value="DOCTOR">Bác sĩ</option>
+                <option value="PATIENT">Bệnh nhân</option>
               </select>
               <i data-feather="chevron-down" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none"></i>
             </div>
@@ -496,9 +496,9 @@ const UserManagement = () => {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent appearance-none bg-white"
               >
-                <option value="ALL">All Status</option>
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
+                <option value="ALL">Tất cả trạng thái</option>
+                <option value="ACTIVE">Hoạt động</option>
+                <option value="INACTIVE">Không hoạt động</option>
               </select>
               <i data-feather="chevron-down" className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none"></i>
             </div>
@@ -507,10 +507,10 @@ const UserManagement = () => {
           {/* Active Filters Display */}
           {(searchTerm || filterRole !== 'ALL' || filterStatus !== 'ALL') && (
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="text-sm text-gray-600">Active filters:</span>
+              <span className="text-sm text-gray-600">Bộ lọc đang hoạt động:</span>
               {searchTerm && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
-                  Search: "{searchTerm}"
+                  Tìm kiếm: "{searchTerm}"
                   <button onClick={() => setSearchTerm('')} className="hover:text-blue-900">
                     <i data-feather="x" className="w-3 h-3"></i>
                   </button>
@@ -518,7 +518,7 @@ const UserManagement = () => {
               )}
               {filterRole !== 'ALL' && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
-                  Role: {filterRole}
+                  Vai trò: {filterRole === 'ADMIN' ? 'Quản trị viên' : filterRole === 'DOCTOR' ? 'Bác sĩ' : 'Bệnh nhân'}
                   <button onClick={() => setFilterRole('ALL')} className="hover:text-purple-900">
                     <i data-feather="x" className="w-3 h-3"></i>
                   </button>
@@ -526,7 +526,7 @@ const UserManagement = () => {
               )}
               {filterStatus !== 'ALL' && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
-                  Status: {filterStatus}
+                  Trạng thái: {filterStatus === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                   <button onClick={() => setFilterStatus('ALL')} className="hover:text-green-900">
                     <i data-feather="x" className="w-3 h-3"></i>
                   </button>
@@ -540,7 +540,7 @@ const UserManagement = () => {
                 }}
                 className="text-sm text-red-600 hover:text-red-800 font-medium"
               >
-                Clear all
+                Xóa tất cả
               </button>
             </div>
           )}
@@ -553,19 +553,19 @@ const UserManagement = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên đăng nhập</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vai trò</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tầo</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                      No users found
+                      Không tìm thấy người dùng
                     </td>
                   </tr>
                 ) : (
@@ -580,14 +580,14 @@ const UserManagement = () => {
                           user.role === 'DOCTOR' ? 'bg-blue-100 text-blue-700' :
                           'bg-green-100 text-green-700'
                         }`}>
-                          {user.role}
+                          {user.role === 'ADMIN' ? 'Quản trị viên' : user.role === 'DOCTOR' ? 'Bác sĩ' : 'Bệnh nhân'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                           user.enabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                         }`}>
-                          {user.enabled ? 'Active' : 'Inactive'}
+                          {user.enabled ? 'Hoạt động' : 'Không hoạt động'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

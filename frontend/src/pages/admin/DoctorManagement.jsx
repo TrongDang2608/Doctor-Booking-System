@@ -73,7 +73,7 @@ const DoctorManagement = () => {
       setAllDoctors(data);
       setError('');
     } catch (err) {
-      setError('Failed to load doctors');
+      setError('Không thể tải danh sách bác sĩ');
       console.error(err);
     } finally {
       setLoading(false);
@@ -90,17 +90,17 @@ const DoctorManagement = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this doctor?')) {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa bác sĩ này?')) {
       return;
     }
 
     try {
       await adminService.deleteDoctor(id);
-      toast.success('Doctor deleted successfully!', { position: 'top-right', autoClose: 3000 });
+      toast.success('Xóa bác sĩ thành công!', { position: 'top-right', autoClose: 3000 });
       loadAllDoctors();
       setError('');
     } catch (err) {
-      const errorMsg = 'Failed to delete doctor';
+      const errorMsg = 'Không thể xóa bác sĩ';
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
@@ -131,16 +131,16 @@ const DoctorManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {editingDoctor ? 'Edit Doctor' : 'Create New Doctor'}
+                {editingDoctor ? 'Chỉnh Sửa Bác Sĩ' : 'Tạo Bác Sĩ Mới'}
               </h1>
-              <p className="text-gray-600 mt-1">Update doctor information</p>
+              <p className="text-gray-600 mt-1">Cập nhật thông tin bác sĩ</p>
             </div>
             <button 
               onClick={() => navigate('/admin/doctors')} 
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <i data-feather="arrow-left" className="w-5 h-5"></i>
-              Back to List
+              Quay lại danh sách
             </button>
           </div>
 
@@ -171,15 +171,15 @@ const DoctorManagement = () => {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Doctor Management</h1>
-            <p className="text-gray-600 mt-1">{doctors.length} total doctors</p>
+            <h1 className="text-3xl font-bold text-gray-900">Quản Lý Bác Sĩ</h1>
+            <p className="text-gray-600 mt-1">Tổng số {doctors.length} bác sĩ</p>
           </div>
           <button 
             onClick={handleCreate} 
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium shadow-sm"
           >
             <span className="text-xl">+</span>
-            Add Doctor
+            Thêm bác sĩ
           </button>
         </div>
 
@@ -203,7 +203,7 @@ const DoctorManagement = () => {
             <i data-feather="search" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
             <input
               type="text"
-              placeholder="Search by name, specialization, or email..."
+              placeholder="Tìm kiếm theo tên, chuyên khoa, email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -218,19 +218,19 @@ const DoctorManagement = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ và Tên</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chuyên Khoa</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SĐT</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {doctors.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                      {searchTerm ? `No doctors found matching "${searchTerm}"` : 'No doctors found'}
+                      {searchTerm ? `Không tìm thấy bác sĩ khớp với "${searchTerm}"` : 'Không có bác sĩ'}
                     </td>
                   </tr>
                 ) : (
@@ -247,7 +247,7 @@ const DoctorManagement = () => {
                             ? 'bg-green-100 text-green-700' 
                             : 'bg-red-100 text-red-700'
                         }`}>
-                          {doctor.status}
+                          {doctor.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
