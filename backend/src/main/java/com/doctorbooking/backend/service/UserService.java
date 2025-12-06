@@ -7,6 +7,7 @@ import com.doctorbooking.backend.dto.response.UserResponse;
 import com.doctorbooking.backend.model.User;
 import com.doctorbooking.backend.repository.UserRepository;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -158,7 +159,14 @@ public class UserService implements UserDetailsService {
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-        userRepository.delete(user);
+        
+        try {
+            userRepository.delete(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException("Cannot delete user: User has associated data (patients, doctors, or appointments). Please remove associated data first.");
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting user: " + e.getMessage());
+        }
     }
 
     @Transactional

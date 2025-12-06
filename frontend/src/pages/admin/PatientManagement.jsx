@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { adminService } from '../../services/adminService';
 import Loading from '../../components/common/Loading';
@@ -10,6 +10,7 @@ import feather from 'feather-icons';
 
 const PatientManagement = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const [allPatients, setAllPatients] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -19,6 +20,7 @@ const PatientManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterGender, setFilterGender] = useState('ALL');
   const [showForm, setShowForm] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // 'list', 'create', 'edit', 'detail', 'delete'
   const [editingPatient, setEditingPatient] = useState(null);
   const [formData, setFormData] = useState({
     username: '',
@@ -41,32 +43,67 @@ const PatientManagement = () => {
   // Initialize Feather Icons
   useEffect(() => {
     feather.replace();
-  }, [patients, showForm]);
+  }, [patients, showForm, viewMode]);
 
-  // Load patient data when editing from URL
+  // Determine view mode based on URL
   useEffect(() => {
-    if (id && allPatients.length > 0) {
-      const patient = allPatients.find(p => p.id === parseInt(id));
-      if (patient) {
-        setEditingPatient(patient);
-        setFormData({
-          fullName: patient.fullName,
-          email: patient.email,
-          dateOfBirth: patient.dateOfBirth || '',
-          gender: patient.gender || 'MALE',
-          phone: patient.phone || '',
-          address: patient.address || '',
-          emergencyContact: patient.emergencyContact || '',
-          emergencyPhone: patient.emergencyPhone || ''
-        });
-        setFormErrors({});
-        setShowForm(true);
-      }
-    } else if (!id) {
+    const path = location.pathname;
+    
+    if (path.endsWith('/create')) {
+      setViewMode('create');
+      setShowForm(true);
+      setEditingPatient(null);
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        fullName: '',
+        dateOfBirth: '',
+        gender: 'MALE',
+        phone: '',
+        address: '',
+        emergencyContact: '',
+        emergencyPhone: ''
+      });
+      setFormErrors({});
+    } else if (path.includes('/delete')) {
+      setViewMode('delete');
+      setShowForm(false);
+    } else if (path.includes('/edit')) {
+      setViewMode('edit');
+      setShowForm(true);
+    } else if (id && !path.includes('/edit') && !path.includes('/delete')) {
+      setViewMode('detail');
+      setShowForm(false);
+    } else {
+      setViewMode('list');
       setShowForm(false);
       setEditingPatient(null);
     }
-  }, [id, allPatients]);
+  }, [id, location.pathname]);
+
+  // Load patient data when viewing/editing from URL
+  useEffect(() => {
+    if (id && allPatients.length > 0 && (viewMode === 'edit' || viewMode === 'detail' || viewMode === 'delete')) {
+      const patient = allPatients.find(p => p.id === parseInt(id));
+      if (patient) {
+        setEditingPatient(patient);
+        if (viewMode === 'edit') {
+          setFormData({
+            fullName: patient.fullName,
+            email: patient.email,
+            dateOfBirth: patient.dateOfBirth || '',
+            gender: patient.gender || 'MALE',
+            phone: patient.phone || '',
+            address: patient.address || '',
+            emergencyContact: patient.emergencyContact || '',
+            emergencyPhone: patient.emergencyPhone || ''
+          });
+          setFormErrors({});
+        }
+      }
+    }
+  }, [id, allPatients, viewMode]);
 
   const filteredPatients = useMemo(() => {
     let filtered = allPatients;
@@ -91,10 +128,7 @@ const PatientManagement = () => {
 
   useEffect(() => {
     setPatients(filteredPatients);
-    // Replace Feather Icons after patients update
-    if (window.feather) {
-      setTimeout(() => window.feather.replace(), 100);
-    }
+
   }, [filteredPatients]);
 
   const loadAllPatients = async () => {
@@ -112,35 +146,28 @@ const PatientManagement = () => {
   };
 
   const handleCreate = () => {
-    setEditingPatient(null);
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      fullName: '',
-      dateOfBirth: '',
-      gender: 'MALE',
-      phone: '',
-      address: '',
-      emergencyContact: '',
-      emergencyPhone: ''
-    });
-    setFormErrors({});
-    setShowForm(true);
+    navigate('/admin/patients/create');
+  };
+
+  const handleView = (patient) => {
+    navigate(`/admin/patients/${patient.id}`);
   };
 
   const handleEdit = (patient) => {
-    navigate(`/admin/patients/edit/${patient.id}`);
+    navigate(`/admin/patients/${patient.id}/edit`);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa bệnh nhân này? Hành động này cũng sẽ xóa tài khoản người dùng của họ.')) {
-      return;
-    }
+  const handleDeleteClick = (patient) => {
+    navigate(`/admin/patients/${patient.id}/delete`);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!editingPatient) return;
 
     try {
-      await adminService.deletePatient(id);
+      await adminService.deletePatient(editingPatient.id);
       toast.success('Xóa bệnh nhân thành công!', { position: 'top-right', autoClose: 3000 });
+      navigate('/admin/patients');
       loadAllPatients();
       setError('');
     } catch (err) {
@@ -149,6 +176,12 @@ const PatientManagement = () => {
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setViewMode('list');
+    setEditingPatient(null);
+    navigate('/admin/patients');
   };
 
   const validateForm = () => {
@@ -224,6 +257,156 @@ const PatientManagement = () => {
     }
   };
 
+  // Delete Confirmation Modal Component
+  const DeleteConfirmModal = () => {
+    if (viewMode !== 'delete' || !editingPatient) return null;
+
+    return (
+      <AdminLayout>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <i data-feather="alert-triangle" className="w-6 h-6 text-red-600"></i>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Xác Nhận Xóa</h2>
+                <p className="text-sm text-gray-600">Hành động này không thể hoàn tác</p>
+              </div>
+            </div>
+            
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <p className="text-gray-700 mb-2">
+                Bạn có chắc chắn muốn xóa bệnh nhân này? Hành động này cũng sẽ xóa tài khoản người dùng của họ.
+              </p>
+              <div className="space-y-1 text-sm">
+                <p><strong>ID:</strong> {editingPatient.id}</p>
+                <p><strong>Họ và Tên:</strong> {editingPatient.fullName}</p>
+                <p><strong>Email:</strong> {editingPatient.email}</p>
+                <p><strong>Số điện thoại:</strong> {editingPatient.phone || '-'}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteCancel}
+                className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
+              >
+                Xác Nhận Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+        <ToastContainer />
+      </AdminLayout>
+    );
+  };
+
+  // Detail View Modal Component
+  const PatientDetailModal = () => {
+    if (viewMode !== 'detail' || !editingPatient) return null;
+
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-gray-900">Chi Tiết Bệnh Nhân</h1>
+            <button 
+              onClick={() => {
+                setViewMode('list');
+                setEditingPatient(null);
+                navigate('/admin/patients');
+              }} 
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <i data-feather="arrow-left" className="w-5 h-5"></i>
+              Quay lại danh sách
+            </button>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">ID</label>
+                <p className="text-lg text-gray-900">{editingPatient.id}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Họ và Tên</label>
+                <p className="text-lg text-gray-900">{editingPatient.fullName}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
+                <p className="text-lg text-gray-900">{editingPatient.email}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Số điện thoại</label>
+                <p className="text-lg text-gray-900">{editingPatient.phone || '-'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Ngày sinh</label>
+                <p className="text-lg text-gray-900">{editingPatient.dateOfBirth ? new Date(editingPatient.dateOfBirth).toLocaleDateString('vi-VN') : '-'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Giới tính</label>
+                <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${
+                  editingPatient.gender === 'MALE' ? 'bg-blue-100 text-blue-700' :
+                  editingPatient.gender === 'FEMALE' ? 'bg-pink-100 text-pink-700' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {editingPatient.gender === 'MALE' ? 'Nam' : editingPatient.gender === 'FEMALE' ? 'Nữ' : 'Khác'}
+                </span>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-500 mb-1">Địa chỉ</label>
+                <p className="text-lg text-gray-900">{editingPatient.address || '-'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Người liên hệ khẩn cấp</label>
+                <p className="text-lg text-gray-900">{editingPatient.emergencyContact || '-'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">SĐT khẩn cấp</label>
+                <p className="text-lg text-gray-900">{editingPatient.emergencyPhone || '-'}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6 pt-6 border-t">
+              <button
+                onClick={() => handleEdit(editingPatient)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <i data-feather="edit-2" className="w-4 h-4"></i>
+                Chỉnh sửa
+              </button>
+              <button
+                onClick={() => handleDeleteClick(editingPatient)}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+              >
+                <i data-feather="trash-2" className="w-4 h-4"></i>
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+        <ToastContainer />
+      </AdminLayout>
+    );
+  };
+
+  if (viewMode === 'delete') {
+    return <DeleteConfirmModal />;
+  }
+
+  if (viewMode === 'detail') {
+    return <PatientDetailModal />;
+  }
+
   if (loading && patients.length === 0 && !id) {
     return (
       <AdminLayout>
@@ -233,7 +416,7 @@ const PatientManagement = () => {
   }
 
   // If showing form, render form layout
-  if (showForm) {
+  if (showForm || viewMode === 'create' || viewMode === 'edit') {
     return (
       <AdminLayout>
         <div className="space-y-6">
@@ -241,7 +424,7 @@ const PatientManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {editingPatient ? 'Chỉnh Sửa Bệnh Nhân' : 'Tạo Bệnh Nhân Mới'}
+                {viewMode === 'edit' || editingPatient ? 'Chỉnh Sửa Bệnh Nhân' : 'Tạo Bệnh Nhân Mới'}
               </h1>
               <p className="text-gray-600 mt-1">Cập nhật thông tin bệnh nhân</p>
             </div>
@@ -436,7 +619,12 @@ const PatientManagement = () => {
               <div className="flex items-center gap-3 pt-4 border-t">
                 <button
                   type="button"
-                  onClick={() => navigate('/admin/patients')}
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingPatient(null);
+                    setViewMode('list');
+                    navigate('/admin/patients');
+                  }}
                   disabled={submitting}
                   style={{ borderRadius: '0.5rem', minHeight: '44px', height: '44px', margin: 0 }}
                   className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
@@ -624,16 +812,23 @@ const PatientManagement = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center gap-2">
                           <button
+                            onClick={() => handleView(patient)}
+                            className="text-green-600 hover:text-green-800 transition-colors"
+                            title="Xem chi tiết"
+                          >
+                            <i data-feather="eye" className="w-4 h-4"></i>
+                          </button>
+                          <button
                             onClick={() => handleEdit(patient)}
                             className="text-blue-600 hover:text-blue-800 transition-colors"
-                            title="Edit"
+                            title="Chỉnh sửa"
                           >
                             <i data-feather="edit-2" className="w-4 h-4"></i>
                           </button>
                           <button
-                            onClick={() => handleDelete(patient.id)}
+                            onClick={() => handleDeleteClick(patient)}
                             className="text-red-600 hover:text-red-800 transition-colors"
-                            title="Delete"
+                            title="Xóa"
                           >
                             <i data-feather="trash-2" className="w-4 h-4"></i>
                           </button>

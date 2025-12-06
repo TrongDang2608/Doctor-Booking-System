@@ -51,8 +51,9 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
 
     try {
       if (doctor) {
-        // For update, only send fields that should be updated
+        // For update, send all required fields
         const updateData = {
+          username: formData.username, // Required field
           email: formData.email,
           fullName: formData.fullName,
           specialization: formData.specialization,
@@ -62,9 +63,12 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
           address: formData.address,
           bio: formData.bio,
         };
-        // Only include password if it's not empty
+        // Only include password if it's not empty, otherwise send a valid placeholder
         if (formData.password && formData.password.trim() !== '') {
           updateData.password = formData.password;
+        } else {
+          // Send a placeholder that meets validation but backend can detect as unchanged
+          updateData.password = 'current_password_unchanged';
         }
         await adminService.updateDoctor(doctor.id, updateData);
         toast.success('Cập nhật bác sĩ thành công!', { position: 'top-right', autoClose: 3000 });

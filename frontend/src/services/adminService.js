@@ -77,6 +77,23 @@ export const adminService = {
     return response.data;
   },
 
+  updateAppointment: async (id, appointmentData) => {
+    try {
+      const response = await api.put(`/admin/appointments/${id}`, appointmentData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  deleteAppointment: async (id) => {
+    try {
+      await api.delete(`/admin/appointments/${id}`);
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   // Feedback Management
   getAllFeedbacks: async (status) => {
     const params = status ? { status } : {};
@@ -92,6 +109,23 @@ export const adminService = {
   markFeedbackAsRead: async (id) => {
     const response = await api.put(`/admin/feedbacks/${id}/read`);
     return response.data;
+  },
+
+  replyFeedback: async (id, replyData) => {
+    try {
+      const response = await api.put(`/admin/feedbacks/${id}/reply`, replyData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  deleteFeedback: async (id) => {
+    try {
+      await api.delete(`/admin/feedbacks/${id}`);
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
   },
 };
 

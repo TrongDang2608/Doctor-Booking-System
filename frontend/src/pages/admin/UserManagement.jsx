@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
 import userService from '../../services/userService';
 import Loading from '../../components/common/Loading';
@@ -10,6 +10,7 @@ import feather from 'feather-icons';
 
 const UserManagement = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const [allUsers, setAllUsers] = useState([]);
   const [users, setUsers] = useState([]);
@@ -20,6 +21,7 @@ const UserManagement = () => {
   const [filterRole, setFilterRole] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [showForm, setShowForm] = useState(false);
+  const [viewMode, setViewMode] = useState('list'); // 'list', 'create', 'edit', 'detail', 'delete'
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
     username: '',
@@ -40,29 +42,59 @@ const UserManagement = () => {
   // Initialize Feather Icons
   useEffect(() => {
     feather.replace();
-  }, [users, showForm]);
+  }, [users, showForm, viewMode]);
 
-  // Load user data when editing from URL
+  // Determine view mode based on URL
   useEffect(() => {
-    if (id && allUsers.length > 0) {
-      const user = allUsers.find(u => u.id === parseInt(id));
-      if (user) {
-        setEditingUser(user);
-        setFormData({
-          username: user.username,
-          email: user.email,
-          password: '',
-          role: user.role,
-          enabled: user.enabled
-        });
-        setFormErrors({});
-        setShowForm(true);
-      }
-    } else if (!id) {
+    const path = location.pathname;
+    
+    if (path.endsWith('/create')) {
+      setViewMode('create');
+      setShowForm(true);
+      setEditingUser(null);
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        role: 'PATIENT',
+        enabled: true
+      });
+      setFormErrors({});
+    } else if (path.includes('/delete')) {
+      setViewMode('delete');
+      setShowForm(false);
+    } else if (path.includes('/edit')) {
+      setViewMode('edit');
+      setShowForm(true);
+    } else if (id && !path.includes('/edit') && !path.includes('/delete')) {
+      setViewMode('detail');
+      setShowForm(false);
+    } else {
+      setViewMode('list');
       setShowForm(false);
       setEditingUser(null);
     }
-  }, [id, allUsers]);
+  }, [id, location.pathname]);
+
+  // Load user data when viewing/editing from URL
+  useEffect(() => {
+    if (id && allUsers.length > 0 && (viewMode === 'edit' || viewMode === 'detail' || viewMode === 'delete')) {
+      const user = allUsers.find(u => u.id === parseInt(id));
+      if (user) {
+        setEditingUser(user);
+        if (viewMode === 'edit') {
+          setFormData({
+            username: user.username,
+            email: user.email,
+            password: '',
+            role: user.role,
+            enabled: user.enabled
+          });
+          setFormErrors({});
+        }
+      }
+    }
+  }, [id, allUsers, viewMode]);
 
   const filteredUsers = useMemo(() => {
     let filtered = allUsers;
@@ -93,10 +125,7 @@ const UserManagement = () => {
 
   useEffect(() => {
     setUsers(filteredUsers);
-    // Replace Feather Icons after users update
-    if (window.feather) {
-      setTimeout(() => window.feather.replace(), 100);
-    }
+
   }, [filteredUsers]);
 
   const loadAllUsers = async () => {
@@ -114,38 +143,46 @@ const UserManagement = () => {
   };
 
   const handleCreate = () => {
-    setEditingUser(null);
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      role: 'PATIENT',
-      enabled: true
-    });
-    setFormErrors({});
-    setShowForm(true);
+    navigate('/admin/users/create');
+  };
+
+  const handleView = (user) => {
+    navigate(`/admin/users/${user.id}`);
   };
 
   const handleEdit = (user) => {
-    navigate(`/admin/users/edit/${user.id}`);
+    navigate(`/admin/users/${user.id}/edit`);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      return;
-    }
+  const handleDeleteClick = (user) => {
+    navigate(`/admin/users/${user.id}/delete`);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!editingUser) return;
 
     try {
-      await userService.deleteUser(id);
+      await userService.deleteUser(editingUser.id);
       toast.success('Xóa người dùng thành công!', { position: 'top-right', autoClose: 3000 });
+      setViewMode('list');
+      setEditingUser(null);
+      setShowForm(false);
       loadAllUsers();
       setError('');
+      navigate('/admin/users');
     } catch (err) {
       const errorMsg = typeof err === 'string' ? err : 'Không thể xóa người dùng';
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
       console.error(err);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setViewMode('list');
+    setEditingUser(null);
+    setShowForm(false);
+    navigate('/admin/users');
   };
 
   const handleToggleStatus = async (id) => {
@@ -256,7 +293,147 @@ const UserManagement = () => {
     }
   };
 
+  // Delete Confirmation Modal Component
+  const DeleteConfirmModal = () => {
+    if (viewMode !== 'delete' || !editingUser) return null;
 
+    return (
+      <AdminLayout>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <i data-feather="alert-triangle" className="w-6 h-6 text-red-600"></i>
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Xác Nhận Xóa</h2>
+                <p className="text-sm text-gray-600">Hành động này không thể hoàn tác</p>
+              </div>
+            </div>
+            
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <p className="text-gray-700 mb-2">
+                Bạn có chắc chắn muốn xóa người dùng này?
+              </p>
+              <div className="space-y-1 text-sm">
+                <p><strong>ID:</strong> {editingUser.id}</p>
+                <p><strong>Tên đăng nhập:</strong> {editingUser.username}</p>
+                <p><strong>Email:</strong> {editingUser.email}</p>
+                <p><strong>Vai trò:</strong> {editingUser.role === 'ADMIN' ? 'Quản trị viên' : editingUser.role === 'DOCTOR' ? 'Bác sĩ' : 'Bệnh nhân'}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteCancel}
+                className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
+              >
+                Xác Nhận Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+        <ToastContainer />
+      </AdminLayout>
+    );
+  };
+
+  // Detail View Modal Component
+  const UserDetailModal = () => {
+    if (viewMode !== 'detail' || !editingUser) return null;
+
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-gray-900">Chi Tiết Người Dùng</h1>
+            <button 
+              onClick={() => {
+                setViewMode('list');
+                setEditingUser(null);
+                navigate('/admin/users');
+              }} 
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+            >
+              <i data-feather="arrow-left" className="w-5 h-5"></i>
+              Quay lại danh sách
+            </button>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">ID</label>
+                <p className="text-lg text-gray-900">{editingUser.id}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Tên đăng nhập</label>
+                <p className="text-lg text-gray-900">{editingUser.username}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
+                <p className="text-lg text-gray-900">{editingUser.email}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Vai trò</label>
+                <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${
+                  editingUser.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' :
+                  editingUser.role === 'DOCTOR' ? 'bg-blue-100 text-blue-700' :
+                  'bg-green-100 text-green-700'
+                }`}>
+                  {editingUser.role === 'ADMIN' ? 'Quản trị viên' : editingUser.role === 'DOCTOR' ? 'Bác sĩ' : 'Bệnh nhân'}
+                </span>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Trạng thái</label>
+                <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${
+                  editingUser.enabled ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {editingUser.enabled ? 'Hoạt động' : 'Không hoạt động'}
+                </span>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Ngày tạo</label>
+                <p className="text-lg text-gray-900">{new Date(editingUser.createdAt).toLocaleDateString('vi-VN')}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6 pt-6 border-t">
+              <button
+                onClick={() => handleEdit(editingUser)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <i data-feather="edit-2" className="w-4 h-4"></i>
+                Chỉnh sửa
+              </button>
+              <button
+                onClick={() => handleDeleteClick(editingUser)}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+              >
+                <i data-feather="trash-2" className="w-4 h-4"></i>
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+        <ToastContainer />
+      </AdminLayout>
+    );
+  };
+
+  if (viewMode === 'delete') {
+    return <DeleteConfirmModal />;
+  }
+
+  if (viewMode === 'detail') {
+    return <UserDetailModal />;
+  }
 
   if (loading && users.length === 0 && !id) {
     return (
@@ -267,7 +444,7 @@ const UserManagement = () => {
   }
 
   // If showing form, render form layout
-  if (showForm) {
+  if (showForm || viewMode === 'create' || viewMode === 'edit') {
     return (
       <AdminLayout>
         <div className="space-y-6">
@@ -275,7 +452,7 @@ const UserManagement = () => {
           <div className="flex items-center justify-between">
             <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {editingUser ? 'Chỉnh Sửa Người Dùng' : 'Tạo Người Dùng Mới'}
+              {viewMode === 'edit' || editingUser ? 'Chỉnh Sửa Người Dùng' : 'Tạo Người Dùng Mới'}
             </h1>
             <p className="text-gray-600 mt-1">Cập nhật thông tin người dùng</p>
             </div>
@@ -400,7 +577,12 @@ const UserManagement = () => {
               <div className="flex items-center gap-3 pt-4 border-t">
                 <button
                   type="button"
-                  onClick={() => navigate('/admin/users')}
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingUser(null);
+                    setViewMode('list');
+                    navigate('/admin/users');
+                  }}
                   disabled={submitting}
                   style={{ borderRadius: '0.5rem', minHeight: '44px', height: '44px', margin: 0 }}
                   className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
@@ -617,7 +799,7 @@ const UserManagement = () => {
                             <i data-feather={user.enabled ? 'user-x' : 'user-check'} className="w-4 h-4"></i>
                           </button>
                           <button
-                            onClick={() => handleDelete(user.id)}
+                            onClick={() => handleDeleteClick(user)}
                             className="text-red-600 hover:text-red-800 transition-colors"
                             title="Delete"
                           >
