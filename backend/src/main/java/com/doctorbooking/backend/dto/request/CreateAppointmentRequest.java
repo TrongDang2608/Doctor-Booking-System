@@ -24,5 +24,7 @@ public class CreateAppointmentRequest {
     private String notes;
     
     private String paymentMethod; // CASH, WALLET, VNPAY
+    
+    private Long familyMemberId; // ID của family member nếu đặt lịch cho người nhà (null nếu đặt cho bản thân)
 }
 

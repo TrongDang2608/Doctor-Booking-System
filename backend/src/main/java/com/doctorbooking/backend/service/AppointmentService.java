@@ -8,6 +8,10 @@ import com.doctorbooking.backend.model.Patient;
 import com.doctorbooking.backend.repository.AppointmentRepository;
 import com.doctorbooking.backend.repository.DoctorRepository;
 import com.doctorbooking.backend.repository.PatientRepository;
+import com.doctorbooking.backend.repository.FamilyAppointmentRepository;
+import com.doctorbooking.backend.repository.FamilyMemberRepository;
+import com.doctorbooking.backend.model.FamilyAppointment;
+import com.doctorbooking.backend.model.FamilyMember;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +34,8 @@ public class AppointmentService {
     private final DoctorRepository doctorRepository;
     private final WalletService walletService;
     private final jakarta.persistence.EntityManager entityManager;
+    private final FamilyAppointmentRepository familyAppointmentRepository;
+    private final FamilyMemberRepository familyMemberRepository;
 
     public List<AppointmentResponse> getAllAppointments() {
         // Use custom query to fetch all with relationships
@@ -193,6 +199,37 @@ public class AppointmentService {
             // CASH: Payment status = PENDING
             appointment.setPaymentStatus(Appointment.PaymentStatus.PENDING);
             appointment = appointmentRepository.save(appointment);
+        }
+        
+        // Nếu đặt lịch cho người nhà (có familyMemberId), tạo record trong family_appointments
+        if (request.getFamilyMemberId() != null) {
+            try {
+                // Verify family member belongs to this patient
+                FamilyMember familyMember = familyMemberRepository.findByIdAndMainPatientId(
+                    request.getFamilyMemberId(), 
+                    patientId
+                );
+                
+                if (familyMember == null) {
+                    logger.warn("Family member not found or does not belong to patient: familyMemberId={}, patientId={}", 
+                               request.getFamilyMemberId(), patientId);
+                    throw new RuntimeException("Family member not found or does not belong to you");
+                }
+                
+                // Tạo FamilyAppointment record
+                FamilyAppointment familyAppointment = new FamilyAppointment();
+                familyAppointment.setFamilyMember(familyMember);
+                familyAppointment.setAppointment(appointment);
+                familyAppointment.setBookedByPatient(patient);
+                
+                familyAppointmentRepository.save(familyAppointment);
+                
+                logger.info("Created family appointment: appointmentId={}, familyMemberId={}, bookedByPatientId={}", 
+                           appointment.getId(), familyMember.getId(), patientId);
+            } catch (Exception e) {
+                logger.error("Error creating family appointment: {}", e.getMessage(), e);
+                throw new RuntimeException("Failed to create family appointment: " + e.getMessage());
+            }
         }
         
         return AppointmentResponse.fromEntity(appointment);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import PatientLayout from '../../components/patient/PatientLayout';
 import { patientService } from '../../services/patientService';
+import familyService from '../../services/familyService';
 import Loading from '../../components/common/Loading';
 import { useNavigate } from 'react-router-dom';
 import '../patient/patientPages.css';
@@ -20,11 +21,8 @@ const NewBooking = () => {
     notes: '',
     paymentMethod: 'CASH', // CASH, VNPAY, WALLET
   });
-  // Mock data cho thành viên gia đình (sẽ thay bằng API call sau)
-  const [familyMembers] = useState([
-    { id: 1, fullName: 'Bé Bi', relationship: 'CHILD', dateOfBirth: '2020-05-15', medicalHistory: '' },
-    { id: 2, fullName: 'Mẹ Lan', relationship: 'PARENT', dateOfBirth: '1975-03-20', medicalHistory: 'Cao huyết áp' },
-  ]);
+  const [familyMembers, setFamilyMembers] = useState([]);
+  const [loadingFamilyMembers, setLoadingFamilyMembers] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -33,10 +31,26 @@ const NewBooking = () => {
   useEffect(() => {
     loadDoctors();
     loadWalletBalance();
+    loadFamilyMembers();
     // Set minimum date to today
     const today = new Date().toISOString().split('T')[0];
     setFormData(prev => ({ ...prev, appointmentDate: today }));
   }, []);
+
+  const loadFamilyMembers = async () => {
+    try {
+      setLoadingFamilyMembers(true);
+      const members = await familyService.getFamilyMembers();
+      console.log('✅ Family members loaded:', members);
+      setFamilyMembers(members);
+    } catch (err) {
+      console.error('❌ Error loading family members:', err);
+      // Không hiển thị error vì có thể user chưa có thành viên nào
+      setFamilyMembers([]);
+    } finally {
+      setLoadingFamilyMembers(false);
+    }
+  };
 
   useEffect(() => {
     // Initialize Feather Icons ONCE sau khi doctors load xong
@@ -137,13 +151,25 @@ const NewBooking = () => {
       }
 
       console.log('📤 Calling API to create appointment...');
-      const response = await patientService.createAppointment({
+      
+      // Chuẩn bị request data
+      const appointmentData = {
         doctorId: parseInt(formData.doctorId),
         appointmentDate: formData.appointmentDate,
         appointmentTime: formData.appointmentTime + ':00',
         notes: formData.notes,
         paymentMethod: formData.paymentMethod,
-      });
+      };
+      
+      // Nếu đặt cho người nhà (không phải 'self'), thêm familyMemberId
+      if (formData.patientFor !== 'self') {
+        appointmentData.familyMemberId = parseInt(formData.patientFor);
+        console.log('👨‍👩‍👧‍👦 Booking for family member:', appointmentData.familyMemberId);
+      } else {
+        console.log('👤 Booking for self');
+      }
+      
+      const response = await patientService.createAppointment(appointmentData);
 
       console.log('✅ API response received:', response);
 
@@ -277,7 +303,28 @@ const NewBooking = () => {
                 </label>
 
                 {/* Options: Cho thành viên gia đình */}
-                {familyMembers.map((member) => (
+                {loadingFamilyMembers ? (
+                  <div className="patient-option-card" style={{ opacity: 0.6, cursor: 'not-allowed' }}>
+                    <div className="patient-option-content">
+                      <div className="patient-option-icon">⏳</div>
+                      <div className="patient-option-info">
+                        <div className="patient-option-name">Đang tải...</div>
+                        <div className="patient-option-desc">Đang tải danh sách thành viên</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : familyMembers.length === 0 ? (
+                  <div className="patient-option-card" style={{ opacity: 0.5, borderStyle: 'dashed' }}>
+                    <div className="patient-option-content">
+                      <div className="patient-option-icon">👤</div>
+                      <div className="patient-option-info">
+                        <div className="patient-option-name">Chưa có thành viên</div>
+                        <div className="patient-option-desc">Vào "Hồ sơ Gia đình" để thêm thành viên</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  familyMembers.map((member) => (
                   <label 
                     key={member.id} 
                     className={`patient-option-card ${formData.patientFor === String(member.id) ? 'selected' : ''}`}
@@ -311,7 +358,8 @@ const NewBooking = () => {
                       <span style={{ fontSize: '1.2rem' }}>✓</span>
                     </div>
                   </label>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
