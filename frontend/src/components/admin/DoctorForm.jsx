@@ -51,8 +51,9 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
 
     try {
       if (doctor) {
-        // For update, only send fields that should be updated
+        // For update, send all required fields
         const updateData = {
+          username: formData.username, // Required field
           email: formData.email,
           fullName: formData.fullName,
           specialization: formData.specialization,
@@ -62,15 +63,18 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
           address: formData.address,
           bio: formData.bio,
         };
-        // Only include password if it's not empty
+        // Only include password if it's not empty, otherwise send a valid placeholder
         if (formData.password && formData.password.trim() !== '') {
           updateData.password = formData.password;
+        } else {
+          // Send a placeholder that meets validation but backend can detect as unchanged
+          updateData.password = 'current_password_unchanged';
         }
         await adminService.updateDoctor(doctor.id, updateData);
-        toast.success('Doctor updated successfully!', { position: 'top-right', autoClose: 3000 });
+        toast.success('Cập nhật bác sĩ thành công!', { position: 'top-right', autoClose: 3000 });
       } else {
         await adminService.createDoctor(formData);
-        toast.success('Doctor created successfully!', { position: 'top-right', autoClose: 3000 });
+        toast.success('Tạo bác sĩ thành công!', { position: 'top-right', autoClose: 3000 });
       }
       // Delay to show toast before navigating
       setTimeout(() => {
@@ -79,7 +83,7 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
       }, 300);
     } catch (err) {
       setLoading(false);
-      const errorMsg = err.response?.data?.message || 'Failed to save doctor';
+      const errorMsg = err.response?.data?.message || 'Không thể lưu thông tin bác sĩ';
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
     }
@@ -107,7 +111,7 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
             {/* Username - only show when creating */}
             {!doctor && (
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Username <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Tên đăng nhập <span className="text-red-500">*</span></label>
                 <input 
                   type="text" 
                   name="username" 
@@ -115,7 +119,7 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
                   onChange={handleChange} 
                   required 
                   className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
-                  placeholder="johndoe" 
+                  placeholder="nguyenvana" 
                 />
               </div>
             )}
@@ -123,7 +127,7 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
             {/* Password - only show when creating, or optional when editing */}
             {!doctor ? (
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Password <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Mật khẩu <span className="text-red-500">*</span></label>
                 <input 
                   type="password" 
                   name="password" 
@@ -137,7 +141,7 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
             ) : (
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Password <span className="text-gray-500 font-normal">(leave blank to keep current)</span>
+                  Mật khẩu <span className="text-gray-500 font-normal">(bỏ trống để giữ mật khẩu hiện tại)</span>
                 </label>
                 <input 
                   type="password" 
@@ -151,7 +155,7 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
             )}
 
             <div className={!doctor ? 'md:col-span-2' : ''}>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Họ và Tên <span className="text-red-500">*</span></label>
               <input 
                 type="text" 
                 name="fullName" 
@@ -159,7 +163,7 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
                 onChange={handleChange} 
                 required 
                 className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
-                placeholder="Dr. John Doe" 
+                placeholder="BS. Nguyễn Văn A" 
               />
             </div>
 
@@ -172,12 +176,12 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
                 onChange={handleChange} 
                 required 
                 className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
-                placeholder="john.doe@hospital.com" 
+                placeholder="bsnguyenvana@hospital.com" 
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Specialization <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Chuyên Khoa <span className="text-red-500">*</span></label>
               <input 
                 type="text" 
                 name="specialization" 
@@ -185,24 +189,24 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
                 onChange={handleChange} 
                 required 
                 className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
-                placeholder="Cardiology" 
+                placeholder="Tim mạch" 
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Qualification</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Bằng cấp</label>
               <input 
                 type="text" 
                 name="qualification" 
                 value={formData.qualification} 
                 onChange={handleChange} 
                 className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
-                placeholder="MBBS, MD" 
+                placeholder="Bác sĩ Đa khoa, Thạc sĩ" 
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Experience (years)</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Kinh nghiệm (năm)</label>
               <input 
                 type="number" 
                 name="experience" 
@@ -215,39 +219,39 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
               <input 
                 type="tel" 
                 name="phone" 
                 value={formData.phone} 
                 onChange={handleChange} 
                 className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
-                placeholder="+1 234 567 8900" 
+                placeholder="0912345678" 
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ</label>
             <input 
               type="text" 
               name="address" 
               value={formData.address} 
               onChange={handleChange} 
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" 
-              placeholder="123 Hospital St, City" 
+              placeholder="123 Đường Bệnh viện, Thành phố" 
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Bio</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Tiểu sư</label>
             <textarea 
               name="bio" 
               value={formData.bio} 
               onChange={handleChange} 
               rows="4" 
               className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 resize-none" 
-              placeholder="Brief description about the doctor..." 
+              placeholder="Mô tả ngắn về bác sĩ..." 
             />
           </div>
 
@@ -260,7 +264,7 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
             style={{ borderRadius: '0.5rem', minHeight: '44px', height: '44px', margin: 0 }}
             className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            Cancel
+            Hủy
           </button>
           <button 
             type="submit" 
@@ -276,7 +280,7 @@ const DoctorForm = ({ doctor, onClose, onSuccess }) => {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             )}
-            {loading ? 'Updating...' : doctor ? 'Update Doctor' : 'Create Doctor'}
+            {loading ? 'Đang cập nhật...' : doctor ? 'Cập nhật' : 'Tạo mới'}
           </button>
         </div>
       </form>

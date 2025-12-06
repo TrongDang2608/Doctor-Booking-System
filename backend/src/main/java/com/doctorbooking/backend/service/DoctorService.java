@@ -105,7 +105,8 @@ public class DoctorService {
             user.setEmail(request.getEmail());
         }
 
-        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+        if (request.getPassword() != null && !request.getPassword().isEmpty() 
+                && !"current_password_unchanged".equals(request.getPassword())) {
             // Tạm thời dùng plain text password (KHÔNG hash)
             user.setPassword(request.getPassword()); // Plain text
             // user.setPassword(passwordEncoder.encode(request.getPassword())); // BCrypt - uncomment sau khi test xong

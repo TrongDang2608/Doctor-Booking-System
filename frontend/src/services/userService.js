@@ -45,8 +45,16 @@ const userService = {
   // Delete user
   deleteUser: async (id) => {
     try {
-      await api.delete(`/admin/users/${id}`);
+      console.log('🔥 Attempting to delete user with ID:', id);
+      console.log('🔥 DELETE URL:', `/admin/users/${id}`);
+      const response = await api.delete(`/admin/users/${id}`);
+      console.log('✅ Delete user successful:', response);
+      return response.data;
     } catch (error) {
+      console.error('❌ Delete user failed:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error status:', error.response?.status);
+      console.error('❌ Error URL:', error.config?.url);
       throw error.response?.data || error.message;
     }
   },
