@@ -39,23 +39,28 @@ const FamilyProfilePage = () => {
     // 3. Không đang deleting
     // 4. Modal KHÔNG đang mở (tránh replace icons trong modal khi đang submit)
     if (!loading && !submitting && !deletingMemberId && !showAddModal) {
-      // Dùng setTimeout với delay để đảm bảo DOM đã ổn định
+      // Dùng requestAnimationFrame + setTimeout để đảm bảo chạy SAU KHI React đã hoàn tất render/unmount
       const timer = setTimeout(() => {
-        try {
-          // Double-check: vẫn không đang submit/delete và modal không mở (tránh race condition)
-          if (!submitting && !deletingMemberId && !showAddModal) {
-            // Replace icons (modal đã dùng Unicode nên không cần exclude)
-            const icons = document.querySelectorAll('[data-feather]');
-            if (icons.length > 0) {
-              feather.replace();
-              console.log('✅ Feather icons initialized/replaced');
+        // Dùng requestAnimationFrame để đảm bảo chạy trong next frame (sau khi React đã cleanup)
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            try {
+              // Double-check: vẫn không đang submit/delete và modal không mở (tránh race condition)
+              if (!submitting && !deletingMemberId && !showAddModal) {
+                // Replace icons (chỉ các icons còn tồn tại trong DOM)
+                const icons = document.querySelectorAll('[data-feather]');
+                if (icons.length > 0) {
+                  feather.replace();
+                  console.log('✅ Feather icons initialized/replaced');
+                }
+              }
+            } catch (e) {
+              // Ignore errors (có thể do removeChild nhưng không ảnh hưởng UX)
+              console.log('⚠️ Feather icons error (ignored):', e.message);
             }
-          }
-        } catch (e) {
-          // Ignore errors (có thể do removeChild nhưng không ảnh hưởng UX)
-          console.log('⚠️ Feather icons error (ignored):', e.message);
-        }
-      }, 400); // Tăng delay lên 400ms để đảm bảo DOM đã update xong và React đã hoàn tất render
+          }, 100); // Thêm delay nhỏ trong requestAnimationFrame
+        });
+      }, 500); // Delay ban đầu 500ms
       
       return () => clearTimeout(timer);
     }
@@ -151,31 +156,42 @@ const FamilyProfilePage = () => {
       // Close modal
       handleCloseModal();
       
-      // Đợi một chút để React hoàn tất render, rồi mới replace icons
-      setTimeout(() => {
-        try {
-          if (!submitting) {
-            feather.replace();
-          }
-        } catch (e) {
-          console.log('⚠️ Feather icons error after submit (ignored):', e.message);
-        }
-      }, 500);
+      // Đợi một chút để React hoàn tất render trước khi clear submitting
+      // (để useEffect có thời gian xử lý icons trước khi state thay đổi)
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       alert(editingMember ? 'Cập nhật thành công!' : 'Thêm thành viên thành công!');
     } catch (err) {
       console.error('❌ Error submitting form:', err);
       alert(err.response?.data || 'Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
-      setSubmitting(false);
+      // Clear submitting sau khi đã đợi React render xong
+      setTimeout(() => {
+        setSubmitting(false);
+      }, 200);
     }
   };
 
   const handleDeleteMember = async (member) => {
     if (deletingMemberId) return; // Prevent multiple deletes
     
-    if (!window.confirm(`Bạn có chắc muốn xóa hồ sơ của ${member.fullName}?`)) {
-      return;
+    // Kiểm tra nếu là main account
+    if (member.isMainAccount) {
+      // Đếm số main accounts
+      const mainAccountCount = familyMembers.filter(m => m.isMainAccount).length;
+      
+      if (mainAccountCount <= 1) {
+        alert('Không thể xóa tài khoản chính duy nhất. Phải có ít nhất 1 tài khoản chính.');
+        return;
+      }
+      
+      if (!window.confirm(`Bạn có chắc muốn xóa tài khoản chính "${member.fullName}"?\n\nCòn ${mainAccountCount - 1} tài khoản chính khác.`)) {
+        return;
+      }
+    } else {
+      if (!window.confirm(`Bạn có chắc muốn xóa hồ sơ của ${member.fullName}?`)) {
+        return;
+      }
     }
     
     try {
@@ -188,23 +204,20 @@ const FamilyProfilePage = () => {
       // Reload data (KHÔNG hiện loading screen)
       await loadFamilyData(false);
       
-      // Đợi một chút để React hoàn tất render, rồi mới replace icons
-      setTimeout(() => {
-        try {
-          if (!deletingMemberId) {
-            feather.replace();
-          }
-        } catch (e) {
-          console.log('⚠️ Feather icons error after delete (ignored):', e.message);
-        }
-      }, 500);
+      // Đợi một chút để React hoàn tất render trước khi clear deletingMemberId
+      // (để useEffect có thời gian xử lý icons trước khi state thay đổi)
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       alert('Xóa thành công!');
     } catch (err) {
       console.error('❌ Error deleting member:', err);
-      alert(err.response?.data || 'Không thể xóa. Vui lòng thử lại.');
+      const errorMessage = err.response?.data?.message || err.response?.data || err.message || 'Không thể xóa. Vui lòng thử lại.';
+      alert(errorMessage);
     } finally {
-      setDeletingMemberId(null);
+      // Clear deletingMemberId sau khi đã đợi React render xong
+      setTimeout(() => {
+        setDeletingMemberId(null);
+      }, 200);
     }
   };
 
@@ -417,13 +430,14 @@ const FamilyProfilePage = () => {
                   onClick={() => handleEditMember(member)}
                   disabled={member.isMainAccount || deletingMemberId || submitting}
                 >
-                  <i data-feather="edit-2"></i>
+                  <span style={{ marginRight: '6px', fontSize: '14px' }}>✏️</span>
                   Sửa
                 </button>
                 <button 
                   className="btn-action btn-delete"
                   onClick={() => handleDeleteMember(member)}
-                  disabled={member.isMainAccount || deletingMemberId || submitting}
+                  disabled={deletingMemberId || submitting}
+                  title={member.isMainAccount ? 'Có thể xóa nếu còn tài khoản chính khác' : ''}
                 >
                   {deletingMemberId === member.id ? (
                     <>
@@ -432,7 +446,7 @@ const FamilyProfilePage = () => {
                     </>
                   ) : (
                     <>
-                      <i data-feather="trash-2"></i>
+                      <span style={{ marginRight: '6px', fontSize: '14px' }}>🗑️</span>
                       Xóa
                     </>
                   )}

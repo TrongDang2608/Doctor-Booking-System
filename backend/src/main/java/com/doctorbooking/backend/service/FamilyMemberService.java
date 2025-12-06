@@ -142,9 +142,13 @@ public class FamilyMemberService {
             throw new RuntimeException("Family member not found or access denied");
         }
 
-        // Không cho phép xóa main account
+        // Nếu là main account, kiểm tra xem còn main account khác không
         if (member.getIsMainAccount()) {
-            throw new RuntimeException("Cannot delete main account");
+            long mainAccountCount = familyMemberRepository.countMainAccountByPatientId(patientId);
+            if (mainAccountCount <= 1) {
+                throw new RuntimeException("Cannot delete the only main account. At least one main account must exist.");
+            }
+            logger.info("Deleting main account. Remaining main accounts: {}", mainAccountCount - 1);
         }
 
         familyMemberRepository.delete(member);
