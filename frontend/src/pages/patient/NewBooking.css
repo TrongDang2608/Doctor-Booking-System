@@ -113,6 +113,130 @@
   color: #10b981;
 }
 
+/* Patient Selection Section */
+.patient-selection-section {
+  margin-bottom: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.patient-options-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.patient-option-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.patient-option-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.patient-option-card:hover::before {
+  opacity: 1;
+}
+
+.patient-option-card:hover {
+  border-color: rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.patient-option-card.selected {
+  border-color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.patient-option-card.selected::before {
+  opacity: 1;
+}
+
+.patient-option-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.patient-option-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  z-index: 1;
+}
+
+.patient-option-icon {
+  font-size: 2rem;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s;
+}
+
+.patient-option-card.selected .patient-option-icon {
+  background: rgba(102, 126, 234, 0.2);
+  transform: scale(1.05);
+}
+
+.patient-option-info {
+  flex: 1;
+}
+
+.patient-option-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-bottom: 0.35rem;
+}
+
+.patient-option-desc {
+  font-size: 0.9rem;
+  color: #888;
+  line-height: 1.4;
+}
+
+.medical-history-badge {
+  color: #f59e0b;
+  font-weight: 500;
+  margin-left: 0.25rem;
+}
+
+.patient-check-icon {
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.3s;
+  z-index: 1;
+  color: #667eea;
+  font-weight: bold;
+}
+
+.patient-option-card.selected .patient-check-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Doctor Selection */
 .doctor-select-wrapper {
   position: relative;
@@ -1009,6 +1133,24 @@
 
   .step-label {
     font-size: 0.7rem;
+  }
+
+  .patient-option-card {
+    padding: 1rem;
+  }
+
+  .patient-option-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.75rem;
+  }
+
+  .patient-option-name {
+    font-size: 1rem;
+  }
+
+  .patient-option-desc {
+    font-size: 0.85rem;
   }
 
   .vnpay-redirect-content {

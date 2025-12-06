@@ -13,12 +13,18 @@ const NewBooking = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
+    patientFor: 'self', // 'self' hoặc family member ID
     doctorId: '',
     appointmentDate: '',
     appointmentTime: '',
     notes: '',
     paymentMethod: 'CASH', // CASH, VNPAY, WALLET
   });
+  // Mock data cho thành viên gia đình (sẽ thay bằng API call sau)
+  const [familyMembers] = useState([
+    { id: 1, fullName: 'Bé Bi', relationship: 'CHILD', dateOfBirth: '2020-05-15', medicalHistory: '' },
+    { id: 2, fullName: 'Mẹ Lan', relationship: 'PARENT', dateOfBirth: '1975-03-20', medicalHistory: 'Cao huyết áp' },
+  ]);
   const [walletBalance, setWalletBalance] = useState(0);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -180,10 +186,11 @@ const NewBooking = () => {
 
   // Calculate current step based on form completion
   const getCurrentStep = () => {
-    if (!formData.doctorId) return 1;
-    if (!formData.appointmentDate || !formData.appointmentTime) return 2;
-    if (consultationFee > 0 && !formData.paymentMethod) return 3;
-    return 4;
+    if (!formData.patientFor) return 1;
+    if (!formData.doctorId) return 2;
+    if (!formData.appointmentDate || !formData.appointmentTime) return 3;
+    if (consultationFee > 0 && !formData.paymentMethod) return 4;
+    return 5;
   };
 
   return (
@@ -214,27 +221,100 @@ const NewBooking = () => {
               <div className="step-circle">
                 {getCurrentStep() > 1 ? '✓' : '1'}
               </div>
-              <div className="step-label">Chọn bác sĩ</div>
+              <div className="step-label">Chọn người khám</div>
             </div>
             <div className={`form-step ${getCurrentStep() >= 2 ? 'active' : ''} ${getCurrentStep() > 2 ? 'completed' : ''}`}>
               <div className="step-circle">
                 {getCurrentStep() > 2 ? '✓' : '2'}
               </div>
-              <div className="step-label">Chọn thời gian</div>
+              <div className="step-label">Chọn bác sĩ</div>
             </div>
             <div className={`form-step ${getCurrentStep() >= 3 ? 'active' : ''} ${getCurrentStep() > 3 ? 'completed' : ''}`}>
               <div className="step-circle">
                 {getCurrentStep() > 3 ? '✓' : '3'}
               </div>
+              <div className="step-label">Chọn thời gian</div>
+            </div>
+            <div className={`form-step ${getCurrentStep() >= 4 ? 'active' : ''} ${getCurrentStep() > 4 ? 'completed' : ''}`}>
+              <div className="step-circle">
+                {getCurrentStep() > 4 ? '✓' : '4'}
+              </div>
               <div className="step-label">Thanh toán</div>
             </div>
-            <div className={`form-step ${getCurrentStep() >= 4 ? 'active' : ''}`}>
-              <div className="step-circle">4</div>
+            <div className={`form-step ${getCurrentStep() >= 5 ? 'active' : ''}`}>
+              <div className="step-circle">5</div>
               <div className="step-label">Xác nhận</div>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '2rem' }}>
+            {/* Patient Selection - Cho ai khám */}
+            <div className="patient-selection-section">
+              <label className="form-label">
+                Bạn đặt lịch cho ai?
+                <span className="required">*</span>
+              </label>
+              <div className="patient-options-grid">
+                {/* Option: Cho bản thân */}
+                <label className={`patient-option-card ${formData.patientFor === 'self' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="patientFor"
+                    value="self"
+                    checked={formData.patientFor === 'self'}
+                    onChange={handleChange}
+                  />
+                  <div className="patient-option-content">
+                    <div className="patient-option-icon">👤</div>
+                    <div className="patient-option-info">
+                      <div className="patient-option-name">Cho bản thân tôi</div>
+                      <div className="patient-option-desc">Đặt lịch cho chính bạn</div>
+                    </div>
+                  </div>
+                  <div className="patient-check-icon">
+                    <span style={{ fontSize: '1.2rem' }}>✓</span>
+                  </div>
+                </label>
+
+                {/* Options: Cho thành viên gia đình */}
+                {familyMembers.map((member) => (
+                  <label 
+                    key={member.id} 
+                    className={`patient-option-card ${formData.patientFor === String(member.id) ? 'selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="patientFor"
+                      value={String(member.id)}
+                      checked={formData.patientFor === String(member.id)}
+                      onChange={handleChange}
+                    />
+                    <div className="patient-option-content">
+                      <div className="patient-option-icon">
+                        {member.relationship === 'CHILD' ? '👶' : 
+                         member.relationship === 'PARENT' ? '👨‍👩' : 
+                         member.relationship === 'SPOUSE' ? '💑' : '👤'}
+                      </div>
+                      <div className="patient-option-info">
+                        <div className="patient-option-name">{member.fullName}</div>
+                        <div className="patient-option-desc">
+                          {member.relationship === 'CHILD' ? 'Con cái' : 
+                           member.relationship === 'PARENT' ? 'Bố/Mẹ' : 
+                           member.relationship === 'SPOUSE' ? 'Vợ/Chồng' : 'Thành viên'}
+                          {member.medicalHistory && (
+                            <span className="medical-history-badge"> • {member.medicalHistory}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="patient-check-icon">
+                      <span style={{ fontSize: '1.2rem' }}>✓</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             {/* Doctor Selection */}
             <div>
               <label className="form-label">
