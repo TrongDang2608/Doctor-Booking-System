@@ -22,7 +22,7 @@ const FeedbackList = () => {
       setFeedbacks(data);
       setError('');
     } catch (err) {
-      setError('Failed to load feedbacks');
+      setError('Không thể tải danh sách phản hồi');
       console.error(err);
     } finally {
       setLoading(false);
@@ -35,7 +35,7 @@ const FeedbackList = () => {
       loadFeedbacks();
       setError('');
     } catch (err) {
-      setError('Failed to mark feedback as read');
+      setError('Không thể đánh dấu phản hồi');
       console.error(err);
     }
   };
@@ -52,7 +52,7 @@ const FeedbackList = () => {
     <AdminLayout>
       <div className="space-y-6">
         {/* Page Header */}
-        <h1 className="text-3xl font-bold text-gray-900">Feedback Management</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Quản Lý Phản Hồi</h1>
 
         {/* Error Alert */}
         {error && (
@@ -70,15 +70,15 @@ const FeedbackList = () => {
 
         {/* Filter Section */}
         <div className="flex items-center gap-3">
-          <label className="font-semibold text-gray-700">Filter by Status:</label>
+          <label className="font-semibold text-gray-700">Lọc theo trạng thái:</label>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200"
           >
-            <option value="">All</option>
-            <option value="PENDING">Pending</option>
-            <option value="READ">Read</option>
+            <option value="">Tất cả</option>
+            <option value="PENDING">Chưa đọc</option>
+            <option value="READ">Đã đọc</option>
           </select>
         </div>
 
@@ -86,7 +86,7 @@ const FeedbackList = () => {
         {feedbacks.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 bg-white rounded-lg border border-gray-200">
             <span className="text-6xl mb-4">📭</span>
-            <p className="text-gray-500 text-lg">No feedbacks found</p>
+            <p className="text-gray-500 text-lg">Không có phản hồi</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -94,12 +94,12 @@ const FeedbackList = () => {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Patient</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Rating</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Comment</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Bệnh nhân</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Đánh giá</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Nhận xét</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Trạng thái</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Ngày</th>
+                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Hành động</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">

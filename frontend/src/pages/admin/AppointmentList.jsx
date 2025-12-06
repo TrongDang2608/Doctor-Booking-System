@@ -24,7 +24,7 @@ const AppointmentList = () => {
       setAppointments(data);
       setError('');
     } catch (err) {
-      setError('Failed to load appointments');
+      setError('Không thể tải danh sách lịch hẹn');
       console.error(err);
     } finally {
       setLoading(false);
@@ -57,13 +57,13 @@ const AppointmentList = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-900">Appointment Management</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Quản Lý Lịch Hẹn</h1>
 
         <ErrorMessage message={error} onClose={() => setError('')} />
 
         {/* Filter Section */}
         <div className="flex items-center gap-3 flex-wrap">
-          <label className="font-semibold text-gray-700">Filter by Date:</label>
+          <label className="font-semibold text-gray-700">Lọc theo ngày:</label>
           <input
             type="date"
             value={filterDate}
@@ -75,7 +75,7 @@ const AppointmentList = () => {
               onClick={() => setFilterDate('')}
               className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium"
             >
-              Clear Filter
+              Xóa bộ lọc
             </button>
           )}
         </div>
@@ -84,7 +84,7 @@ const AppointmentList = () => {
         <DataTable
           columns={[
             {
-              header: 'Patient',
+              header: 'Bệnh nhân',
               accessor: 'patientName',
               render: (appointment) => (
                 <div>
@@ -94,7 +94,7 @@ const AppointmentList = () => {
               )
             },
             {
-              header: 'Doctor',
+              header: 'Bác sĩ',
               accessor: 'doctorName',
               render: (appointment) => (
                 <div>
@@ -104,17 +104,17 @@ const AppointmentList = () => {
               )
             },
             {
-              header: 'Date',
+              header: 'Ngày',
               accessor: 'appointmentDate',
               render: (appointment) => formatDate(appointment.appointmentDate)
             },
             {
-              header: 'Time',
+              header: 'Giờ',
               accessor: 'appointmentTime',
               render: (appointment) => formatTime(appointment.appointmentTime)
             },
             {
-              header: 'Status',
+              header: 'Trạng thái',
               accessor: 'status',
               render: (appointment) => {
                 const statusStyles = {
@@ -143,7 +143,7 @@ const AppointmentList = () => {
           ]}
           data={appointments}
           loading={loading && appointments.length === 0}
-          emptyMessage={filterDate ? `No appointments found for ${formatDate(filterDate)}` : 'No appointments found'}
+          emptyMessage={filterDate ? `Không tìm thấy lịch hẹn cho ngày ${formatDate(filterDate)}` : 'Không có lịch hẹn'}
         />
       </div>
     </AdminLayout>
