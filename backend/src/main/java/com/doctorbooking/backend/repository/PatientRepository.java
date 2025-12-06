@@ -13,6 +13,9 @@ import java.util.Optional;
 public interface PatientRepository extends JpaRepository<Patient, Long> {
     Optional<Patient> findByUserId(Long userId);
     
+    @Query("SELECT p FROM Patient p LEFT JOIN FETCH p.user u WHERE u.username = :username")
+    Optional<Patient> findByUser_Username(@Param("username") String username);
+    
     @Query("SELECT p FROM Patient p WHERE " +
            "LOWER(p.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "CAST(p.id AS string) LIKE CONCAT('%', :keyword, '%')")

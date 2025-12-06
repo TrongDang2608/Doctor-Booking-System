@@ -1,66 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PatientLayout from '../../components/patient/PatientLayout';
+import familyService from '../../services/familyService';
+import feather from 'feather-icons';
 import './FamilyProfilePage.css';
-import * as feather from 'feather-icons';
 
 const FamilyProfilePage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
-  
-  // Dữ liệu tĩnh mẫu
-  const [familyMembers] = useState([
-    {
-      id: 1,
-      fullName: 'Đặng Tấn Trọng',
-      relationship: 'Bản thân',
-      dateOfBirth: '2003-08-26',
-      gender: 'Nam',
-      medicalHistory: '',
-      isMainAccount: true
-    },
-    {
-      id: 2,
-      fullName: 'Bé Bi',
-      relationship: 'Con cái',
-      dateOfBirth: '2020-05-15',
-      gender: 'Nam',
-      medicalHistory: 'Dị ứng với đậu phộng',
-      isMainAccount: false
-    },
-    {
-      id: 3,
-      fullName: 'Mẹ Lan',
-      relationship: 'Bố/Mẹ',
-      dateOfBirth: '1970-03-20',
-      gender: 'Nữ',
-      medicalHistory: 'Cao huyết áp, Tiểu đường type 2',
-      isMainAccount: false
-    }
-  ]);
+  const [familyMembers, setFamilyMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [deletingMemberId, setDeletingMemberId] = useState(null);
+  const [stats, setStats] = useState({
+    totalMembers: 0,
+    mainAccounts: 0,
+    membersWithMedicalHistory: 0
+  });
 
   const [formData, setFormData] = useState({
     fullName: '',
-    relationship: 'Con cái',
+    relationship: 'CHILD',
     dateOfBirth: '',
-    gender: 'Nam',
+    gender: 'MALE',
     medicalHistory: ''
   });
 
-  React.useEffect(() => {
-    try {
-      feather.replace();
-    } catch (error) {
-      console.error('Feather icons error:', error);
+  // Load dữ liệu khi component mount
+  useEffect(() => {
+    loadFamilyData();
+  }, []);
+
+  // Initialize Feather Icons sau khi DOM được update (tránh lỗi removeChild)
+  useEffect(() => {
+    // CHỈ initialize khi:
+    // 1. Không đang loading
+    // 2. Không đang submitting (tránh xung đột với React render)
+    // 3. Không đang deleting
+    // 4. Modal KHÔNG đang mở (tránh replace icons trong modal khi đang submit)
+    if (!loading && !submitting && !deletingMemberId && !showAddModal) {
+      // Dùng setTimeout với delay để đảm bảo DOM đã ổn định
+      const timer = setTimeout(() => {
+        try {
+          // Double-check: vẫn không đang submit/delete và modal không mở (tránh race condition)
+          if (!submitting && !deletingMemberId && !showAddModal) {
+            // Replace icons (modal đã dùng Unicode nên không cần exclude)
+            const icons = document.querySelectorAll('[data-feather]');
+            if (icons.length > 0) {
+              feather.replace();
+              console.log('✅ Feather icons initialized/replaced');
+            }
+          }
+        } catch (e) {
+          // Ignore errors (có thể do removeChild nhưng không ảnh hưởng UX)
+          console.log('⚠️ Feather icons error (ignored):', e.message);
+        }
+      }, 400); // Tăng delay lên 400ms để đảm bảo DOM đã update xong và React đã hoàn tất render
+      
+      return () => clearTimeout(timer);
     }
-  }, [familyMembers, showAddModal]);
+  }, [loading, familyMembers, showAddModal, submitting, deletingMemberId]); // Thêm submitting và deletingMemberId vào dependencies
+
+  // Load danh sách thành viên và stats
+  const loadFamilyData = async (showLoadingScreen = true) => {
+    try {
+      if (showLoadingScreen) {
+        setLoading(true);
+      }
+      setError(null);
+      
+      console.log('🔄 Loading family data...');
+      const [membersData, statsData] = await Promise.all([
+        familyService.getFamilyMembers(),
+        familyService.getFamilyStats()
+      ]);
+      
+      console.log('✅ Family members loaded:', membersData);
+      console.log('📊 Stats loaded:', statsData);
+      
+      setFamilyMembers(membersData);
+      setStats(statsData);
+    } catch (err) {
+      console.error('❌ Error loading family data:', err);
+      setError('Không thể tải dữ liệu. Vui lòng thử lại.');
+    } finally {
+      if (showLoadingScreen) {
+        setLoading(false);
+      }
+    }
+  };
 
   const handleAddMember = () => {
     setEditingMember(null);
     setFormData({
       fullName: '',
-      relationship: 'Con cái',
+      relationship: 'CHILD',
       dateOfBirth: '',
-      gender: 'Nam',
+      gender: 'MALE',
       medicalHistory: ''
     });
     setShowAddModal(true);
@@ -83,26 +119,92 @@ const FamilyProfilePage = () => {
     setEditingMember(null);
     setFormData({
       fullName: '',
-      relationship: 'Con cái',
+      relationship: 'CHILD',
       dateOfBirth: '',
-      gender: 'Nam',
+      gender: 'MALE',
       medicalHistory: ''
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement API call later
-    console.log('Form data:', formData);
-    alert(editingMember ? 'Cập nhật thành công!' : 'Thêm thành viên thành công!');
-    handleCloseModal();
+    
+    if (submitting) return; // Prevent multiple submits
+    
+    try {
+      setSubmitting(true);
+      console.log('📤 Submitting form:', formData);
+      
+      if (editingMember) {
+        // Update existing member
+        await familyService.updateFamilyMember(editingMember.id, formData);
+        console.log('✅ Member updated successfully');
+      } else {
+        // Create new member
+        await familyService.createFamilyMember(formData);
+        console.log('✅ Member created successfully');
+      }
+      
+      // Reload data (KHÔNG hiện loading screen)
+      await loadFamilyData(false);
+      
+      // Close modal
+      handleCloseModal();
+      
+      // Đợi một chút để React hoàn tất render, rồi mới replace icons
+      setTimeout(() => {
+        try {
+          if (!submitting) {
+            feather.replace();
+          }
+        } catch (e) {
+          console.log('⚠️ Feather icons error after submit (ignored):', e.message);
+        }
+      }, 500);
+      
+      alert(editingMember ? 'Cập nhật thành công!' : 'Thêm thành viên thành công!');
+    } catch (err) {
+      console.error('❌ Error submitting form:', err);
+      alert(err.response?.data || 'Có lỗi xảy ra. Vui lòng thử lại.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleDeleteMember = (member) => {
-    if (window.confirm(`Bạn có chắc muốn xóa hồ sơ của ${member.fullName}?`)) {
-      // TODO: Implement API call later
-      console.log('Delete member:', member.id);
+  const handleDeleteMember = async (member) => {
+    if (deletingMemberId) return; // Prevent multiple deletes
+    
+    if (!window.confirm(`Bạn có chắc muốn xóa hồ sơ của ${member.fullName}?`)) {
+      return;
+    }
+    
+    try {
+      setDeletingMemberId(member.id);
+      console.log('🗑️ Deleting member:', member.id);
+      
+      await familyService.deleteFamilyMember(member.id);
+      console.log('✅ Member deleted successfully');
+      
+      // Reload data (KHÔNG hiện loading screen)
+      await loadFamilyData(false);
+      
+      // Đợi một chút để React hoàn tất render, rồi mới replace icons
+      setTimeout(() => {
+        try {
+          if (!deletingMemberId) {
+            feather.replace();
+          }
+        } catch (e) {
+          console.log('⚠️ Feather icons error after delete (ignored):', e.message);
+        }
+      }, 500);
+      
       alert('Xóa thành công!');
+    } catch (err) {
+      console.error('❌ Error deleting member:', err);
+      alert(err.response?.data || 'Không thể xóa. Vui lòng thử lại.');
+    } finally {
+      setDeletingMemberId(null);
     }
   };
 
@@ -117,24 +219,47 @@ const FamilyProfilePage = () => {
     return age;
   };
 
+  // Map relationship từ backend (SELF, CHILD...) sang tiếng Việt
+  const getRelationshipLabel = (relationship) => {
+    const map = {
+      'SELF': 'Bản thân',
+      'CHILD': 'Con cái',
+      'PARENT': 'Bố/Mẹ',
+      'SPOUSE': 'Vợ/Chồng',
+      'SIBLING': 'Anh/Chị/Em',
+      'OTHER': 'Khác'
+    };
+    return map[relationship] || relationship;
+  };
+
+  // Map gender từ backend (MALE, FEMALE...) sang tiếng Việt
+  const getGenderLabel = (gender) => {
+    const map = {
+      'MALE': 'Nam',
+      'FEMALE': 'Nữ',
+      'OTHER': 'Khác'
+    };
+    return map[gender] || gender;
+  };
+
   const getRelationshipIcon = (relationship) => {
     switch (relationship) {
-      case 'Bản thân': return '👤';
-      case 'Con cái': return '👶';
-      case 'Bố/Mẹ': return '👨‍👩';
-      case 'Ông/Bà': return '👴👵';
-      case 'Anh/Chị/Em': return '👫';
+      case 'SELF': return '👤';
+      case 'CHILD': return '👶';
+      case 'PARENT': return '👨‍👩';
+      case 'SPOUSE': return '💑';
+      case 'SIBLING': return '👫';
       default: return '👤';
     }
   };
 
   const getRelationshipColor = (relationship) => {
     switch (relationship) {
-      case 'Bản thân': return '#667eea';
-      case 'Con cái': return '#48bb78';
-      case 'Bố/Mẹ': return '#ed8936';
-      case 'Ông/Bà': return '#9f7aea';
-      case 'Anh/Chị/Em': return '#4299e1';
+      case 'SELF': return '#667eea';
+      case 'CHILD': return '#48bb78';
+      case 'PARENT': return '#ed8936';
+      case 'SPOUSE': return '#ec4899';
+      case 'SIBLING': return '#4299e1';
       default: return '#718096';
     }
   };
@@ -167,7 +292,7 @@ const FamilyProfilePage = () => {
           </div>
           <div className="stat-info">
             <div className="stat-label">Thành viên</div>
-            <div className="stat-value">{familyMembers.length}</div>
+            <div className="stat-value">{stats.totalMembers}</div>
           </div>
         </div>
         <div className="stat-card">
@@ -176,7 +301,7 @@ const FamilyProfilePage = () => {
           </div>
           <div className="stat-info">
             <div className="stat-label">Tài khoản chính</div>
-            <div className="stat-value">1</div>
+            <div className="stat-value">{stats.mainAccounts}</div>
           </div>
         </div>
         <div className="stat-card">
@@ -185,19 +310,51 @@ const FamilyProfilePage = () => {
           </div>
           <div className="stat-info">
             <div className="stat-label">Có tiền sử bệnh</div>
-            <div className="stat-value">{familyMembers.filter(m => m.medicalHistory).length}</div>
+            <div className="stat-value">{stats.membersWithMedicalHistory}</div>
           </div>
         </div>
       </div>
 
-      {/* Members List */}
-      <div className="members-section">
-        <div className="section-header">
-          <h2>Danh sách thành viên</h2>
-          <span className="member-count">{familyMembers.length} người</span>
+      {/* Loading state */}
+      {loading && (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Đang tải dữ liệu...</p>
         </div>
+      )}
 
-        <div className="members-grid">
+      {/* Error state */}
+      {error && (
+        <div className="error-message">
+          <i data-feather="alert-circle"></i>
+          <p>{error}</p>
+          <button onClick={() => loadFamilyData(true)} className="btn-retry">
+            <i data-feather="refresh-cw"></i>
+            Thử lại
+          </button>
+        </div>
+      )}
+
+      {/* Members List */}
+      {!loading && !error && (
+        <div className="members-section">
+          <div className="section-header">
+            <h2>Danh sách thành viên</h2>
+            <span className="member-count">{familyMembers.length} người</span>
+          </div>
+
+          {familyMembers.length === 0 ? (
+            <div className="empty-state">
+              <i data-feather="users"></i>
+              <h3>Chưa có thành viên nào</h3>
+              <p>Thêm thành viên gia đình để bắt đầu quản lý hồ sơ sức khỏe</p>
+              <button className="btn-add-member" onClick={handleAddMember}>
+                <i data-feather="user-plus"></i>
+                Thêm thành viên đầu tiên
+              </button>
+            </div>
+          ) : (
+            <div className="members-grid">
           {familyMembers.map(member => (
             <div 
               key={member.id} 
@@ -221,7 +378,7 @@ const FamilyProfilePage = () => {
                     className="member-relationship"
                     style={{ color: getRelationshipColor(member.relationship) }}
                   >
-                    {member.relationship}
+                    {getRelationshipLabel(member.relationship)}
                   </span>
                 </div>
               </div>
@@ -239,8 +396,8 @@ const FamilyProfilePage = () => {
                 </div>
                 <div className="detail-row">
                   <div className="detail-item">
-                    <i data-feather={member.gender === 'Nam' ? 'user' : 'user'}></i>
-                    <span>{member.gender}</span>
+                    <i data-feather={member.gender === 'MALE' ? 'user' : 'user'}></i>
+                    <span>{getGenderLabel(member.gender)}</span>
                   </div>
                 </div>
                 {member.medicalHistory && (
@@ -258,7 +415,7 @@ const FamilyProfilePage = () => {
                 <button 
                   className="btn-action btn-edit"
                   onClick={() => handleEditMember(member)}
-                  disabled={member.isMainAccount}
+                  disabled={member.isMainAccount || deletingMemberId || submitting}
                 >
                   <i data-feather="edit-2"></i>
                   Sửa
@@ -266,25 +423,36 @@ const FamilyProfilePage = () => {
                 <button 
                   className="btn-action btn-delete"
                   onClick={() => handleDeleteMember(member)}
-                  disabled={member.isMainAccount}
+                  disabled={member.isMainAccount || deletingMemberId || submitting}
                 >
-                  <i data-feather="trash-2"></i>
-                  Xóa
+                  {deletingMemberId === member.id ? (
+                    <>
+                      <div className="loading-spinner-small"></div>
+                      Đang xóa...
+                    </>
+                  ) : (
+                    <>
+                      <i data-feather="trash-2"></i>
+                      Xóa
+                    </>
+                  )}
                 </button>
               </div>
             </div>
           ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       {/* Add/Edit Modal */}
       {showAddModal && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
+        <div className="modal-overlay" onClick={submitting ? null : handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{editingMember ? 'Chỉnh sửa thành viên' : 'Thêm thành viên mới'}</h2>
-              <button className="btn-close" onClick={handleCloseModal}>
-                <i data-feather="x"></i>
+              <button className="btn-close" onClick={handleCloseModal} disabled={submitting}>
+                <span style={{ fontSize: '20px', lineHeight: '1' }}>×</span>
               </button>
             </div>
 
@@ -293,14 +461,15 @@ const FamilyProfilePage = () => {
                 <label className="form-label">
                   Họ và tên <span className="required">*</span>
                 </label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  placeholder="Nhập họ và tên"
-                  required
-                />
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    placeholder="Nhập họ và tên"
+                    required
+                    disabled={submitting}
+                  />
               </div>
 
               <div className="form-row">
@@ -313,11 +482,13 @@ const FamilyProfilePage = () => {
                     value={formData.relationship}
                     onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
                     required
+                    disabled={submitting}
                   >
-                    <option value="Con cái">Con cái</option>
-                    <option value="Bố/Mẹ">Bố/Mẹ</option>
-                    <option value="Ông/Bà">Ông/Bà</option>
-                    <option value="Anh/Chị/Em">Anh/Chị/Em</option>
+                    <option value="CHILD">Con cái</option>
+                    <option value="PARENT">Bố/Mẹ</option>
+                    <option value="SPOUSE">Vợ/Chồng</option>
+                    <option value="SIBLING">Anh/Chị/Em</option>
+                    <option value="OTHER">Khác</option>
                   </select>
                 </div>
 
@@ -330,10 +501,11 @@ const FamilyProfilePage = () => {
                     value={formData.gender}
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                     required
+                    disabled={submitting}
                   >
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                    <option value="Khác">Khác</option>
+                    <option value="MALE">Nam</option>
+                    <option value="FEMALE">Nữ</option>
+                    <option value="OTHER">Khác</option>
                   </select>
                 </div>
               </div>
@@ -348,6 +520,7 @@ const FamilyProfilePage = () => {
                   value={formData.dateOfBirth}
                   onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                   required
+                  disabled={submitting}
                 />
               </div>
 
@@ -359,6 +532,7 @@ const FamilyProfilePage = () => {
                   onChange={(e) => setFormData({ ...formData, medicalHistory: e.target.value })}
                   placeholder="Nhập tiền sử bệnh (nếu có)..."
                   rows="4"
+                  disabled={submitting}
                 />
                 <div className="form-hint">
                   Ví dụ: Cao huyết áp, Tiểu đường, Dị ứng thuốc...
@@ -366,12 +540,26 @@ const FamilyProfilePage = () => {
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-cancel" onClick={handleCloseModal}>
+                <button 
+                  type="button" 
+                  className="btn-cancel" 
+                  onClick={handleCloseModal}
+                  disabled={submitting}
+                >
                   Hủy
                 </button>
-                <button type="submit" className="btn-submit">
-                  <i data-feather="check"></i>
-                  {editingMember ? 'Cập nhật' : 'Thêm thành viên'}
+                <button type="submit" className="btn-submit" disabled={submitting}>
+                  {submitting ? (
+                    <>
+                      <div className="loading-spinner-small"></div>
+                      {editingMember ? 'Đang cập nhật...' : 'Đang thêm...'}
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ marginRight: '6px', fontSize: '16px' }}>✓</span>
+                      {editingMember ? 'Cập nhật' : 'Thêm thành viên'}
+                    </>
+                  )}
                 </button>
               </div>
             </form>
