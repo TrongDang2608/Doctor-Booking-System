@@ -42,7 +42,15 @@ const NewBooking = () => {
       setLoadingFamilyMembers(true);
       const members = await familyService.getFamilyMembers();
       console.log('✅ Family members loaded:', members);
-      setFamilyMembers(members);
+      
+      // Filter ra main account (isMainAccount = true hoặc relationship = 'SELF')
+      // Vì "Cho bản thân tôi" đã đại diện cho main account rồi
+      const familyMembersOnly = members.filter(member => 
+        !member.isMainAccount && member.relationship !== 'SELF'
+      );
+      
+      console.log('✅ Filtered family members (excluding main account):', familyMembersOnly);
+      setFamilyMembers(familyMembersOnly);
     } catch (err) {
       console.error('❌ Error loading family members:', err);
       // Không hiển thị error vì có thể user chưa có thành viên nào
