@@ -9,9 +9,52 @@ import './PatientLayout.css';
 const PatientLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [chatOpen, setChatOpen] = useState(false);
+    const [notificationsOpen, setNotificationsOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+
+    // Mock notifications data (sẽ thay bằng API call sau)
+    const [notifications] = useState([
+        {
+            id: 1,
+            type: 'appointment_reminder',
+            title: 'Nhắc lịch khám',
+            message: 'Bạn có lịch khám với Bác sĩ Nguyễn Văn A vào ngày mai lúc 09:00',
+            time: '2 giờ trước',
+            read: false,
+            appointmentId: 123
+        },
+        {
+            id: 2,
+            type: 'appointment_reminder',
+            title: 'Nhắc lịch khám',
+            message: 'Bạn có lịch khám với Bác sĩ Trần Thị B vào 1 giờ nữa',
+            time: '30 phút trước',
+            read: false,
+            appointmentId: 124
+        },
+        {
+            id: 3,
+            type: 'appointment_confirmed',
+            title: 'Xác nhận lịch khám',
+            message: 'Lịch khám của bạn đã được xác nhận thành công',
+            time: '1 ngày trước',
+            read: true,
+            appointmentId: 125
+        },
+        {
+            id: 4,
+            type: 'payment_success',
+            title: 'Thanh toán thành công',
+            message: 'Bạn đã thanh toán thành công cho lịch khám #126',
+            time: '2 ngày trước',
+            read: true,
+            appointmentId: 126
+        }
+    ]);
+
+    const unreadCount = notifications.filter(n => !n.read).length;
 
     useEffect(() => {
         // Initialize Feather Icons
@@ -34,7 +77,7 @@ const PatientLayout = ({ children }) => {
             }
         }, 100);
         return () => clearTimeout(timer);
-    });
+    }, [notificationsOpen]); // Re-initialize when notifications dropdown opens/closes
 
     const handleLogout = () => {
         logout();
@@ -54,6 +97,17 @@ const PatientLayout = ({ children }) => {
     const isActive = (path) => {
         return location.pathname === path || location.pathname.startsWith(path + '/');
     };
+
+    // Close notifications when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationsOpen && !event.target.closest('.notification-container')) {
+                setNotificationsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [notificationsOpen]);
 
     return (
         <div className="patient-layout">
@@ -144,6 +198,74 @@ const PatientLayout = ({ children }) => {
                     >
                         <i data-feather={sidebarOpen ? 'chevron-left' : 'chevron-right'}></i>
                     </button>
+                    
+                    {/* Notification Bell */}
+                    <div className="notification-container">
+                        <button 
+                            className="notification-bell"
+                            onClick={() => setNotificationsOpen(!notificationsOpen)}
+                            aria-label="Thông báo"
+                        >
+                            <i data-feather="bell"></i>
+                            {unreadCount > 0 && (
+                                <span className="notification-badge">{unreadCount}</span>
+                            )}
+                        </button>
+
+                        {/* Notification Dropdown */}
+                        {notificationsOpen && (
+                            <div className="notification-dropdown">
+                                <div className="notification-header">
+                                    <h3>Thông báo</h3>
+                                    {unreadCount > 0 && (
+                                        <span className="unread-count">{unreadCount} chưa đọc</span>
+                                    )}
+                                </div>
+                                
+                                <div className="notification-list">
+                                    {notifications.length === 0 ? (
+                                        <div className="notification-empty">
+                                            <i data-feather="bell-off"></i>
+                                            <p>Chưa có thông báo nào</p>
+                                        </div>
+                                    ) : (
+                                        notifications.map((notification) => (
+                                            <div 
+                                                key={notification.id}
+                                                className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                                                onClick={() => {
+                                                    // Handle notification click (sẽ implement sau)
+                                                    console.log('Notification clicked:', notification);
+                                                }}
+                                            >
+                                                <div className="notification-icon">
+                                                    {notification.type === 'appointment_reminder' && '⏰'}
+                                                    {notification.type === 'appointment_confirmed' && '✓'}
+                                                    {notification.type === 'payment_success' && '💳'}
+                                                </div>
+                                                <div className="notification-content">
+                                                    <div className="notification-title">{notification.title}</div>
+                                                    <div className="notification-message">{notification.message}</div>
+                                                    <div className="notification-time">{notification.time}</div>
+                                                </div>
+                                                {!notification.read && (
+                                                    <div className="notification-dot"></div>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                                
+                                {notifications.length > 0 && (
+                                    <div className="notification-footer">
+                                        <button className="mark-all-read">
+                                            Đánh dấu tất cả đã đọc
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <div className={`main-content ${chatOpen ? 'with-chat' : ''}`}>
                     {children}
