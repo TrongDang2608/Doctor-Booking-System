@@ -276,8 +276,9 @@ const PatientLayout = ({ children }) => {
                                                     {notification.type === 'APPOINTMENT_REMINDER_1H' && '⏰'}
                                                     {notification.type === 'APPOINTMENT_CONFIRMED' && '✓'}
                                                     {notification.type === 'PAYMENT_SUCCESS' && '💳'}
+                                                    {notification.type === 'WALLET_DEPOSIT_SUCCESS' && '💰'}
                                                     {notification.type === 'APPOINTMENT_CANCELLED' && '❌'}
-                                                    {!['APPOINTMENT_REMINDER_24H', 'APPOINTMENT_REMINDER_1H', 'APPOINTMENT_CONFIRMED', 'PAYMENT_SUCCESS', 'APPOINTMENT_CANCELLED'].includes(notification.type) && '📢'}
+                                                    {!['APPOINTMENT_REMINDER_24H', 'APPOINTMENT_REMINDER_1H', 'APPOINTMENT_CONFIRMED', 'PAYMENT_SUCCESS', 'WALLET_DEPOSIT_SUCCESS', 'APPOINTMENT_CANCELLED'].includes(notification.type) && '📢'}
                                                 </div>
                                                 <div className="notification-content">
                                                     <div className="notification-title">{notification.title}</div>

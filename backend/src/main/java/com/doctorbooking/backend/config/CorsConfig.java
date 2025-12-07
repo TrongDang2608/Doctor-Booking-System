@@ -18,7 +18,8 @@ public class CorsConfig {
         // Cho phép tất cả localhost ports và các origin phổ biến
         configuration.setAllowedOriginPatterns(List.of(
             "http://localhost:*",
-            "http://127.0.0.1:*"
+            "http://127.0.0.1:*",
+            "https://sandbox.vnpayment.vn" // Cho phép VNPAY sandbox
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));

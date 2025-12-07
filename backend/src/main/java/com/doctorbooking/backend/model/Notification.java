@@ -61,6 +61,7 @@ public class Notification {
         APPOINTMENT_REMINDER_1H,  // Nhắc hẹn 1h
         APPOINTMENT_CANCELLED,    // Hủy lịch
         PAYMENT_SUCCESS,          // Thanh toán thành công
+        WALLET_DEPOSIT_SUCCESS,  // Nạp tiền vào ví thành công
         OTHER                     // Khác
     }
 }
