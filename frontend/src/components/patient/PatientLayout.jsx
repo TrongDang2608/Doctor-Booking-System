@@ -4,57 +4,57 @@ import { useAuth } from '../../contexts/AuthContext';
 import logoImage from '../../assets/DoctorBooking.png';
 import HealthAIChat from './HealthAIChat';
 import AnimatedLogoutButton from '../common/AnimatedLogoutButton';
+import notificationService from '../../services/notificationService';
 import './PatientLayout.css';
 
 const PatientLayout = ({ children }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [chatOpen, setChatOpen] = useState(false);
     const [notificationsOpen, setNotificationsOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [loadingNotifications, setLoadingNotifications] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
-    // Mock notifications data (sẽ thay bằng API call sau)
-    const [notifications] = useState([
-        {
-            id: 1,
-            type: 'appointment_reminder',
-            title: 'Nhắc lịch khám',
-            message: 'Bạn có lịch khám với Bác sĩ Nguyễn Văn A vào ngày mai lúc 09:00',
-            time: '2 giờ trước',
-            read: false,
-            appointmentId: 123
-        },
-        {
-            id: 2,
-            type: 'appointment_reminder',
-            title: 'Nhắc lịch khám',
-            message: 'Bạn có lịch khám với Bác sĩ Trần Thị B vào 1 giờ nữa',
-            time: '30 phút trước',
-            read: false,
-            appointmentId: 124
-        },
-        {
-            id: 3,
-            type: 'appointment_confirmed',
-            title: 'Xác nhận lịch khám',
-            message: 'Lịch khám của bạn đã được xác nhận thành công',
-            time: '1 ngày trước',
-            read: true,
-            appointmentId: 125
-        },
-        {
-            id: 4,
-            type: 'payment_success',
-            title: 'Thanh toán thành công',
-            message: 'Bạn đã thanh toán thành công cho lịch khám #126',
-            time: '2 ngày trước',
-            read: true,
-            appointmentId: 126
+    // Load notifications từ API
+    const loadNotifications = async () => {
+        try {
+            setLoadingNotifications(true);
+            const [notificationsData, unreadData] = await Promise.all([
+                notificationService.getNotifications(),
+                notificationService.getUnreadCount()
+            ]);
+            setNotifications(notificationsData);
+            setUnreadCount(unreadData);
+        } catch (err) {
+            console.error('❌ Error loading notifications:', err);
+            // Không hiển thị error để không làm gián đoạn UX
+            setNotifications([]);
+            setUnreadCount(0);
+        } finally {
+            setLoadingNotifications(false);
         }
-    ]);
+    };
 
-    const unreadCount = notifications.filter(n => !n.read).length;
+    // Load notifications khi component mount và khi location thay đổi
+    useEffect(() => {
+        if (user) {
+            loadNotifications();
+        }
+    }, [user, location.pathname]);
+
+    // Reload notifications mỗi 30 giây để cập nhật real-time
+    useEffect(() => {
+        if (!user) return;
+        
+        const interval = setInterval(() => {
+            loadNotifications();
+        }, 30000); // 30 giây
+
+        return () => clearInterval(interval);
+    }, [user]);
 
     useEffect(() => {
         // Initialize Feather Icons
@@ -108,6 +108,28 @@ const PatientLayout = ({ children }) => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [notificationsOpen]);
+
+    // Handle mark notification as read
+    const handleMarkAsRead = async (notificationId) => {
+        try {
+            await notificationService.markAsRead(notificationId);
+            // Reload notifications để cập nhật UI
+            await loadNotifications();
+        } catch (err) {
+            console.error('❌ Error marking notification as read:', err);
+        }
+    };
+
+    // Handle mark all as read
+    const handleMarkAllAsRead = async () => {
+        try {
+            await notificationService.markAllAsRead();
+            // Reload notifications để cập nhật UI
+            await loadNotifications();
+        } catch (err) {
+            console.error('❌ Error marking all as read:', err);
+        }
+    };
 
     return (
         <div className="patient-layout">
@@ -223,7 +245,12 @@ const PatientLayout = ({ children }) => {
                                 </div>
                                 
                                 <div className="notification-list">
-                                    {notifications.length === 0 ? (
+                                    {loadingNotifications ? (
+                                        <div className="notification-empty">
+                                            <div className="loading-spinner-small" style={{ margin: '0 auto 1rem' }}></div>
+                                            <p>Đang tải thông báo...</p>
+                                        </div>
+                                    ) : notifications.length === 0 ? (
                                         <div className="notification-empty">
                                             <i data-feather="bell-off"></i>
                                             <p>Chưa có thông báo nào</p>
@@ -232,23 +259,32 @@ const PatientLayout = ({ children }) => {
                                         notifications.map((notification) => (
                                             <div 
                                                 key={notification.id}
-                                                className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                                                className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
                                                 onClick={() => {
-                                                    // Handle notification click (sẽ implement sau)
-                                                    console.log('Notification clicked:', notification);
+                                                    // Đánh dấu đã đọc khi click
+                                                    if (!notification.isRead) {
+                                                        handleMarkAsRead(notification.id);
+                                                    }
+                                                    // Có thể navigate đến appointment detail nếu có appointmentId
+                                                    if (notification.appointmentId) {
+                                                        navigate(`/patient/history`);
+                                                    }
                                                 }}
                                             >
                                                 <div className="notification-icon">
-                                                    {notification.type === 'appointment_reminder' && '⏰'}
-                                                    {notification.type === 'appointment_confirmed' && '✓'}
-                                                    {notification.type === 'payment_success' && '💳'}
+                                                    {notification.type === 'APPOINTMENT_REMINDER_24H' && '⏰'}
+                                                    {notification.type === 'APPOINTMENT_REMINDER_1H' && '⏰'}
+                                                    {notification.type === 'APPOINTMENT_CONFIRMED' && '✓'}
+                                                    {notification.type === 'PAYMENT_SUCCESS' && '💳'}
+                                                    {notification.type === 'APPOINTMENT_CANCELLED' && '❌'}
+                                                    {!['APPOINTMENT_REMINDER_24H', 'APPOINTMENT_REMINDER_1H', 'APPOINTMENT_CONFIRMED', 'PAYMENT_SUCCESS', 'APPOINTMENT_CANCELLED'].includes(notification.type) && '📢'}
                                                 </div>
                                                 <div className="notification-content">
                                                     <div className="notification-title">{notification.title}</div>
                                                     <div className="notification-message">{notification.message}</div>
-                                                    <div className="notification-time">{notification.time}</div>
+                                                    <div className="notification-time">{notification.timeAgo || 'Vừa xong'}</div>
                                                 </div>
-                                                {!notification.read && (
+                                                {!notification.isRead && (
                                                     <div className="notification-dot"></div>
                                                 )}
                                             </div>
@@ -258,7 +294,7 @@ const PatientLayout = ({ children }) => {
                                 
                                 {notifications.length > 0 && (
                                     <div className="notification-footer">
-                                        <button className="mark-all-read">
+                                        <button className="mark-all-read" onClick={handleMarkAllAsRead}>
                                             Đánh dấu tất cả đã đọc
                                         </button>
                                     </div>

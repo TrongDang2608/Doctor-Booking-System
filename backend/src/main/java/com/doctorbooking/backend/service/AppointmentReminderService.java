@@ -25,6 +25,7 @@ public class AppointmentReminderService {
     private final AppointmentRepository appointmentRepository;
     private final FamilyAppointmentRepository familyAppointmentRepository;
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     /**
      * Chạy mỗi 30 phút để kiểm tra và gửi nhắc hẹn 24 giờ
@@ -155,6 +156,49 @@ public class AppointmentReminderService {
 
             logger.info("📧 Reminder email ({}h before) sent to: {} for appointment ID: {}", 
                        hoursBefore, patientEmail, appointment.getId());
+            
+            // Tạo thông báo trong hệ thống (ngoài email)
+            try {
+                String notificationTitle = String.format("Nhắc hẹn: Lịch khám còn %d giờ nữa", hoursBefore);
+                String notificationMessage;
+                
+                if (familyMemberName != null && !familyMemberName.trim().isEmpty()) {
+                    notificationMessage = String.format(
+                        "Lịch khám của %s với Bác sĩ %s sẽ diễn ra sau %d giờ nữa (%s lúc %s). Vui lòng có mặt trước 15 phút.",
+                        familyMemberName,
+                        appointment.getDoctor().getFullName(),
+                        hoursBefore,
+                        appointment.getAppointmentDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        appointment.getAppointmentTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                    );
+                } else {
+                    notificationMessage = String.format(
+                        "Lịch khám của bạn với Bác sĩ %s sẽ diễn ra sau %d giờ nữa (%s lúc %s). Vui lòng có mặt trước 15 phút.",
+                        appointment.getDoctor().getFullName(),
+                        hoursBefore,
+                        appointment.getAppointmentDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        appointment.getAppointmentTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                    );
+                }
+                
+                com.doctorbooking.backend.model.Notification.NotificationType notificationType = 
+                    hoursBefore == 24 
+                        ? com.doctorbooking.backend.model.Notification.NotificationType.APPOINTMENT_REMINDER_24H
+                        : com.doctorbooking.backend.model.Notification.NotificationType.APPOINTMENT_REMINDER_1H;
+                
+                notificationService.createNotification(
+                    appointment.getPatient().getId(),
+                    notificationTitle,
+                    notificationMessage,
+                    notificationType,
+                    appointment.getId()
+                );
+                logger.info("✅ Notification created for reminder ({}h before) - Appointment ID: {}", hoursBefore, appointment.getId());
+            } catch (Exception e) {
+                logger.error("❌ Error creating notification for reminder - Appointment ID: {}", appointment.getId(), e);
+                // Không throw để không làm gián đoạn quá trình gửi email
+            }
+            
         } catch (Exception e) {
             logger.error("❌ Error sending reminder email for appointment ID: {}", appointment.getId(), e);
             throw e; // Re-throw để transaction có thể rollback nếu cần

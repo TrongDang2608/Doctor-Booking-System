@@ -35,6 +35,7 @@ public class AppointmentService {
     private final DoctorRepository doctorRepository;
     private final WalletService walletService;
     private final EmailService emailService;
+    private final NotificationService notificationService;
     private final jakarta.persistence.EntityManager entityManager;
     private final FamilyAppointmentRepository familyAppointmentRepository;
     private final FamilyMemberRepository familyMemberRepository;
@@ -234,6 +235,26 @@ public class AppointmentService {
             }
         }
         
+        // Lấy thông tin family member nếu đặt cho người nhà (dùng cho cả email và notification)
+        String familyMemberName = null;
+        String familyMemberRelationship = null;
+        if (request.getFamilyMemberId() != null) {
+            try {
+                FamilyMember familyMember = familyMemberRepository.findByIdAndMainPatientId(
+                    request.getFamilyMemberId(), 
+                    patientId
+                );
+                if (familyMember != null) {
+                    familyMemberName = familyMember.getFullName();
+                    familyMemberRelationship = familyMember.getRelationship() != null 
+                        ? familyMember.getRelationship().name() 
+                        : null;
+                }
+            } catch (Exception e) {
+                logger.warn("Could not load family member for notification: {}", e.getMessage());
+            }
+        }
+        
         // Gửi email xác nhận đặt lịch thành công (lấy tất cả dữ liệu từ database)
         try {
             String patientEmail = patient.getUser().getEmail();
@@ -242,22 +263,6 @@ public class AppointmentService {
                 String priceFormatted = consultationFee != null && consultationFee.compareTo(java.math.BigDecimal.ZERO) > 0
                     ? String.format("%,d", consultationFee.longValue())
                     : "Miễn phí";
-                
-                // Lấy thông tin family member nếu đặt cho người nhà
-                String familyMemberName = null;
-                String familyMemberRelationship = null;
-                if (request.getFamilyMemberId() != null) {
-                    FamilyMember familyMember = familyMemberRepository.findByIdAndMainPatientId(
-                        request.getFamilyMemberId(), 
-                        patientId
-                    );
-                    if (familyMember != null) {
-                        familyMemberName = familyMember.getFullName();
-                        familyMemberRelationship = familyMember.getRelationship() != null 
-                            ? familyMember.getRelationship().name() 
-                            : null;
-                    }
-                }
                 
                 // Lấy payment status từ appointment
                 String paymentStatus = appointment.getPaymentStatus() != null 
@@ -290,6 +295,41 @@ public class AppointmentService {
         } catch (Exception e) {
             // Log error nhưng không throw exception để không làm gián đoạn quá trình đặt lịch
             logger.error("Failed to send appointment confirmation email for appointment: {}", appointment.getId(), e);
+        }
+        
+        // Tạo thông báo trong hệ thống (ngoài email)
+        try {
+            String notificationTitle = "Đặt lịch khám thành công";
+            String notificationMessage;
+            
+            if (familyMemberName != null && !familyMemberName.trim().isEmpty()) {
+                notificationMessage = String.format(
+                    "Bạn đã đặt lịch khám thành công cho %s với Bác sĩ %s vào %s lúc %s",
+                    familyMemberName,
+                    doctor.getFullName(),
+                    appointment.getAppointmentDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    appointment.getAppointmentTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                );
+            } else {
+                notificationMessage = String.format(
+                    "Bạn đã đặt lịch khám thành công với Bác sĩ %s vào %s lúc %s",
+                    doctor.getFullName(),
+                    appointment.getAppointmentDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    appointment.getAppointmentTime().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                );
+            }
+            
+            notificationService.createNotification(
+                patientId,
+                notificationTitle,
+                notificationMessage,
+                com.doctorbooking.backend.model.Notification.NotificationType.APPOINTMENT_CONFIRMED,
+                appointment.getId()
+            );
+            logger.info("✅ Notification created for appointment ID: {}", appointment.getId());
+        } catch (Exception e) {
+            // Log error nhưng không throw exception để không làm gián đoạn quá trình đặt lịch
+            logger.error("Failed to create notification for appointment: {}", appointment.getId(), e);
         }
         
         return AppointmentResponse.fromEntity(appointment);
