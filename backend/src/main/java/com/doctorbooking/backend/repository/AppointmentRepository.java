@@ -44,5 +44,31 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     
     @Query("SELECT a FROM Appointment a JOIN FETCH a.patient JOIN FETCH a.doctor WHERE a.patient.id = :patientId ORDER BY a.appointmentDate DESC, a.appointmentTime DESC")
     List<Appointment> findByPatientIdOrderByDateDesc(@Param("patientId") Long patientId);
+    
+    /**
+     * Tìm các appointments sắp tới cần gửi nhắc hẹn
+     * Status: PENDING hoặc CONFIRMED
+     * Chưa gửi nhắc hẹn 24h
+     */
+    @Query("SELECT a FROM Appointment a JOIN FETCH a.patient p JOIN FETCH p.user JOIN FETCH a.doctor " +
+           "WHERE a.status IN ('PENDING', 'CONFIRMED') " +
+           "AND a.reminder24hSent = false " +
+           "AND a.appointmentDate = :targetDate")
+    List<Appointment> findAppointmentsFor24hReminder(@Param("targetDate") java.time.LocalDate targetDate);
+    
+    /**
+     * Tìm các appointments sắp tới cần gửi nhắc hẹn 1h
+     * Status: PENDING hoặc CONFIRMED
+     * Chưa gửi nhắc hẹn 1h
+     */
+    @Query("SELECT a FROM Appointment a JOIN FETCH a.patient p JOIN FETCH p.user JOIN FETCH a.doctor " +
+           "WHERE a.status IN ('PENDING', 'CONFIRMED') " +
+           "AND a.reminder1hSent = false " +
+           "AND a.appointmentDate = :targetDate " +
+           "AND a.appointmentTime = :targetTime")
+    List<Appointment> findAppointmentsFor1hReminder(
+        @Param("targetDate") java.time.LocalDate targetDate,
+        @Param("targetTime") java.time.LocalTime targetTime
+    );
 }
 

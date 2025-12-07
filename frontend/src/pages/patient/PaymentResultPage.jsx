@@ -18,10 +18,13 @@ const PaymentResultPage = () => {
       '11': 'Đã hết hạn chờ thanh toán. Xin vui lòng thực hiện lại giao dịch.',
       '12': 'Thẻ/Tài khoản bị khóa.',
       '13': 'Nhập sai mật khẩu xác thực giao dịch (OTP). Quá 3 lần',
+      '24': 'Bạn đã hủy giao dịch',
       '51': 'Tài khoản không đủ số dư để thực hiện giao dịch.',
       '65': 'Tài khoản đã vượt quá hạn mức giao dịch trong ngày.',
+      '70': 'Giao dịch bị từ chối do thông tin thẻ/tài khoản không đúng hoặc đã hủy giao dịch',
       '75': 'Ngân hàng thanh toán đang bảo trì.',
       '79': 'Nhập sai mật khẩu thanh toán quá số lần quy định.',
+      '97': 'Checksum không hợp lệ',
       '99': 'Lỗi không xác định',
     };
     return errorMessages[code] || 'Thanh toán thất bại. Vui lòng thử lại sau.';
