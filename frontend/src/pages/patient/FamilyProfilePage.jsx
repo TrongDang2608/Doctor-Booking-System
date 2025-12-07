@@ -175,23 +175,15 @@ const FamilyProfilePage = () => {
   const handleDeleteMember = async (member) => {
     if (deletingMemberId) return; // Prevent multiple deletes
     
-    // Kiểm tra nếu là main account
+    // Không cho phép xóa tài khoản chính
     if (member.isMainAccount) {
-      // Đếm số main accounts
-      const mainAccountCount = familyMembers.filter(m => m.isMainAccount).length;
-      
-      if (mainAccountCount <= 1) {
-        alert('Không thể xóa tài khoản chính duy nhất. Phải có ít nhất 1 tài khoản chính.');
-        return;
-      }
-      
-      if (!window.confirm(`Bạn có chắc muốn xóa tài khoản chính "${member.fullName}"?\n\nCòn ${mainAccountCount - 1} tài khoản chính khác.`)) {
-        return;
-      }
-    } else {
-      if (!window.confirm(`Bạn có chắc muốn xóa hồ sơ của ${member.fullName}?`)) {
-        return;
-      }
+      alert('Không thể xóa tài khoản chính. Tài khoản chính là bắt buộc và không thể xóa.');
+      return;
+    }
+    
+    // Xác nhận xóa cho thành viên khác
+    if (!window.confirm(`Bạn có chắc muốn xóa hồ sơ của ${member.fullName}?`)) {
+      return;
     }
     
     try {
@@ -424,34 +416,37 @@ const FamilyProfilePage = () => {
                 )}
               </div>
 
-              <div className="member-actions">
-                <button 
-                  className="btn-action btn-edit"
-                  onClick={() => handleEditMember(member)}
-                  disabled={member.isMainAccount || deletingMemberId || submitting}
-                >
-                  <span style={{ marginRight: '6px', fontSize: '14px' }}>✏️</span>
-                  Sửa
-                </button>
-                <button 
-                  className="btn-action btn-delete"
-                  onClick={() => handleDeleteMember(member)}
-                  disabled={deletingMemberId || submitting}
-                  title={member.isMainAccount ? 'Có thể xóa nếu còn tài khoản chính khác' : ''}
-                >
-                  {deletingMemberId === member.id ? (
-                    <>
-                      <div className="loading-spinner-small"></div>
-                      Đang xóa...
-                    </>
-                  ) : (
-                    <>
-                      <span style={{ marginRight: '6px', fontSize: '14px' }}>🗑️</span>
-                      Xóa
-                    </>
-                  )}
-                </button>
-              </div>
+              {/* Chỉ hiển thị nút Sửa và Xóa nếu KHÔNG phải tài khoản chính */}
+              {!member.isMainAccount && (
+                <div className="member-actions">
+                  <button 
+                    className="btn-action btn-edit"
+                    onClick={() => handleEditMember(member)}
+                    disabled={deletingMemberId || submitting}
+                  >
+                    <span style={{ marginRight: '6px', fontSize: '14px' }}>✏️</span>
+                    Sửa
+                  </button>
+                  <button 
+                    className="btn-action btn-delete"
+                    onClick={() => handleDeleteMember(member)}
+                    disabled={deletingMemberId || submitting}
+                    title="Xóa thành viên này"
+                  >
+                    {deletingMemberId === member.id ? (
+                      <>
+                        <div className="loading-spinner-small"></div>
+                        Đang xóa...
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ marginRight: '6px', fontSize: '14px' }}>🗑️</span>
+                        Xóa
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           ))}
             </div>
