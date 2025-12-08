@@ -92,8 +92,27 @@ api.interceptors.response.use(
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
+    } else if (error.response?.status === 403) {
+      // Forbidden - check if it's due to expired JWT token
+      // If the error message contains "JWT expired" or "expired", treat it as auth issue
+      const errorMessage = error.response?.data?.message || error.response?.data || '';
+      const errorString = JSON.stringify(errorMessage).toLowerCase();
+      
+      if (errorString.includes('expired') || errorString.includes('jwt')) {
+        // JWT expired - clear all tokens and redirect to login
+        console.warn('⚠️ JWT token expired. Clearing tokens and redirecting to login...');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        ['ADMIN', 'DOCTOR', 'PATIENT'].forEach(role => {
+          localStorage.removeItem(`token_${role}`);
+          localStorage.removeItem(`refreshToken_${role}`);
+          localStorage.removeItem(`user_${role}`);
+        });
+        window.location.href = '/login';
+      }
+      // Otherwise, it's a legitimate permission issue - let component handle it
     }
-    
     return Promise.reject(error);
   }
 );

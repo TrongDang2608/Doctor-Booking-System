@@ -24,6 +24,7 @@ public class WalletService {
     private static final Logger logger = LoggerFactory.getLogger(WalletService.class);
     private final PatientRepository patientRepository;
     private final WalletTransactionRepository walletTransactionRepository;
+    private final NotificationService notificationService;
 
     /**
      * Lấy thông tin ví của patient
@@ -104,6 +105,31 @@ public class WalletService {
         WalletTransaction saved = walletTransactionRepository.save(transaction);
         logger.info("Transaction completed and saved: id={}, status={}, newBalance={}, newPoints={}", 
                 saved.getId(), saved.getStatus(), patient.getWalletBalance(), patient.getLoyaltyPoints());
+        
+        // Tạo thông báo nạp tiền thành công (không gửi email)
+        try {
+            String notificationTitle = "Nạp tiền vào ví thành công";
+            String amountFormatted = String.format("%,d", amount.longValue());
+            String notificationMessage = String.format(
+                "Bạn đã nạp thành công %s VNĐ vào ví sức khỏe. Số dư hiện tại: %s VNĐ. Bạn nhận được %d điểm tích lũy.",
+                amountFormatted,
+                String.format("%,d", patient.getWalletBalance().longValue()),
+                pointsEarned
+            );
+            
+            notificationService.createNotification(
+                patient.getId(),
+                notificationTitle,
+                notificationMessage,
+                com.doctorbooking.backend.model.Notification.NotificationType.WALLET_DEPOSIT_SUCCESS,
+                null // Không liên quan đến appointment
+            );
+            logger.info("✅ Notification created for wallet deposit: PatientID={}, Amount={}", patient.getId(), amount);
+        } catch (Exception e) {
+            // Log error nhưng không throw exception để không làm gián đoạn quá trình nạp tiền
+            logger.error("Failed to create notification for wallet deposit: {}", transaction.getReferenceId(), e);
+        }
+        
         return saved;
     }
 

@@ -60,6 +60,12 @@ public class Appointment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "reminder_24h_sent", nullable = false)
+    private Boolean reminder24hSent = false;
+
+    @Column(name = "reminder_1h_sent", nullable = false)
+    private Boolean reminder1hSent = false;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

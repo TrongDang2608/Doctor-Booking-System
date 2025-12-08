@@ -1,10 +1,10 @@
 package com.doctorbooking.backend.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import jakarta.annotation.PostConstruct;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -33,6 +33,35 @@ public class VNPayService {
     @Value("${vnpay.appointmentReturnUrl}")
     private String appointmentReturnUrl;
 
+    @PostConstruct
+    public void init() {
+        // Trim và validate VNPAY configuration
+        if (hashSecret != null) {
+            hashSecret = hashSecret.trim();
+        }
+        if (tmnCode != null) {
+            tmnCode = tmnCode.trim();
+        }
+        
+        logger.info("=== VNPAY Service Initialized ===");
+        logger.info("Terminal Code: {}", tmnCode);
+        logger.info("Hash Secret Length: {}", hashSecret != null ? hashSecret.length() : 0);
+        logger.info("Hash Secret (first 10 chars): {}", hashSecret != null && hashSecret.length() > 10 
+            ? hashSecret.substring(0, 10) + "..." : (hashSecret != null ? hashSecret : "NULL"));
+        logger.info("VNPAY URL: {}", vnpUrl);
+        logger.info("Return URL: {}", returnUrl);
+        logger.info("Appointment Return URL: {}", appointmentReturnUrl);
+        
+        // Validate configuration
+        if (hashSecret == null || hashSecret.isEmpty()) {
+            logger.error("❌ VNPAY Hash Secret is NULL or EMPTY! Please check your .env file.");
+        }
+        if (tmnCode == null || tmnCode.isEmpty()) {
+            logger.error("❌ VNPAY Terminal Code is NULL or EMPTY! Please check your .env file.");
+        }
+        logger.info("===================================");
+    }
+
     /**
      * Tạo payment URL cho VNPAY (wallet top-up)
      */
@@ -56,6 +85,16 @@ public class VNPayService {
             String vnp_HashSecret = hashSecret;
             String vnp_Url = vnpUrl;
             String vnp_ReturnUrl = customReturnUrl;
+
+            // Log để kiểm tra Secret Key
+            logger.info("=== VNPAY Payment URL Creation ===");
+            logger.info("Terminal Code: {}", vnp_TmnCode);
+            logger.info("Hash Secret (first 10 chars): {}", vnp_HashSecret != null && vnp_HashSecret.length() > 10 
+                ? vnp_HashSecret.substring(0, 10) + "..." : "NULL or EMPTY");
+            logger.info("Return URL: {}", vnp_ReturnUrl);
+            logger.info("Amount: {} (will be multiplied by 100: {})", amount, amount * 100);
+            logger.info("Order Info: {}", orderInfo);
+            logger.info("Order ID: {}", orderId);
 
             Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", "2.1.0");
@@ -82,36 +121,58 @@ public class VNPayService {
             // Sắp xếp params theo thứ tự alphabet
             List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
             Collections.sort(fieldNames);
+            
+            // Build hash data (theo tài liệu VNPAY: chỉ encode fieldValue, không encode fieldName)
             StringBuilder hashData = new StringBuilder();
             StringBuilder query = new StringBuilder();
-            Iterator<String> itr = fieldNames.iterator();
-            while (itr.hasNext()) {
-                String fieldName = itr.next();
+            
+            List<String> validFields = new ArrayList<>();
+            for (String fieldName : fieldNames) {
                 String fieldValue = vnp_Params.get(fieldName);
-                if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                    // Build hash data
-                    hashData.append(fieldName);
-                    hashData.append('=');
-                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                    // Build query
-                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
-                    query.append('=');
-                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                    if (itr.hasNext()) {
-                        query.append('&');
-                        hashData.append('&');
-                    }
+                if (fieldValue != null && !fieldValue.isEmpty()) {
+                    validFields.add(fieldName);
                 }
             }
+            
+            for (int i = 0; i < validFields.size(); i++) {
+                String fieldName = validFields.get(i);
+                String fieldValue = vnp_Params.get(fieldName);
+                
+                // Build hash data (chỉ encode fieldValue)
+                String encodedValue = URLEncoder.encode(fieldValue, StandardCharsets.UTF_8);
+                hashData.append(fieldName);
+                hashData.append('=');
+                hashData.append(encodedValue);
+                
+                // Build query (encode cả fieldName và fieldValue)
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8));
+                query.append('=');
+                query.append(encodedValue);
+                
+                // Thêm & nếu không phải field cuối cùng
+                if (i < validFields.size() - 1) {
+                    hashData.append('&');
+                    query.append('&');
+                }
+            }
+            
             String queryUrl = query.toString();
-            String vnp_SecureHash = hmacSHA512(vnp_HashSecret, hashData.toString());
+            String hashDataString = hashData.toString();
+            String vnp_SecureHash = hmacSHA512(vnp_HashSecret, hashDataString);
             queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
             String paymentUrl = vnp_Url + "?" + queryUrl;
 
-            logger.info("Created VNPAY payment URL for order: {}", orderId);
+            // Log chi tiết để debug
+            logger.info("=== Hash Data Construction ===");
+            logger.info("Hash Data String: {}", hashDataString);
+            logger.info("Secure Hash: {}", vnp_SecureHash);
+            logger.info("Final Payment URL: {}", paymentUrl);
+            logger.info("===============================");
+            
             return paymentUrl;
         } catch (Exception e) {
             logger.error("Error creating VNPAY payment URL", e);
+            e.printStackTrace();
             throw new RuntimeException("Failed to create payment URL", e);
         }
     }
@@ -133,9 +194,10 @@ public class VNPayService {
                 String fieldName = itr.next();
                 String fieldValue = params.get(fieldName);
                 if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                    // Build hash data (theo tài liệu VNPAY: chỉ encode fieldValue, không encode fieldName)
                     hashData.append(fieldName);
                     hashData.append('=');
-                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                     if (itr.hasNext()) {
                         hashData.append('&');
                     }
@@ -143,11 +205,18 @@ public class VNPayService {
             }
 
             String vnp_HashSecret = hashSecret;
-            String calculatedHash = hmacSHA512(vnp_HashSecret, hashData.toString());
+            String hashDataString = hashData.toString();
+            String calculatedHash = hmacSHA512(vnp_HashSecret, hashDataString);
 
             boolean isValid = vnp_SecureHash.equals(calculatedHash);
             if (!isValid) {
-                logger.warn("Invalid VNPAY checksum. Expected: {}, Got: {}", calculatedHash, vnp_SecureHash);
+                logger.warn("❌ Invalid VNPAY checksum!");
+                logger.warn("Hash Data: {}", hashDataString);
+                logger.warn("Expected Hash: {}", calculatedHash);
+                logger.warn("Received Hash: {}", vnp_SecureHash);
+                logger.warn("Terminal Code used: {}", tmnCode);
+            } else {
+                logger.info("✅ VNPAY checksum verified successfully");
             }
             return isValid;
         } catch (Exception e) {
