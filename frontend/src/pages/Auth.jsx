@@ -245,7 +245,7 @@ const Auth = () => {
               <p className="auth-subtitle">Sign up to get started</p>
 
               <div className="form-group">
-                <label htmlFor="register-fullName">Full Name *</label>
+                <label htmlFor="register-fullName">Full Name <span className="text-red-500">*</span></label>
                 <input
                   id="register-fullName"
                   type="text"
@@ -258,7 +258,7 @@ const Auth = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="register-username">Username *</label>
+                <label htmlFor="register-username">Username <span className="text-red-500">*</span></label>
                 <input
                   id="register-username"
                   type="text"
@@ -272,7 +272,7 @@ const Auth = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="register-email">Email *</label>
+                <label htmlFor="register-email">Email <span className="text-red-500">*</span></label>
                 <input
                   id="register-email"
                   type="email"
@@ -285,7 +285,7 @@ const Auth = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="register-password">Password *</label>
+                <label htmlFor="register-password">Password <span className="text-red-500">*</span></label>
                 <input
                   id="register-password"
                   type="password"

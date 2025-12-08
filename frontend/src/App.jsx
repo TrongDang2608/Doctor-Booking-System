@@ -16,15 +16,17 @@ import NotFound from './pages/NotFound';
 
 // Import Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard';
-import DoctorList from './pages/admin/DoctorList';
-import DoctorManagement from './pages/admin/DoctorManagement';
-import PatientList from './pages/admin/PatientList';
-import PatientManagement from './pages/admin/PatientManagement';
-import AppointmentList from './pages/admin/AppointmentList';
+import DoctorList from './pages/admin/doctors/DoctorList';
+import DoctorForm from './pages/admin/doctors/DoctorForm';
+import DoctorDetail from './pages/admin/doctors/DoctorDetail';
+import PatientList from './pages/admin/patients/PatientList';
+import PatientForm from './pages/admin/patients/PatientForm';
+import PatientDetail from './pages/admin/patients/PatientDetail';
+import UserList from './pages/admin/users/UserList';
+import UserForm from './pages/admin/users/UserForm';
+import UserDetail from './pages/admin/users/UserDetail';
 import AppointmentManagement from './pages/admin/AppointmentManagement';
-import FeedbackList from './pages/admin/FeedbackList';
 import FeedbackManagement from './pages/admin/FeedbackManagement';
-import UserManagement from './pages/admin/UserManagement';
 
 // Import Doctor pages
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
@@ -83,32 +85,26 @@ function App() {
               <ProtectedRoute requiredRole="ADMIN">
                 <Routes>
                   <Route path="dashboard" element={<AdminDashboard />} />
-                  <Route path="users" element={<UserManagement />} />
-                  <Route path="users/create" element={<UserManagement />} />
-                  <Route path="users/:id" element={<UserManagement />} />
-                  <Route path="users/:id/edit" element={<UserManagement />} />
-                  <Route path="users/:id/delete" element={<UserManagement />} />
+                  <Route path="users" element={<UserList />} />
+                  <Route path="users/create" element={<UserForm />} />
+                  <Route path="users/:id" element={<UserDetail />} />
+                  <Route path="users/:id/edit" element={<UserForm />} />
                   <Route path="doctors" element={<DoctorList />} />
-                  <Route path="doctors/create" element={<DoctorManagement />} />
-                  <Route path="doctors/:id" element={<DoctorManagement />} />
-                  <Route path="doctors/:id/edit" element={<DoctorManagement />} />
-                  <Route path="doctors/:id/delete" element={<DoctorManagement />} />
-                  <Route path="patients" element={<PatientManagement />} />
-                  <Route path="patients/create" element={<PatientManagement />} />
-                  <Route path="patients/:id" element={<PatientManagement />} />
-                  <Route path="patients/:id/edit" element={<PatientManagement />} />
-                  <Route path="patients/:id/delete" element={<PatientManagement />} />
-                  <Route path="patients-old" element={<PatientList />} />
+                  <Route path="doctors/create" element={<DoctorForm />} />
+                  <Route path="doctors/:id" element={<DoctorDetail />} />
+                  <Route path="doctors/:id/edit" element={<DoctorForm />} />
+                  <Route path="patients" element={<PatientList />} />
+                  <Route path="patients/create" element={<PatientForm />} />
+                  <Route path="patients/:id" element={<PatientDetail />} />
+                  <Route path="patients/:id/edit" element={<PatientForm />} />
                   <Route path="appointments" element={<AppointmentManagement />} />
                   <Route path="appointments/:id" element={<AppointmentManagement />} />
                   <Route path="appointments/:id/edit" element={<AppointmentManagement />} />
                   <Route path="appointments/:id/delete" element={<AppointmentManagement />} />
-                  <Route path="appointments-old" element={<AppointmentList />} />
                   <Route path="feedbacks" element={<FeedbackManagement />} />
                   <Route path="feedbacks/:id" element={<FeedbackManagement />} />
                   <Route path="feedbacks/:id/reply" element={<FeedbackManagement />} />
                   <Route path="feedbacks/:id/delete" element={<FeedbackManagement />} />
-                  <Route path="feedbacks-old" element={<FeedbackList />} />
                   <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                 </Routes>
               </ProtectedRoute>

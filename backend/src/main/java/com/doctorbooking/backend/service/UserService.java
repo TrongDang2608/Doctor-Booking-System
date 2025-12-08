@@ -5,7 +5,11 @@ import com.doctorbooking.backend.dto.request.UpdateUserRequest;
 import com.doctorbooking.backend.dto.request.UserRequest;
 import com.doctorbooking.backend.dto.response.UserResponse;
 import com.doctorbooking.backend.model.User;
+import com.doctorbooking.backend.model.Doctor;
+import com.doctorbooking.backend.model.Patient;
 import com.doctorbooking.backend.repository.UserRepository;
+import com.doctorbooking.backend.repository.DoctorRepository;
+import com.doctorbooking.backend.repository.PatientRepository;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,10 +28,17 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DoctorRepository doctorRepository;
+    private final PatientRepository patientRepository;
 
-    public UserService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, 
+                      @Lazy PasswordEncoder passwordEncoder,
+                      DoctorRepository doctorRepository,
+                      PatientRepository patientRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.doctorRepository = doctorRepository;
+        this.patientRepository = patientRepository;
     }
 
     @Override
@@ -161,11 +173,24 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         
         try {
+            // Delete associated doctor if exists
+            Optional<Doctor> doctor = doctorRepository.findByUserId(id);
+            if (doctor.isPresent()) {
+                doctorRepository.delete(doctor.get());
+            }
+            
+            // Delete associated patient if exists
+            Optional<Patient> patient = patientRepository.findByUserId(id);
+            if (patient.isPresent()) {
+                patientRepository.delete(patient.get());
+            }
+            
+            // Now delete the user
             userRepository.delete(user);
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Cannot delete user: User has associated data (patients, doctors, or appointments). Please remove associated data first.");
+            throw new RuntimeException("Không thể xóa người dùng: Người dùng có dữ liệu liên quan (lịch hẹn, phản hồi). Vui lòng xóa các dữ liệu liên quan trước.");
         } catch (Exception e) {
-            throw new RuntimeException("Error deleting user: " + e.getMessage());
+            throw new RuntimeException("Lỗi khi xóa người dùng: " + e.getMessage());
         }
     }
 

@@ -123,7 +123,7 @@ const EPrescription = () => {
               <div key={index} className="medication-item">
                 <div className="medication-fields">
                   <div className="field-group">
-                    <label>Tên thuốc *</label>
+                    <label>Tên thuốc <span className="text-red-500">*</span></label>
                     <input
                       type="text"
                       value={med.name}
@@ -133,7 +133,7 @@ const EPrescription = () => {
                     />
                   </div>
                   <div className="field-group">
-                    <label>Liều lượng *</label>
+                    <label>Liều lượng <span className="text-red-500">*</span></label>
                     <input
                       type="text"
                       value={med.dosage}
@@ -143,7 +143,7 @@ const EPrescription = () => {
                     />
                   </div>
                   <div className="field-group">
-                    <label>Tần suất *</label>
+                    <label>Tần suất <span className="text-red-500">*</span></label>
                     <input
                       type="text"
                       value={med.frequency}

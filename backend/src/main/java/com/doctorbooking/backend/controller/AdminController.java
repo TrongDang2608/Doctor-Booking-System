@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,24 +46,32 @@ public class AdminController {
     }
 
     @PostMapping("/doctors")
-    public ResponseEntity<DoctorResponse> createDoctor(@Valid @RequestBody DoctorRequest request) {
+    public ResponseEntity<?> createDoctor(@Valid @RequestBody DoctorRequest request) {
         try {
             DoctorResponse doctor = adminService.createDoctor(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(doctor);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+            errorResponse.put("timestamp", java.time.LocalDateTime.now());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 
     @PutMapping("/doctors/{id}")
-    public ResponseEntity<DoctorResponse> updateDoctor(
+    public ResponseEntity<?> updateDoctor(
             @PathVariable Long id,
             @Valid @RequestBody DoctorRequest request) {
         try {
             DoctorResponse doctor = adminService.updateDoctor(id, request);
             return ResponseEntity.ok(doctor);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+            errorResponse.put("timestamp", java.time.LocalDateTime.now());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 

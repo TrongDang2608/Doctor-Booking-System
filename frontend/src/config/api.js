@@ -32,18 +32,10 @@ api.interceptors.request.use(
       // CRITICAL: If role is determined from URL, ONLY use token for that specific role
       // Do NOT fallback to other roles' tokens to avoid 403 errors
       token = localStorage.getItem(`token_${role}`);
-      if (token) {
-        tokenSource = `token_${role}`;
-        console.log(`✅ API Request - Using ${tokenSource} for ${config.url} (role: ${role})`);
+      if (!token) {
+        tokenSource = null;
       } else {
-        // Role-specific token not found - log warning but don't use wrong token
-        console.warn(`⚠️ API Request - Role ${role} token not found for ${config.url}. Token will not be added.`);
-        console.warn(`⚠️ Available tokens:`, {
-          hasToken_ADMIN: !!localStorage.getItem('token_ADMIN'),
-          hasToken_DOCTOR: !!localStorage.getItem('token_DOCTOR'),
-          hasToken_PATIENT: !!localStorage.getItem('token_PATIENT'),
-          hasToken_default: !!localStorage.getItem('token')
-        });
+        tokenSource = `token_${role}`;
       }
     } else {
       // For non-role-specific endpoints (e.g., /auth/**), use fallback logic
@@ -53,7 +45,6 @@ api.interceptors.request.use(
         token = localStorage.getItem(`token_${r}`);
         if (token) {
           tokenSource = `token_${r} (fallback)`;
-          console.log(`🔵 API Request - Using ${tokenSource} for ${config.url}`);
           break;
         }
       }
@@ -63,34 +54,12 @@ api.interceptors.request.use(
         token = localStorage.getItem('token');
         if (token) {
           tokenSource = 'token (default fallback)';
-          console.log(`🔵 API Request - Using ${tokenSource} for ${config.url}`);
         }
       }
     }
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('🔵 API Request - Token added to headers:', {
-        url: config.url,
-        method: config.method,
-        role: role || 'none (non-role endpoint)',
-        tokenSource: tokenSource,
-        hasToken: !!token,
-        tokenLength: token.length
-      });
-    } else {
-      if (role) {
-        console.error(`❌ API Request - No ${role} token found. Request will fail with 401/403:`, {
-          url: config.url,
-          method: config.method,
-          requiredRole: role
-        });
-      } else {
-        console.warn('⚠️ API Request - No token found in localStorage:', {
-          url: config.url,
-          method: config.method
-        });
-      }
     }
     return config;
   },
@@ -103,7 +72,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Check if JWT expired (401 or 403 with expired token error)
+    const isJwtExpired = error.response?.status === 401 || 
+                         (error.response?.status === 403 && 
+                          error.response?.data?.message?.includes('JWT expired'));
+    
+    if (isJwtExpired) {
       // Unauthorized - clear all tokens and redirect to login
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
@@ -113,10 +87,13 @@ api.interceptors.response.use(
         localStorage.removeItem(`refreshToken_${role}`);
         localStorage.removeItem(`user_${role}`);
       });
-      window.location.href = '/login';
+      
+      // Redirect to login page
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
     }
-    // Note: 403 Forbidden is handled by the component, not here
-    // because it might be a legitimate permission issue, not an auth issue
+    
     return Promise.reject(error);
   }
 );
