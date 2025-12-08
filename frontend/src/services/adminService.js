@@ -23,10 +23,6 @@ export const adminService = {
     return response.data;
   },
 
-  deleteDoctor: async (id) => {
-    await api.delete(`/admin/doctors/${id}`);
-  },
-
   // Patient Management
   searchPatients: async (search) => {
     const params = search ? { search } : {};
@@ -52,14 +48,6 @@ export const adminService = {
     try {
       const response = await api.put(`/admin/patients/${id}`, patientData);
       return response.data;
-    } catch (error) {
-      throw error.response?.data || error.message;
-    }
-  },
-
-  deletePatient: async (id) => {
-    try {
-      await api.delete(`/admin/patients/${id}`);
     } catch (error) {
       throw error.response?.data || error.message;
     }
