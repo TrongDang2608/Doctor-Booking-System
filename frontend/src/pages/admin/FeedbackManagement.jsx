@@ -449,7 +449,7 @@ const FeedbackManagement = () => {
             
             <form onSubmit={handleReplySubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nội dung phản hồi *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nội dung phản hồi <span className="text-red-500">*</span></label>
                 <textarea
                   value={replyData.replyContent}
                   onChange={(e) => setReplyData({...replyData, replyContent: e.target.value})}

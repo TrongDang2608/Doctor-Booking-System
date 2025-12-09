@@ -185,7 +185,7 @@ const FamilyAccount = () => {
             </div>
             <form onSubmit={handleAddMember} className="add-member-form">
               <div className="form-group">
-                <label>Họ tên *</label>
+                <label>Họ tên <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   required
@@ -194,7 +194,7 @@ const FamilyAccount = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Ngày sinh *</label>
+                <label>Ngày sinh <span className="text-red-500">*</span></label>
                 <input
                   type="date"
                   required
@@ -203,7 +203,7 @@ const FamilyAccount = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Giới tính *</label>
+                <label>Giới tính <span className="text-red-500">*</span></label>
                 <select
                   required
                   value={newMember.gender}
@@ -215,7 +215,7 @@ const FamilyAccount = () => {
                 </select>
               </div>
               <div className="form-group">
-                <label>Quan hệ *</label>
+                <label>Quan hệ <span className="text-red-500">*</span></label>
                 <select
                   required
                   value={newMember.relationship}

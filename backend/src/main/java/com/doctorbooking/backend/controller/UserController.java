@@ -64,12 +64,16 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         try {
             userService.deleteUser(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("status", HttpStatus.NOT_FOUND.value());
+            errorResponse.put("timestamp", java.time.LocalDateTime.now());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
 

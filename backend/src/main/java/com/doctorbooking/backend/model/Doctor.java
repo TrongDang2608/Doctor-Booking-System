@@ -50,6 +50,9 @@ public class Doctor {
     @Column(name = "consultation_fee", precision = 10, scale = 2)
     private java.math.BigDecimal consultationFee = java.math.BigDecimal.ZERO;
 
+    @Column(name = "buffer_time")
+    private Integer bufferTime = 15; // Default 15 minutes buffer time
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
