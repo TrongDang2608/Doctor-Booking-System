@@ -182,10 +182,7 @@ const FeedbackManagement = () => {
 
     try {
       const updateData = {
-        id: editingFeedback.id,
-        adminReply: replyData.replyContent,
-        status: replyData.status,
-        repliedAt: new Date().toISOString()
+        adminReply: replyData.replyContent.trim()
       };
 
       await adminService.replyFeedback(editingFeedback.id, updateData);
@@ -268,6 +265,7 @@ const FeedbackManagement = () => {
             </div>
           </div>
         </div>
+        <ToastContainer />
       </AdminLayout>
     );
   };
@@ -472,17 +470,21 @@ const FeedbackManagement = () => {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="flex items-center gap-3 pt-4 border-t">
                 <button
                   type="button"
                   onClick={handleFormClose}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                  style={{ borderRadius: '0.5rem', minHeight: '44px', height: '44px', margin: 0 }}
+                  className="flex-1 px-4 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400 font-medium transition-all flex items-center justify-center"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  style={{ backgroundColor: '#16a34a', borderColor: '#16a34a', color: '#ffffff', borderWidth: '2px', borderRadius: '0.5rem', minHeight: '44px', height: '44px', margin: 0 }}
+                  onMouseEnter={(e) => { e.target.style.backgroundColor = '#15803d'; e.target.style.borderColor = '#15803d'; }}
+                  onMouseLeave={(e) => { e.target.style.backgroundColor = '#16a34a'; e.target.style.borderColor = '#16a34a'; }}
+                  className="flex-1 px-4 py-2.5 font-medium transition-all flex items-center justify-center gap-2"
                 >
                   <i data-feather="send" className="w-4 h-4"></i>
                   {editingFeedback?.adminReply ? 'Cập nhật phản hồi' : 'Gửi phản hồi'}

@@ -205,5 +205,27 @@ public class AdminController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PutMapping("/feedbacks/{id}/reply")
+    public ResponseEntity<FeedbackResponse> replyFeedback(
+            @PathVariable Long id,
+            @RequestBody @Valid com.doctorbooking.backend.dto.request.ReplyFeedbackRequest request) {
+        try {
+            FeedbackResponse feedback = adminService.replyFeedback(id, request);
+            return ResponseEntity.ok(feedback);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @DeleteMapping("/feedbacks/{id}")
+    public ResponseEntity<Void> deleteFeedback(@PathVariable Long id) {
+        try {
+            adminService.deleteFeedback(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
 

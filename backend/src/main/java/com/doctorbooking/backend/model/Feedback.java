@@ -36,6 +36,12 @@ public class Feedback {
     @Column(nullable = false)
     private FeedbackStatus status = FeedbackStatus.PENDING;
 
+    @Column(name = "admin_reply", columnDefinition = "TEXT")
+    private String adminReply;
+
+    @Column(name = "replied_at")
+    private LocalDateTime repliedAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -54,7 +60,7 @@ public class Feedback {
     }
 
     public enum FeedbackStatus {
-        PENDING, READ
+        PENDING, READ, REPLIED
     }
 }
 
