@@ -74,22 +74,37 @@ public class DoctorController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         try {
             Long doctorId = getCurrentDoctorId();
+            System.out.println("🔍 Doctor ID: " + doctorId);
             
             if (date != null) {
-                List<AppointmentResponse> appointments = appointmentService.getAppointmentsByDate(date)
-                        .stream()
-                        .filter(a -> a.getDoctorId().equals(doctorId))
+                List<AppointmentResponse> allByDate = appointmentService.getAppointmentsByDate(date);
+                System.out.println("📅 Total appointments on " + date + ": " + allByDate.size());
+                
+                List<AppointmentResponse> appointments = allByDate.stream()
+                        .filter(a -> {
+                            System.out.println("  - Appointment ID: " + a.getId() + ", Doctor ID: " + a.getDoctorId());
+                            return a.getDoctorId().equals(doctorId);
+                        })
                         .toList();
+                System.out.println("✅ Filtered appointments: " + appointments.size());
                 return ResponseEntity.ok(appointments);
             }
             
             // Get all appointments for this doctor
-            List<AppointmentResponse> allAppointments = appointmentService.getAllAppointments()
-                    .stream()
-                    .filter(a -> a.getDoctorId().equals(doctorId))
+            List<AppointmentResponse> allAppointments = appointmentService.getAllAppointments();
+            System.out.println("📋 Total appointments in system: " + allAppointments.size());
+            
+            List<AppointmentResponse> filtered = allAppointments.stream()
+                    .filter(a -> {
+                        System.out.println("  - Appointment ID: " + a.getId() + ", Doctor ID: " + a.getDoctorId() + ", Patient: " + a.getPatientName());
+                        return a.getDoctorId().equals(doctorId);
+                    })
                     .toList();
-            return ResponseEntity.ok(allAppointments);
+            System.out.println("✅ Filtered appointments for doctor " + doctorId + ": " + filtered.size());
+            return ResponseEntity.ok(filtered);
         } catch (RuntimeException e) {
+            System.err.println("❌ Error getting appointments: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
