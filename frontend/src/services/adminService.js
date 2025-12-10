@@ -82,6 +82,15 @@ export const adminService = {
     }
   },
 
+  cancelAppointment: async (id, cancellationReason) => {
+    try {
+      const response = await api.post(`/admin/appointments/${id}/cancel`, { cancellationReason });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   // Feedback Management
   getAllFeedbacks: async (status) => {
     const params = status ? { status } : {};
@@ -94,23 +103,29 @@ export const adminService = {
     return response.data;
   },
 
-  markFeedbackAsRead: async (id) => {
-    const response = await api.put(`/admin/feedbacks/${id}/read`);
+  getFeedbacksByDoctor: async (doctorId) => {
+    const response = await api.get(`/admin/feedbacks/doctor/${doctorId}`);
     return response.data;
   },
 
-  replyFeedback: async (id, replyData) => {
+  getFeedbacksByPatient: async (patientId) => {
+    const response = await api.get(`/admin/feedbacks/patient/${patientId}`);
+    return response.data;
+  },
+
+  hideFeedback: async (id) => {
     try {
-      const response = await api.put(`/admin/feedbacks/${id}/reply`, replyData);
+      const response = await api.put(`/admin/feedbacks/${id}/hide`);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
     }
   },
 
-  deleteFeedback: async (id) => {
+  unhideFeedback: async (id) => {
     try {
-      await api.delete(`/admin/feedbacks/${id}`);
+      const response = await api.put(`/admin/feedbacks/${id}/unhide`);
+      return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
     }

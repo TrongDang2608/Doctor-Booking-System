@@ -4,8 +4,11 @@ import { doctorService } from '../../services/doctorService';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import TreatmentForm from '../../components/doctor/TreatmentForm';
+import CancelAppointmentModal from '../../components/doctor/CancelAppointmentModal';
 import { formatDate } from '../../utils/formatDate';
 import { formatTime } from '../../utils/formatTime';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './DoctorAppointments.css';
 
 const DoctorAppointments = () => {
@@ -16,6 +19,8 @@ const DoctorAppointments = () => {
   const [showTreatmentForm, setShowTreatmentForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [processingId, setProcessingId] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [appointmentToCancel, setAppointmentToCancel] = useState(null);
 
   useEffect(() => {
     loadAppointments();
@@ -62,6 +67,31 @@ const DoctorAppointments = () => {
     setShowTreatmentForm(false);
     setSelectedAppointment(null);
     loadAppointments();
+  };
+
+  const handleCancelClick = (appointment) => {
+    setAppointmentToCancel(appointment);
+    setShowCancelModal(true);
+  };
+
+  const handleConfirmCancel = async (cancellationReason) => {
+    try {
+      await doctorService.cancelAppointment(appointmentToCancel.id, cancellationReason);
+      setShowCancelModal(false);
+      setAppointmentToCancel(null);
+      setError('');
+      toast.success('Đã hủy lịch hẹn thành công!', {
+        position: "top-right",
+        autoClose: 2000
+      });
+      // Delay reload để toast kịp hiển thị
+      setTimeout(() => {
+        loadAppointments();
+      }, 300);
+    } catch (err) {
+      // Let the modal handle the error display
+      throw err;
+    }
   };
 
   const getStatusColor = (status) => {
@@ -154,21 +184,39 @@ const DoctorAppointments = () => {
                         <td className="actions-cell">
                           <div className="actions-buttons">
                             {appointment.status === 'PENDING' && (
-                                <button
-                                    onClick={() => handleConfirm(appointment.id)}
-                                    disabled={processingId === appointment.id}
-                                    className="action-btn confirm-btn"
-                                >
-                                  {processingId === appointment.id ? 'Confirming...' : 'Confirm'}
-                                </button>
+                                <>
+                                  <button
+                                      onClick={() => handleConfirm(appointment.id)}
+                                      disabled={processingId === appointment.id}
+                                      className="action-btn confirm-btn"
+                                  >
+                                    {processingId === appointment.id ? 'Confirming...' : 'Confirm'}
+                                  </button>
+                                  <button
+                                      onClick={() => handleCancelClick(appointment)}
+                                      className="action-btn cancel-btn"
+                                      style={{ marginLeft: '8px' }}
+                                  >
+                                    Hủy lịch
+                                  </button>
+                                </>
                             )}
                             {appointment.status === 'CONFIRMED' && (
-                                <button
-                                    onClick={() => handleCreateTreatment(appointment)}
-                                    className="action-btn treatment-btn"
-                                >
-                                  Create Treatment
-                                </button>
+                                <>
+                                  <button
+                                      onClick={() => handleCreateTreatment(appointment)}
+                                      className="action-btn treatment-btn"
+                                  >
+                                    Create Treatment
+                                  </button>
+                                  <button
+                                      onClick={() => handleCancelClick(appointment)}
+                                      className="action-btn cancel-btn"
+                                      style={{ marginLeft: '8px' }}
+                                  >
+                                    Hủy lịch
+                                  </button>
+                                </>
                             )}
                             {appointment.status === 'COMPLETED' && (
                                 <span className="completed-text">Completed</span>
@@ -193,7 +241,19 @@ const DoctorAppointments = () => {
                   onSuccess={handleTreatmentSuccess}
               />
           )}
+
+          {showCancelModal && appointmentToCancel && (
+              <CancelAppointmentModal
+                  appointment={appointmentToCancel}
+                  onClose={() => {
+                    setShowCancelModal(false);
+                    setAppointmentToCancel(null);
+                  }}
+                  onConfirm={handleConfirmCancel}
+              />
+          )}
         </div>
+        <ToastContainer position="top-right" autoClose={3000} />
       </DoctorLayout>
   );
 };

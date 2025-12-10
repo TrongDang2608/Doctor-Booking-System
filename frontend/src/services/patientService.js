@@ -75,6 +75,20 @@ export const patientService = {
     return response.data;
   },
 
+  getFeedbackById: async (id) => {
+    const response = await api.get(`/patient/feedbacks/${id}`);
+    return response.data;
+  },
+
+  updateFeedback: async (id, feedbackData) => {
+    try {
+      const response = await api.put(`/patient/feedbacks/${id}`, feedbackData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
   // AI Symptom Checker
   checkSymptoms: async (symptoms) => {
     // Gọi endpoint mà chúng ta vừa test trên Postman

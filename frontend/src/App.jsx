@@ -36,6 +36,7 @@ import DoctorProfile from './pages/doctor/DoctorProfile';
 import DoctorAppointments from './pages/doctor/DoctorAppointments';
 import TreatmentManagement from './pages/doctor/TreatmentManagement';
 import PatientSearch from './pages/doctor/PatientSearch';
+import DoctorFeedbacks from './pages/doctor/DoctorFeedbacks';
 
 // Import Patient pages
 import PatientPortal from './pages/patient/PatientPortal';
@@ -45,6 +46,7 @@ import NewBooking from './pages/patient/NewBooking';
 import BookingHistory from './pages/patient/BookingHistory';
 import DoctorSearch from './pages/patient/DoctorSearch';
 import FeedbackForm from './pages/patient/FeedbackForm';
+import MyFeedbacks from './pages/patient/MyFeedbacks';
 import TreatmentHistory from './pages/patient/TreatmentHistory';
 import HealthAIPage from './pages/patient/HealthAIPage';
 import HealthWalletPage from './pages/patient/HealthWalletPage';
@@ -105,8 +107,6 @@ function App() {
                   <Route path="appointments/:id/edit" element={<AppointmentForm />} />
                   <Route path="feedbacks" element={<FeedbackManagement />} />
                   <Route path="feedbacks/:id" element={<FeedbackManagement />} />
-                  <Route path="feedbacks/:id/reply" element={<FeedbackManagement />} />
-                  <Route path="feedbacks/:id/delete" element={<FeedbackManagement />} />
                   <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                 </Routes>
               </ProtectedRoute>
@@ -123,6 +123,7 @@ function App() {
                   <Route path="appointments" element={<DoctorAppointments />} />
                   <Route path="treatments" element={<TreatmentManagement />} />
                   <Route path="patients" element={<PatientSearch />} />
+                  <Route path="feedbacks" element={<DoctorFeedbacks />} />
                   <Route path="*" element={<Navigate to="/doctor/dashboard" replace />} />
                 </Routes>
               </ProtectedRoute>
@@ -148,7 +149,8 @@ function App() {
                   <Route path="history" element={<BookingHistory />} />
                   <Route path="doctors" element={<DoctorSearch />} />
                   <Route path="treatments" element={<TreatmentHistory />} />
-                  <Route path="feedback" element={<FeedbackForm />} />
+                  <Route path="feedback/new" element={<FeedbackForm />} />
+                  <Route path="feedbacks" element={<MyFeedbacks />} />
                   <Route path="family" element={<FamilyProfilePage />} />
                   <Route path="wallet" element={<HealthWalletPage />} />
                   <Route path="wallet/payment/result" element={<PaymentResultPage />} />

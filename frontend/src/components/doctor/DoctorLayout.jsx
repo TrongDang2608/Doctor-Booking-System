@@ -28,6 +28,7 @@ const DoctorLayout = ({ children }) => {
         { path: '/doctor/profile', label: 'Hồ sơ của tôi', icon: 'user', route: '/doctor/profile' },
         { path: '/doctor/appointments', label: 'Lịch hẹn', icon: 'calendar', route: '/doctor/appointments' },
         { path: '/doctor/patients', label: 'Tìm bệnh nhân', icon: 'search', route: '/doctor/patients' },
+        { path: '/doctor/feedbacks', label: 'Phản hồi', icon: 'message-square', route: '/doctor/feedbacks' },
     ];
 
     const isActive = (path) => {
