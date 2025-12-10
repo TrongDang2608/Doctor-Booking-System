@@ -148,6 +148,16 @@ public class AdminService {
         return appointmentService.getAppointmentById(id);
     }
 
+    @Transactional
+    public AppointmentResponse updateAppointment(Long id, com.doctorbooking.backend.dto.request.UpdateAppointmentRequest request) {
+        return appointmentService.updateAppointmentByAdmin(id, request);
+    }
+
+    @Transactional
+    public void deleteAppointment(Long id) {
+        appointmentService.deleteAppointment(id);
+    }
+
     // Feedback Management
     public List<FeedbackResponse> getAllFeedbacks(String status) {
         return feedbackService.getFeedbacksByStatus(status);

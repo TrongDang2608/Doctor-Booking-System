@@ -155,6 +155,28 @@ public class AdminController {
         }
     }
 
+    @PutMapping("/appointments/{id}")
+    public ResponseEntity<AppointmentResponse> updateAppointment(
+            @PathVariable Long id,
+            @RequestBody @Valid com.doctorbooking.backend.dto.request.UpdateAppointmentRequest request) {
+        try {
+            AppointmentResponse updated = adminService.updateAppointment(id, request);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @DeleteMapping("/appointments/{id}")
+    public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
+        try {
+            adminService.deleteAppointment(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // ========== Feedback Management ==========
 
     @GetMapping("/feedbacks")

@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../../components/admin/AdminLayout';
 import { adminService } from '../../../services/adminService';
+import Loading from '../../../components/common/Loading';
+import ErrorMessage from '../../../components/common/ErrorMessage';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import useFeatherIcons from '../../../hooks/useFeatherIcons';
@@ -13,13 +15,15 @@ const DoctorList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
     loadAllDoctors();
   }, []);
 
   // Initialize Feather Icons
-  useFeatherIcons([doctors]);
+  useFeatherIcons([doctors, currentPage]);
 
   const filteredDoctors = useMemo(() => {
     if (searchTerm.trim() === '') {
@@ -35,7 +39,107 @@ const DoctorList = () => {
 
   useEffect(() => {
     setDoctors(filteredDoctors);
+    setCurrentPage(1); // Reset to page 1 when filter changes
   }, [filteredDoctors]);
+
+  // Pagination calculations
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentDoctors = doctors.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(doctors.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    // Previous button
+    pages.push(
+      <button
+        key="prev"
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ‹
+      </button>
+    );
+
+    // First page
+    if (startPage > 1) {
+      pages.push(
+        <button
+          key={1}
+          onClick={() => handlePageChange(1)}
+          className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          1
+        </button>
+      );
+      if (startPage > 2) {
+        pages.push(<span key="dots1" className="px-2">...</span>);
+      }
+    }
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-2 border rounded-lg ${
+            currentPage === i
+              ? 'bg-indigo-600 text-white border-indigo-600'
+              : 'border-gray-300 hover:bg-gray-50'
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    // Last page
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pages.push(<span key="dots2" className="px-2">...</span>);
+      }
+      pages.push(
+        <button
+          key={totalPages}
+          onClick={() => handlePageChange(totalPages)}
+          className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          {totalPages}
+        </button>
+      );
+    }
+
+    // Next button
+    pages.push(
+      <button
+        key="next"
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        ›
+      </button>
+    );
+
+    return pages;
+  };
 
   const loadAllDoctors = async () => {
     try {
@@ -62,6 +166,14 @@ const DoctorList = () => {
   const handleEdit = (doctor) => {
     navigate(`/admin/doctors/${doctor.id}/edit`);
   };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <Loading />
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>
@@ -121,30 +233,18 @@ const DoctorList = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SĐT</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {loading ? (
-                  <tr>
-                    <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
-                      <div className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Đang tải...
-                      </div>
-                    </td>
-                  </tr>
-                ) : doctors.length === 0 ? (
+                {doctors.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="px-6 py-4 text-center text-gray-500">
                       {searchTerm ? `Không tìm thấy bác sĩ khớp với "${searchTerm}"` : 'Không có bác sĩ'}
                     </td>
                   </tr>
                 ) : (
-                  doctors.map((doctor) => (
+                  currentDoctors.map((doctor) => (
                     <tr key={doctor.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{doctor.id}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{doctor.fullName}</td>
@@ -161,7 +261,7 @@ const DoctorList = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleView(doctor)}
                             className="text-green-600 hover:text-green-800 transition-colors"
@@ -185,6 +285,20 @@ const DoctorList = () => {
             </table>
           </div>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                Hiển thị {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, doctors.length)} của {doctors.length} bác sĩ
+              </div>
+              <div className="flex items-center gap-2">
+                {renderPagination()}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <ToastContainer />
     </AdminLayout>
