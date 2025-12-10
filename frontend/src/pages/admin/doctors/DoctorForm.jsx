@@ -27,6 +27,48 @@ const DoctorForm = () => {
     bio: ''
   });
   const [formErrors, setFormErrors] = useState({});
+  
+  // Danh sách chuyên khoa
+  const specializationOptions = [
+    'Nội khoa',
+    'Ngoại khoa',
+    'Nhi khoa',
+    'Sản khoa',
+    'Phụ khoa',
+    'Tim mạch',
+    'Da liễu',
+    'Tai - Mũi - Họng',
+    'Răng - Hàm - Mặt',
+    'Mắt',
+    'Thần kinh',
+    'Chấn thương chỉnh hình',
+    'Ung bướu',
+    'Hô hấp',
+    'Tiết niệu',
+    'Nội tiết',
+    'Huyết học',
+    'Tâm thần',
+    'Cơ xương khớp',
+    'Dị ứng - Miễn dịch'
+  ];
+
+  // Danh sách trình độ
+  const qualificationOptions = [
+    'Bác sĩ (BS)',
+    'Bác sĩ nội trú',
+    'Chuyên khoa I (CKI)',
+    'Chuyên khoa II (CKII)',
+    'Thạc sĩ (ThS)',
+    'Tiến sĩ (TS)',
+    'Phó giáo sư (PGS)',
+    'Giáo sư (GS)'
+  ];
+
+  const [selectedSpecializations, setSelectedSpecializations] = useState([]);
+  const [customSpecialization, setCustomSpecialization] = useState('');
+  const [showSpecializationDropdown, setShowSpecializationDropdown] = useState(false);
+  const [customQualification, setCustomQualification] = useState('');
+  const [showQualificationDropdown, setShowQualificationDropdown] = useState(false);
 
   useEffect(() => {
     if (isEdit) {
@@ -34,11 +76,34 @@ const DoctorForm = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    // Close dropdowns when clicking outside
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.relative')) {
+        setShowSpecializationDropdown(false);
+        setShowQualificationDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   useFeatherIcons([]);
 
   const loadDoctor = async () => {
     try {
       const doctor = await adminService.getDoctorById(id);
+      
+      // Parse specialization (có thể là string với dấu phảy hoặc array)
+      const specializationArray = doctor.specialization 
+        ? (typeof doctor.specialization === 'string' 
+            ? doctor.specialization.split(',').map(s => s.trim()).filter(s => s) 
+            : doctor.specialization)
+        : [];
+      
+      setSelectedSpecializations(specializationArray);
+      
       setFormData({
         username: doctor.username,
         email: doctor.email,
@@ -55,6 +120,32 @@ const DoctorForm = () => {
       setError('Không thể tải thông tin bác sĩ');
       console.error(err);
     }
+  };
+
+  const handleAddSpecialization = (spec) => {
+    if (spec && !selectedSpecializations.includes(spec)) {
+      setSelectedSpecializations([...selectedSpecializations, spec]);
+    }
+    setCustomSpecialization('');
+    setShowSpecializationDropdown(false);
+  };
+
+  const handleRemoveSpecialization = (spec) => {
+    setSelectedSpecializations(selectedSpecializations.filter(s => s !== spec));
+  };
+
+  const handleAddCustomSpecialization = () => {
+    const trimmed = customSpecialization.trim();
+    if (trimmed && !selectedSpecializations.includes(trimmed)) {
+      setSelectedSpecializations([...selectedSpecializations, trimmed]);
+      setCustomSpecialization('');
+    }
+  };
+
+  const handleQualificationSelect = (qual) => {
+    setFormData({ ...formData, qualification: qual });
+    setCustomQualification('');
+    setShowQualificationDropdown(false);
   };
 
   const validateForm = () => {
@@ -80,8 +171,14 @@ const DoctorForm = () => {
       errors.fullName = 'Họ và tên không được để trống';
     }
 
-    if (!formData.specialization?.trim()) {
-      errors.specialization = 'Chuyên khoa không được để trống';
+    if (selectedSpecializations.length === 0) {
+      errors.specialization = 'Vui lòng chọn ít nhất một chuyên khoa';
+    } else {
+      // Check total length of specializations string
+      const specializationString = selectedSpecializations.join(', ');
+      if (specializationString.length > 500) {
+        errors.specialization = `Tổng độ dài chuyên khoa vượt quá giới hạn (${specializationString.length}/500 ký tự). Vui lòng bỏ bớt một số chuyên khoa.`;
+      }
     }
 
     setFormErrors(errors);
@@ -100,15 +197,22 @@ const DoctorForm = () => {
     setFormErrors({});
 
     try {
+      // Convert selectedSpecializations array to comma-separated string
+      const specializationString = selectedSpecializations.join(', ');
+      
+      // Parse experience safely
+      const experienceValue = formData.experience ? parseInt(formData.experience) : 0;
+      const finalExperience = isNaN(experienceValue) ? 0 : experienceValue;
+      
       if (isEdit) {
         // Update
         const updateData = {
           username: formData.username?.trim(),
           email: formData.email?.trim(),
           fullName: formData.fullName?.trim(),
-          specialization: formData.specialization?.trim(),
-          qualification: formData.qualification?.trim() || '',
-          experience: parseInt(formData.experience) || 0,
+          specialization: specializationString,
+          qualification: formData.qualification?.trim() || customQualification.trim() || '',
+          experience: finalExperience,
           phone: formData.phone?.trim() || '',
           address: formData.address?.trim() || '',
           bio: formData.bio?.trim() || '',
@@ -118,6 +222,8 @@ const DoctorForm = () => {
         } else {
           updateData.password = 'current_password_unchanged';
         }
+        
+        console.log('Update data:', updateData); // Debug
         await adminService.updateDoctor(id, updateData);
         toast.success('Cập nhật bác sĩ thành công!', { position: 'top-right', autoClose: 3000 });
         setTimeout(() => navigate('/admin/doctors'), 500);
@@ -128,13 +234,15 @@ const DoctorForm = () => {
           email: formData.email?.trim(),
           password: formData.password?.trim(),
           fullName: formData.fullName?.trim(),
-          specialization: formData.specialization?.trim(),
-          qualification: formData.qualification?.trim() || '',
-          experience: parseInt(formData.experience) || 0,
+          specialization: specializationString,
+          qualification: formData.qualification?.trim() || customQualification.trim() || '',
+          experience: finalExperience,
           phone: formData.phone?.trim() || '',
           address: formData.address?.trim() || '',
           bio: formData.bio?.trim() || ''
         };
+        
+        console.log('Create data:', createData); // Debug
         await adminService.createDoctor(createData);
         toast.success('Tạo bác sĩ thành công!', { position: 'top-right', autoClose: 3000 });
         setTimeout(() => navigate('/admin/doctors'), 500);
@@ -142,10 +250,15 @@ const DoctorForm = () => {
 
       setError('');
     } catch (err) {
-      const errorMsg = typeof err === 'string' ? err : `Không thể ${isEdit ? 'cập nhật' : 'tạo'} bác sĩ`;
+      console.error('Full error:', err);
+      console.error('Error response:', err.response);
+      console.error('Error data:', err.response?.data);
+      
+      const errorMsg = err.response?.data?.message || 
+                       err.response?.data || 
+                       (typeof err === 'string' ? err : `Không thể ${isEdit ? 'cập nhật' : 'tạo'} bác sĩ`);
       setError(errorMsg);
       toast.error(errorMsg, { position: 'top-right', autoClose: 4000 });
-      console.error(err);
     } finally {
       setSubmitting(false);
     }
@@ -273,37 +386,160 @@ const DoctorForm = () => {
                 />
               </div>
 
-              {/* Specialization */}
-              <div>
+              {/* Specialization - Multi Select */}
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Chuyên khoa <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.specialization}
-                  onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
-                    formErrors.specialization ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Nhập chuyên khoa"
-                />
+                
+                {/* Selected Specializations */}
+                {selectedSpecializations.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {selectedSpecializations.map((spec, index) => (
+                      <span 
+                        key={index}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm"
+                      >
+                        {spec}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSpecialization(spec)}
+                          className="hover:text-indigo-900 font-bold"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Input with Dropdown */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={customSpecialization}
+                    onChange={(e) => setCustomSpecialization(e.target.value)}
+                    onFocus={() => setShowSpecializationDropdown(true)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCustomSpecialization();
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                      formErrors.specialization ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    placeholder="Chọn từ danh sách hoặc nhập chuyên khoa mới..."
+                  />
+                  
+                  {/* Dropdown List */}
+                  {showSpecializationDropdown && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {specializationOptions
+                        .filter(opt => !selectedSpecializations.includes(opt))
+                        .filter(opt => opt.toLowerCase().includes(customSpecialization.toLowerCase()))
+                        .map((option, index) => (
+                          <div
+                            key={index}
+                            onClick={() => handleAddSpecialization(option)}
+                            className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm"
+                          >
+                            {option}
+                          </div>
+                        ))}
+                      
+                      {customSpecialization.trim() && (
+                        <div
+                          onClick={handleAddCustomSpecialization}
+                          className="px-4 py-2 hover:bg-green-50 cursor-pointer text-sm border-t border-gray-200 text-green-600 font-medium"
+                        >
+                          + Thêm "{customSpecialization.trim()}"
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {formErrors.specialization && (
                   <p className="text-red-500 text-sm mt-1">{formErrors.specialization}</p>
                 )}
               </div>
 
-              {/* Qualification */}
-              <div>
+              {/* Qualification - Dropdown with Custom Input */}
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Trình độ
                 </label>
-                <input
-                  type="text"
-                  value={formData.qualification}
-                  onChange={(e) => setFormData({ ...formData, qualification: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="Nhập trình độ"
-                />
+                
+                {/* Display selected qualification */}
+                {formData.qualification && (
+                  <div className="mb-2">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                      {formData.qualification}
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, qualification: '' })}
+                        className="hover:text-green-900 font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  </div>
+                )}
+
+                {/* Input with Dropdown */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={customQualification}
+                    onChange={(e) => setCustomQualification(e.target.value)}
+                    onFocus={() => setShowQualificationDropdown(true)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const trimmed = customQualification.trim();
+                        if (trimmed) {
+                          setFormData({ ...formData, qualification: trimmed });
+                          setCustomQualification('');
+                          setShowQualificationDropdown(false);
+                        }
+                      }
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="Chọn từ danh sách hoặc nhập trình độ mới..."
+                  />
+                  
+                  {/* Dropdown List */}
+                  {showQualificationDropdown && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {qualificationOptions
+                        .filter(opt => opt.toLowerCase().includes(customQualification.toLowerCase()))
+                        .map((option, index) => (
+                          <div
+                            key={index}
+                            onClick={() => handleQualificationSelect(option)}
+                            className="px-4 py-2 hover:bg-green-50 cursor-pointer text-sm"
+                          >
+                            {option}
+                          </div>
+                        ))}
+                      
+                      {customQualification.trim() && (
+                        <div
+                          onClick={() => {
+                            const trimmed = customQualification.trim();
+                            setFormData({ ...formData, qualification: trimmed });
+                            setCustomQualification('');
+                            setShowQualificationDropdown(false);
+                          }}
+                          className="px-4 py-2 hover:bg-green-50 cursor-pointer text-sm border-t border-gray-200 text-green-600 font-medium"
+                        >
+                          + Thêm "{customQualification.trim()}"
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Experience */}

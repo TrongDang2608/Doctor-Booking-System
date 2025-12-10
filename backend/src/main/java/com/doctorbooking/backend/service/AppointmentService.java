@@ -457,5 +457,35 @@ public class AppointmentService {
         appointment.setStatus(Appointment.AppointmentStatus.COMPLETED);
         appointmentRepository.save(appointment);
     }
+
+    // Admin methods
+    @Transactional
+    public AppointmentResponse updateAppointmentByAdmin(Long id, com.doctorbooking.backend.dto.request.UpdateAppointmentRequest request) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + id));
+
+        if (request.getStatus() != null) {
+            appointment.setStatus(request.getStatus());
+        }
+        if (request.getAppointmentDate() != null) {
+            appointment.setAppointmentDate(request.getAppointmentDate());
+        }
+        if (request.getAppointmentTime() != null) {
+            appointment.setAppointmentTime(request.getAppointmentTime());
+        }
+        if (request.getNotes() != null) {
+            appointment.setNotes(request.getNotes());
+        }
+
+        Appointment updated = appointmentRepository.save(appointment);
+        return AppointmentResponse.fromEntity(updated);
+    }
+
+    @Transactional
+    public void deleteAppointment(Long id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + id));
+        appointmentRepository.delete(appointment);
+    }
 }
 
