@@ -50,6 +50,7 @@ public class FeedbackService {
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public FeedbackResponse markFeedbackAsRead(Long id) {
         Feedback feedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Feedback not found with id: " + id));
@@ -85,6 +86,28 @@ public class FeedbackService {
         return feedbackRepository.findByPatientId(patientId).stream()
                 .map(FeedbackResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @SuppressWarnings("null")
+    public FeedbackResponse replyFeedback(Long id, com.doctorbooking.backend.dto.request.ReplyFeedbackRequest request) {
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Feedback not found with id: " + id));
+        
+        feedback.setAdminReply(request.getAdminReply());
+        feedback.setStatus(Feedback.FeedbackStatus.REPLIED);
+        feedback.setRepliedAt(java.time.LocalDateTime.now());
+        
+        feedback = feedbackRepository.save(feedback);
+        return FeedbackResponse.fromEntity(feedback);
+    }
+
+    @Transactional
+    @SuppressWarnings("null")
+    public void deleteFeedback(Long id) {
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Feedback not found with id: " + id));
+        feedbackRepository.delete(feedback);
     }
 }
 

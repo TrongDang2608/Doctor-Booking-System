@@ -170,5 +170,15 @@ public class AdminService {
     public FeedbackResponse markFeedbackAsRead(Long id) {
         return feedbackService.markFeedbackAsRead(id);
     }
+
+    @Transactional
+    public FeedbackResponse replyFeedback(Long id, com.doctorbooking.backend.dto.request.ReplyFeedbackRequest request) {
+        return feedbackService.replyFeedback(id, request);
+    }
+
+    @Transactional
+    public void deleteFeedback(Long id) {
+        feedbackService.deleteFeedback(id);
+    }
 }
 
