@@ -23,6 +23,7 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final com.doctorbooking.backend.service.AppointmentService appointmentService;
 
     // ========== Doctor Management ==========
 
@@ -167,6 +168,18 @@ public class AdminController {
         }
     }
 
+    @PostMapping("/appointments/{id}/cancel")
+    public ResponseEntity<?> cancelAppointment(
+            @PathVariable Long id,
+            @RequestBody com.doctorbooking.backend.dto.appointment.CancelAppointmentRequest request) {
+        try {
+            appointmentService.cancelAppointmentByAdmin(id, request.getCancellationReason());
+            return ResponseEntity.ok().body(java.util.Map.of("message", "Appointment cancelled successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
+        }
+    }
+
     @DeleteMapping("/appointments/{id}")
     public ResponseEntity<Void> deleteAppointment(@PathVariable Long id) {
         try {
@@ -185,6 +198,18 @@ public class AdminController {
         List<FeedbackResponse> feedbacks = adminService.getAllFeedbacks(status);
         return ResponseEntity.ok(feedbacks);
     }
+    
+    @GetMapping("/feedbacks/doctor/{doctorId}")
+    public ResponseEntity<List<FeedbackResponse>> getFeedbacksByDoctor(@PathVariable Long doctorId) {
+        List<FeedbackResponse> feedbacks = adminService.getFeedbacksByDoctor(doctorId);
+        return ResponseEntity.ok(feedbacks);
+    }
+    
+    @GetMapping("/feedbacks/patient/{patientId}")
+    public ResponseEntity<List<FeedbackResponse>> getFeedbacksByPatient(@PathVariable Long patientId) {
+        List<FeedbackResponse> feedbacks = adminService.getFeedbacksByPatient(patientId);
+        return ResponseEntity.ok(feedbacks);
+    }
 
     @GetMapping("/feedbacks/{id}")
     public ResponseEntity<FeedbackResponse> getFeedbackById(@PathVariable Long id) {
@@ -196,33 +221,21 @@ public class AdminController {
         }
     }
 
-    @PutMapping("/feedbacks/{id}/read")
-    public ResponseEntity<FeedbackResponse> markFeedbackAsRead(@PathVariable Long id) {
+    @PutMapping("/feedbacks/{id}/hide")
+    public ResponseEntity<FeedbackResponse> hideFeedback(@PathVariable Long id) {
         try {
-            FeedbackResponse feedback = adminService.markFeedbackAsRead(id);
+            FeedbackResponse feedback = adminService.hideFeedback(id);
             return ResponseEntity.ok(feedback);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
-
-    @PutMapping("/feedbacks/{id}/reply")
-    public ResponseEntity<FeedbackResponse> replyFeedback(
-            @PathVariable Long id,
-            @RequestBody @Valid com.doctorbooking.backend.dto.request.ReplyFeedbackRequest request) {
+    
+    @PutMapping("/feedbacks/{id}/unhide")
+    public ResponseEntity<FeedbackResponse> unhideFeedback(@PathVariable Long id) {
         try {
-            FeedbackResponse feedback = adminService.replyFeedback(id, request);
+            FeedbackResponse feedback = adminService.unhideFeedback(id);
             return ResponseEntity.ok(feedback);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
-
-    @DeleteMapping("/feedbacks/{id}")
-    public ResponseEntity<Void> deleteFeedback(@PathVariable Long id) {
-        try {
-            adminService.deleteFeedback(id);
-            return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }

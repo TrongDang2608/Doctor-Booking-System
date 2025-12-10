@@ -33,6 +33,11 @@ export const doctorService = {
     return response.data;
   },
 
+  cancelAppointment: async (id, cancellationReason) => {
+    const response = await api.post(`/doctor/appointments/${id}/cancel`, { cancellationReason });
+    return response.data;
+  },
+
   // Treatments
   getTreatments: async () => {
     const response = await api.get('/doctor/treatments');
@@ -72,6 +77,45 @@ export const doctorService = {
 
   getPatientTreatments: async (patientId) => {
     const response = await api.get(`/doctor/patients/${patientId}/treatments`);
+    return response.data;
+  },
+
+  // Feedback Management
+  getFeedbacks: async () => {
+    const response = await api.get('/doctor/feedbacks');
+    return response.data;
+  },
+
+  getFeedbacksByRating: async (rating) => {
+    const response = await api.get(`/doctor/feedbacks/rating/${rating}`);
+    return response.data;
+  },
+
+  getFeedbackById: async (id) => {
+    const response = await api.get(`/doctor/feedbacks/${id}`);
+    return response.data;
+  },
+
+  replyToFeedback: async (id, replyData) => {
+    try {
+      const response = await api.post(`/doctor/feedbacks/${id}/reply`, replyData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  updateDoctorReply: async (id, replyData) => {
+    try {
+      const response = await api.put(`/doctor/feedbacks/${id}/reply`, replyData);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  getAverageRating: async () => {
+    const response = await api.get('/doctor/average-rating');
     return response.data;
   },
 };

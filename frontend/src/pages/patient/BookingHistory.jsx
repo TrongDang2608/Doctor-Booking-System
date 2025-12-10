@@ -594,6 +594,7 @@ const FeedbackModal = ({ appointment, onClose, onSuccess }) => {
                             onClick={onClose}
                             style={{
                                 padding: '0.75rem 1.5rem',
+                                height: '49.6px',
                                 background: 'rgba(255, 255, 255, 0.05)',
                                 border: '1px solid rgba(255, 255, 255, 0.1)',
                                 color: '#e0e0e0',
@@ -601,6 +602,9 @@ const FeedbackModal = ({ appointment, onClose, onSuccess }) => {
                                 cursor: 'pointer',
                                 fontWeight: '500',
                                 transition: 'all 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}
                             onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
                             onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.05)'}
@@ -612,13 +616,18 @@ const FeedbackModal = ({ appointment, onClose, onSuccess }) => {
                             disabled={submitting}
                             style={{
                                 padding: '0.75rem 1.5rem',
+                                height: '49.6px',
+                                margin: 0,
                                 background: submitting ? 'rgba(16, 185, 129, 0.5)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                                 color: 'white',
-                                border: 'none',
+                                border: '1px solid transparent',
                                 borderRadius: '8px',
                                 cursor: submitting ? 'not-allowed' : 'pointer',
                                 fontWeight: '500',
                                 transition: 'all 0.2s',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}
                             onMouseEnter={(e) => !submitting && (e.target.style.transform = 'translateY(-2px)')}
                             onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}

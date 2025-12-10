@@ -66,6 +66,9 @@ public class Appointment {
     @Column(name = "reminder_1h_sent", nullable = false)
     private Boolean reminder1hSent = false;
 
+    @Column(name = "cancellation_reason", columnDefinition = "TEXT")
+    private String cancellationReason;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

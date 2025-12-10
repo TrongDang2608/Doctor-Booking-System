@@ -162,23 +162,27 @@ public class AdminService {
     public List<FeedbackResponse> getAllFeedbacks(String status) {
         return feedbackService.getFeedbacksByStatus(status);
     }
+    
+    public List<FeedbackResponse> getFeedbacksByDoctor(Long doctorId) {
+        return feedbackService.getFeedbacksByDoctor(doctorId);
+    }
+    
+    public List<FeedbackResponse> getFeedbacksByPatient(Long patientId) {
+        return feedbackService.getFeedbacksByPatient(patientId);
+    }
 
     public FeedbackResponse getFeedbackById(Long id) {
         return feedbackService.getFeedbackById(id);
     }
 
-    public FeedbackResponse markFeedbackAsRead(Long id) {
-        return feedbackService.markFeedbackAsRead(id);
-    }
-
     @Transactional
-    public FeedbackResponse replyFeedback(Long id, com.doctorbooking.backend.dto.request.ReplyFeedbackRequest request) {
-        return feedbackService.replyFeedback(id, request);
+    public FeedbackResponse hideFeedback(Long id) {
+        return feedbackService.hideFeedback(id);
     }
-
+    
     @Transactional
-    public void deleteFeedback(Long id) {
-        feedbackService.deleteFeedback(id);
+    public FeedbackResponse unhideFeedback(Long id) {
+        return feedbackService.unhideFeedback(id);
     }
 }
 
