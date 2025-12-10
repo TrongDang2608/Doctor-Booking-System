@@ -25,7 +25,9 @@ import PatientDetail from './pages/admin/patients/PatientDetail';
 import UserList from './pages/admin/users/UserList';
 import UserForm from './pages/admin/users/UserForm';
 import UserDetail from './pages/admin/users/UserDetail';
-import AppointmentManagement from './pages/admin/AppointmentManagement';
+import AppointmentList from './pages/admin/appointments/AppointmentList';
+import AppointmentDetail from './pages/admin/appointments/AppointmentDetail';
+import AppointmentForm from './pages/admin/appointments/AppointmentForm';
 import FeedbackManagement from './pages/admin/FeedbackManagement';
 
 // Import Doctor pages
@@ -98,10 +100,9 @@ function App() {
                   <Route path="patients/create" element={<PatientForm />} />
                   <Route path="patients/:id" element={<PatientDetail />} />
                   <Route path="patients/:id/edit" element={<PatientForm />} />
-                  <Route path="appointments" element={<AppointmentManagement />} />
-                  <Route path="appointments/:id" element={<AppointmentManagement />} />
-                  <Route path="appointments/:id/edit" element={<AppointmentManagement />} />
-                  <Route path="appointments/:id/delete" element={<AppointmentManagement />} />
+                  <Route path="appointments" element={<AppointmentList />} />
+                  <Route path="appointments/:id" element={<AppointmentDetail />} />
+                  <Route path="appointments/:id/edit" element={<AppointmentForm />} />
                   <Route path="feedbacks" element={<FeedbackManagement />} />
                   <Route path="feedbacks/:id" element={<FeedbackManagement />} />
                   <Route path="feedbacks/:id/reply" element={<FeedbackManagement />} />

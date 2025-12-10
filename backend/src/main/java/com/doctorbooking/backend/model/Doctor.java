@@ -25,7 +25,7 @@ public class Doctor {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 500)
     private String specialization;
 
     @Column(length = 200)
