@@ -276,7 +276,7 @@ const FamilyProfilePage = () => {
       <div className="family-header">
         <div className="header-content">
           <h1>
-            <span className="header-icon">👨‍👩‍👧‍👦</span>
+            <span className="header-icon"></span>
             Hồ sơ Gia đình
           </h1>
           <p className="header-subtitle">
