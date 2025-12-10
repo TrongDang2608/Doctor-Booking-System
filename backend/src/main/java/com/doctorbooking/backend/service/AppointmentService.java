@@ -440,6 +440,16 @@ public class AppointmentService {
 
         appointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
         appointment = appointmentRepository.save(appointment);
+        
+        // Send confirmation email to patient
+        try {
+            sendConfirmationEmail(appointment);
+            logger.info("✅ Confirmation email sent for appointment ID: {}", appointmentId);
+        } catch (Exception e) {
+            logger.error("❌ Failed to send confirmation email for appointment ID: {}", appointmentId, e);
+            // Don't throw - email failure shouldn't block confirmation
+        }
+        
         return AppointmentResponse.fromEntity(appointment);
     }
 
@@ -464,8 +474,16 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + id));
 
+        Appointment.AppointmentStatus oldStatus = appointment.getStatus();
+        boolean statusChangedToConfirmed = false;
+        
         if (request.getStatus() != null) {
             appointment.setStatus(request.getStatus());
+            // Check if status changed from PENDING to CONFIRMED
+            if (oldStatus == Appointment.AppointmentStatus.PENDING && 
+                request.getStatus() == Appointment.AppointmentStatus.CONFIRMED) {
+                statusChangedToConfirmed = true;
+            }
         }
         if (request.getAppointmentDate() != null) {
             appointment.setAppointmentDate(request.getAppointmentDate());
@@ -478,6 +496,18 @@ public class AppointmentService {
         }
 
         Appointment updated = appointmentRepository.save(appointment);
+        
+        // Send confirmation email if status changed to CONFIRMED
+        if (statusChangedToConfirmed) {
+            try {
+                sendConfirmationEmail(updated);
+                logger.info("✅ Confirmation email sent by admin for appointment ID: {}", id);
+            } catch (Exception e) {
+                logger.error("❌ Failed to send confirmation email for appointment ID: {}", id, e);
+                // Don't throw - email failure shouldn't block update
+            }
+        }
+        
         return AppointmentResponse.fromEntity(updated);
     }
 
@@ -487,5 +517,78 @@ public class AppointmentService {
                 .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + id));
         appointmentRepository.delete(appointment);
     }
+    
+    /**
+     * Helper method to send confirmation email when appointment is confirmed
+     */
+    private void sendConfirmationEmail(Appointment appointment) {
+        try {
+            Patient patient = appointment.getPatient();
+            Doctor doctor = appointment.getDoctor();
+            
+            if (patient == null || doctor == null) {
+                logger.warn("⚠️ Cannot send email - missing patient or doctor for appointment ID: {}", appointment.getId());
+                return;
+            }
+            
+            // Get patient email from User entity
+            String patientEmail = null;
+            if (patient.getUser() != null) {
+                patientEmail = patient.getUser().getEmail();
+            }
+            
+            if (patientEmail == null || patientEmail.trim().isEmpty()) {
+                logger.warn("⚠️ Cannot send email - patient has no email for appointment ID: {}", appointment.getId());
+                return;
+            }
+            
+            // Get family member info if this is a family appointment
+            String familyMemberName = null;
+            String familyMemberRelationship = null;
+            
+            try {
+                FamilyAppointment familyAppointment = familyAppointmentRepository
+                    .findByAppointmentId(appointment.getId())
+                    .orElse(null);
+                
+                if (familyAppointment != null && familyAppointment.getFamilyMember() != null) {
+                    FamilyMember familyMember = familyAppointment.getFamilyMember();
+                    familyMemberName = familyMember.getFullName();
+                    familyMemberRelationship = familyMember.getRelationship() != null 
+                        ? familyMember.getRelationship().toString() : null;
+                }
+            } catch (Exception e) {
+                logger.warn("⚠️ Error getting family member info for appointment {}: {}", 
+                    appointment.getId(), e.getMessage());
+                // Continue without family member info
+            }
+            
+            emailService.sendAppointmentConfirmationEmail(
+                patientEmail,
+                patient.getFullName() != null ? patient.getFullName() : "Bệnh nhân",
+                patient.getPhone() != null ? patient.getPhone() : "",
+                doctor.getFullName() != null ? doctor.getFullName() : "Bác sĩ",
+                doctor.getSpecialization() != null ? doctor.getSpecialization() : "",
+                doctor.getPhone() != null ? doctor.getPhone() : "",
+                doctor.getAddress() != null ? doctor.getAddress() : "",
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentTime(),
+                appointment.getId().toString(),
+                appointment.getPaymentMethod() != null ? appointment.getPaymentMethod().toString() : "Chưa xác định",
+                appointment.getPaymentStatus() != null ? appointment.getPaymentStatus().toString() : "Chưa thanh toán",
+                appointment.getPrice() != null ? appointment.getPrice().toString() : "0",
+                appointment.getNotes() != null ? appointment.getNotes() : "",
+                familyMemberName,
+                familyMemberRelationship
+            );
+            
+            logger.info("✅ Confirmation email sent successfully for appointment ID: {}", appointment.getId());
+        } catch (Exception e) {
+            logger.error("❌ Unexpected error sending confirmation email for appointment ID: {}", 
+                appointment.getId(), e);
+            throw e; // Re-throw to be caught by caller's try-catch
+        }
+    }
 }
+
 
