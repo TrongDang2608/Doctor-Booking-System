@@ -32,6 +32,7 @@ public class DoctorController {
     private final TreatmentService treatmentService;
     private final UserService userService;
     private final FeedbackService feedbackService;
+    private final MedicationService medicationService;
 
     // ========== Profile Management ==========
 
@@ -263,6 +264,16 @@ public class DoctorController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    // ========== Medications ==========
+    @GetMapping("/medications")
+    public ResponseEntity<List<com.doctorbooking.backend.model.Medication>> searchMedications(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false, defaultValue = "5") Integer limit
+    ) {
+        List<com.doctorbooking.backend.model.Medication> meds = medicationService.searchMedications(search, limit);
+        return ResponseEntity.ok(meds);
     }
 
     // ========== Feedback Management ==========

@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -19,9 +21,15 @@ public class TreatmentResponse {
     private Long patientId;
     private String patientName;
     private String diagnosis;
+    private String diagnosisCode;
     private String prescription;
     private String treatmentNotes;
+    private String advice;
+    private String pharmacyInstructions;
     private LocalDate followUpDate;
+    private String prescriptionId;
+    private String qrCodeUrl;
+    private List<TreatmentMedicationResponse> medications;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -34,9 +42,21 @@ public class TreatmentResponse {
         response.setPatientId(treatment.getPatient().getId());
         response.setPatientName(treatment.getPatient().getFullName());
         response.setDiagnosis(treatment.getDiagnosis());
+        response.setDiagnosisCode(treatment.getDiagnosisCode());
         response.setPrescription(treatment.getPrescription());
         response.setTreatmentNotes(treatment.getTreatmentNotes());
+        response.setAdvice(treatment.getAdvice());
+        response.setPharmacyInstructions(treatment.getPharmacyInstructions());
         response.setFollowUpDate(treatment.getFollowUpDate());
+        response.setPrescriptionId(treatment.getPrescriptionId());
+        response.setQrCodeUrl(treatment.getQrCodeUrl());
+        if (treatment.getMedications() != null) {
+            response.setMedications(
+                    treatment.getMedications().stream()
+                            .map(TreatmentMedicationResponse::fromEntity)
+                            .collect(Collectors.toList())
+            );
+        }
         response.setCreatedAt(treatment.getCreatedAt());
         response.setUpdatedAt(treatment.getUpdatedAt());
         return response;

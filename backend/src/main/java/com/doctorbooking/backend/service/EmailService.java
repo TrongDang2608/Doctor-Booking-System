@@ -550,5 +550,165 @@ public class EmailService {
             default -> relationship;
         };
     }
+
+    /**
+     * Gửi email đơn thuốc điện tử (HTML) kèm danh sách thuốc.
+     */
+    public void sendPrescriptionEmailHtml(
+            String toEmail,
+            String patientName,
+            String patientPhone,
+            String patientAddress,
+            String doctorName,
+            String clinicName,
+            String clinicAddress,
+            String clinicPhone,
+            String diagnosisCode,
+            String diagnosis,
+            String advice,
+            String followUpDate,
+            String prescriptionId,
+            java.util.List<com.doctorbooking.backend.model.PrescriptionMedication> medications
+    ) {
+        if (!isSmtpConfigured()) {
+            logger.warn("⚠️ Skipping email send - SMTP not configured");
+            return;
+        }
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject("Đơn thuốc điện tử của bạn");
+
+            String medsHtml;
+            if (medications == null || medications.isEmpty()) {
+                medsHtml = "<p style='margin:4px 0;'>Chưa có thuốc.</p>";
+            } else {
+                StringBuilder sb = new StringBuilder();
+                for (var pm : medications) {
+                    String qty = pm.getQuantity() != null ? pm.getQuantity().toString() : "";
+                    String unit = pm.getUnit() != null ? pm.getUnit() : "";
+                    sb.append("""
+                      <tr>
+                        <td style="padding:8px; border-bottom:1px solid #e2e8f0;">
+                          <div style="font-weight:700; color:#0f172a;">%s</div>
+                          <div style="color:#475569; font-size:13px;">Liều dùng: %s</div>
+                          <div style="color:#475569; font-size:13px;">Tần suất: %s</div>
+                          %s
+                          <div style="color:#475569; font-size:13px;">Số lượng: %s %s</div>
+                          %s
+                        </td>
+                      </tr>
+                    """.formatted(
+                            safe(pm.getMedicationName()),
+                            safe(pm.getDosage()),
+                            safe(pm.getFrequency()),
+                            pm.getDuration() != null && !pm.getDuration().isEmpty()
+                                    ? "<div style='color:#475569; font-size:13px;'>Thời gian: " + safe(pm.getDuration()) + "</div>"
+                                    : "",
+                            safe(qty),
+                            safe(unit),
+                            pm.getInstructions() != null && !pm.getInstructions().isEmpty()
+                                    ? "<div style='color:#475569; font-size:13px;'>Hướng dẫn: " + safe(pm.getInstructions()) + "</div>"
+                                    : ""
+                    ));
+                }
+                medsHtml = sb.toString();
+            }
+
+            String htmlContent = """
+              <!DOCTYPE html>
+              <html lang="vi">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Đơn thuốc điện tử</title>
+              </head>
+              <body style="font-family: Arial, sans-serif; background:#f6f9fc; padding:16px; margin:0; color:#0f172a;">
+                <div style="max-width:720px; margin:0 auto; background:white; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.08); padding:24px;">
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+                    <div>
+                      <div style="font-size:18px; font-weight:800; text-transform:uppercase;">%s</div>
+                      <div style="color:#475569; font-size:14px; margin-top:4px;">%s</div>
+                      <div style="color:#475569; font-size:14px; margin-top:2px;">SĐT: %s</div>
+                    </div>
+                    <div style="text-align:right; color:#475569;">
+                      <div style="font-size:12px; letter-spacing:1px;">MÃ ĐƠN THUỐC</div>
+                      <div style="font-size:14px; font-weight:700;">%s</div>
+                    </div>
+                  </div>
+
+                  <h3 style="margin:12px 0; font-size:20px; font-weight:800; text-align:center; color:#0f172a;">ĐƠN THUỐC ĐIỆN TỬ</h3>
+
+                  <table style="width:100%%; border-collapse:collapse; margin-bottom:12px;">
+                    <tr>
+                      <td style="padding:6px 0; width:120px; font-weight:700;">Họ tên:</td>
+                      <td style="padding:6px 0;">%s</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0; font-weight:700;">Điện thoại:</td>
+                      <td style="padding:6px 0;">%s</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0; font-weight:700;">Địa chỉ:</td>
+                      <td style="padding:6px 0;">%s</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0; font-weight:700;">Chẩn đoán:</td>
+                      <td style="padding:6px 0;">%s%s</td>
+                    </tr>
+                  </table>
+
+                  <div style="margin:16px 0; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+                    <div style="font-weight:800; margin-bottom:8px;">ĐIỀU TRỊ</div>
+                    <table style="width:100%%; border-collapse:collapse;">%s</table>
+                  </div>
+
+                  <div style="margin:12px 0; padding:12px; background:#fff7ed; border:1px solid #fdba74; border-radius:8px;">
+                    <div><strong>Lời dặn:</strong> %s</div>
+                    <div><strong>Ngày tái khám:</strong> %s</div>
+                    <div><strong>Bác sĩ:</strong> %s</div>
+                  </div>
+
+                  <div style="margin-top:16px; font-size:12px; color:#64748b;">
+                    * Email tự động, vui lòng không trả lời. Nếu cần hỗ trợ, liên hệ phòng khám.
+                  </div>
+                </div>
+              </body>
+              </html>
+            """.formatted(
+                    safe(clinicName),
+                    safe(clinicAddress),
+                    safe(clinicPhone),
+                    safe(prescriptionId),
+                    safe(patientName),
+                    safe(patientPhone),
+                    safe(patientAddress),
+                    diagnosisCode != null ? safe(diagnosisCode) + " - " : "",
+                    diagnosis != null ? safe(diagnosis) : "",
+                    medsHtml,
+                    advice != null ? safe(advice) : "Không có",
+                    followUpDate != null ? safe(followUpDate) : "Không đặt",
+                    safe(doctorName)
+            );
+
+            helper.setText(htmlContent, true);
+            mailSender.send(message);
+            logger.info("Prescription email sent successfully to: {}", toEmail);
+        } catch (org.springframework.mail.MailAuthenticationException e) {
+            logger.error("❌ SMTP Authentication failed for email: {}. Error: {}", toEmail, e.getMessage());
+        } catch (jakarta.mail.MessagingException e) {
+            logger.error("❌ Messaging error sending prescription email to: {}. Error: {}", toEmail, e.getMessage());
+        } catch (Exception e) {
+            logger.error("❌ Unexpected error sending prescription email to: {}. Error: {}", toEmail, e.getMessage(), e);
+        }
+    }
+
+    private String safe(String v) {
+        return v == null ? "" : v;
+    }
 }
 

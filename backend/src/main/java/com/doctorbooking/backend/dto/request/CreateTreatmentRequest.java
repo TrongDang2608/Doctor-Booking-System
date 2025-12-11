@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,8 +18,12 @@ public class CreateTreatmentRequest {
     private Long patientId;
 
     private String diagnosis;
+    private String diagnosisCode;
     private String prescription;
     private String treatmentNotes;
+    private String advice;
+    private String pharmacyInstructions;
     private LocalDate followUpDate;
+    private List<TreatmentMedicationRequest> medications;
 }
 

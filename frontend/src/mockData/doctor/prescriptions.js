@@ -192,6 +192,28 @@ export const medicationDatabase = [
     requiresPrescription: false
   },
   {
+    id: "med_db_panadol",
+    name: "Panadol 500mg",
+    genericName: "Paracetamol",
+    category: "Giảm đau, Hạ sốt",
+    commonDosages: ["500mg"],
+    commonFrequencies: ["3 lần/ngày", "4 lần/ngày"],
+    price: 55000,
+    available: true,
+    requiresPrescription: false
+  },
+  {
+    id: "med_db_panadol_extra",
+    name: "Panadol Extra",
+    genericName: "Paracetamol + Caffeine",
+    category: "Giảm đau, Hạ sốt",
+    commonDosages: ["500mg + 65mg"],
+    commonFrequencies: ["3 lần/ngày", "4 lần/ngày"],
+    price: 65000,
+    available: true,
+    requiresPrescription: false
+  },
+  {
     id: "med_db_002",
     name: "Omeprazole 20mg",
     genericName: "Omeprazole",
@@ -214,6 +236,17 @@ export const medicationDatabase = [
     requiresPrescription: true
   },
   {
+    id: "med_db_augmentin",
+    name: "Augmentin 320mg",
+    genericName: "Amoxicillin + Clavulanic acid",
+    category: "Kháng sinh",
+    commonDosages: ["320mg", "625mg"],
+    commonFrequencies: ["2 lần/ngày", "3 lần/ngày"],
+    price: 120000,
+    available: true,
+    requiresPrescription: true
+  },
+  {
     id: "med_db_004",
     name: "Amlodipine 5mg",
     genericName: "Amlodipine",
@@ -221,6 +254,50 @@ export const medicationDatabase = [
     commonDosages: ["5mg", "10mg"],
     commonFrequencies: ["1 lần/ngày"],
     price: 120000,
+    available: true,
+    requiresPrescription: true
+  },
+  {
+    id: "med_db_propranolol",
+    name: "Propranolol 40mg",
+    genericName: "Propranolol",
+    category: "Tim mạch",
+    commonDosages: ["40mg", "80mg"],
+    commonFrequencies: ["2 lần/ngày", "3 lần/ngày"],
+    price: 90000,
+    available: true,
+    requiresPrescription: true
+  },
+  {
+    id: "med_db_acemuc",
+    name: "Acemuc 100mg gói",
+    genericName: "Acetylcysteine",
+    category: "Ho, long đờm",
+    commonDosages: ["100mg"],
+    commonFrequencies: ["2 lần/ngày", "3 lần/ngày"],
+    price: 45000,
+    available: true,
+    requiresPrescription: false
+  },
+  {
+    id: "med_db_oresol",
+    name: "Oresol",
+    genericName: "Oral Rehydration Salts",
+    category: "Bù nước, điện giải",
+    commonDosages: ["1 gói"],
+    commonFrequencies: ["2 lần/ngày", "3 lần/ngày"],
+    price: 30000,
+    available: true,
+    requiresPrescription: false
+  },
+  {
+    id: "med_db_domperidone",
+    name: "Domperidone 10mg",
+    genericName: "Domperidone",
+    category: "Tiêu hóa",
+    commonDosages: ["10mg"],
+    commonFrequencies: ["3 lần/ngày"],
+    price: 70000,
     available: true,
     requiresPrescription: true
   }

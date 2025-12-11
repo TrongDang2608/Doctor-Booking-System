@@ -1,0 +1,287 @@
+.prescription-template {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f5f5f5;
+  }
+  
+  .prescription-paper {
+    background: white;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    color: #0b0b0b;
+    line-height: 1.6;
+  }
+  
+  /* Header */
+  .prescription-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #333;
+  }
+  
+  .clinic-info {
+    flex: 1;
+  }
+  
+  .clinic-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+  
+  .clinic-address {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #555;
+  }
+  
+  .clinic-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 13px;
+    color: #666;
+  }
+  
+  
+  /* Title Section */
+  .prescription-title-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #333;
+  }
+  
+  .prescription-title {
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #0b0b0b;
+  }
+  
+  .prescription-barcode {
+    text-align: center;
+  }
+  
+  
+  .barcode-number {
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  
+  /* Patient Info Section */
+  .patient-info-section {
+    margin-bottom: 20px;
+  }
+  
+  .info-row {
+    display: flex;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+  
+  .info-label {
+  font-weight: 700;
+    min-width: 120px;
+    margin-right: 12px;
+  color: #000000 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  
+  .info-value {
+    flex: 1;
+  color: #000000 !important;
+  font-weight: 500;
+  }
+
+.patient-info-section .info-row .info-value {
+  color: #000000 !important;
+  font-weight: 500;
+}
+  
+  .diagnosis-code {
+    font-weight: 700;
+    padding: 6px 10px;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 6px;
+    display: inline-block;
+    color: #0b0b0b;
+  }
+  
+  /* Treatment Section */
+  .treatment-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8fafc;
+    border-left: 4px solid #333;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+  
+  .section-title {
+    font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 12px;
+  color: #000000 !important;
+    text-transform: uppercase;
+  }
+
+/* Ensure section titles like "Điều trị", "Lời dặn", "Ngày tái khám" are always dark */
+.treatment-section .section-title,
+.follow-up-section .section-title,
+.clinic-hours .section-title {
+  color: #000000 !important;
+  font-weight: 800;
+}
+  
+  .medications-list {
+    margin-left: 20px;
+  }
+  
+  .medication-item {
+    display: flex;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #ccc;
+  }
+  
+  .medication-item:last-child {
+    border-bottom: none;
+  }
+  
+  .med-number {
+    font-weight: bold;
+    margin-right: 10px;
+    min-width: 30px;
+  }
+  
+  .med-details {
+    flex: 1;
+  }
+  
+  .med-name {
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    color: #0b0b0b;
+  }
+  
+  .med-dosage,
+  .med-quantity {
+    font-size: 14px;
+    margin-bottom: 3px;
+    color: #0b0b0b;
+  }
+  
+  .dosage-label,
+  .quantity-label {
+    font-weight: bold;
+    margin-right: 5px;
+    color: #0b0b0b;
+  }
+  
+  /* Follow-up Section */
+  .follow-up-section {
+    margin: 20px 0;
+    padding: 15px 15px 10px;
+    background: #f8fafc;
+    border-left: 4px solid #0ea5e9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+  
+  /* Clinic Hours */
+  .clinic-hours {
+    margin: 20px 0;
+    padding: 10px;
+    background: #fff9e6;
+    border-left: 4px solid #ff9900;
+    font-size: 13px;
+    color: #0b0b0b;
+  }
+  
+  .hours-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .hours-details {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-left: 10px;
+  }
+  
+  /* Footer */
+  .prescription-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 2px solid #333;
+    font-size: 14px;
+    color: #0b0b0b;
+  }
+  
+  .prescription-date {
+    display: flex;
+    align-items: center;
+    color: #0b0b0b;
+  }
+  
+  .doctor-signature {
+    text-align: right;
+    color: #0b0b0b;
+  }
+  
+  .doctor-name {
+  font-weight: 500;
+    margin-top: 5px;
+  color: #000000 !important;
+  }
+  
+  /* Note */
+  .prescription-note {
+    margin-top: 15px;
+    padding: 10px;
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    font-size: 13px;
+    font-style: italic;
+    border-radius: 6px;
+    color: #0b0b0b;
+  }
+  
+  .note-label {
+    font-weight: bold;
+    color: #000000;
+  }
+  
+  /* Print Styles */
+  @media print {
+    .prescription-template {
+      padding: 0;
+      background: white;
+    }
+  
+    .prescription-paper {
+      box-shadow: none;
+      padding: 20px;
+    }
+  }
+  
+  
