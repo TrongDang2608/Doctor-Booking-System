@@ -23,7 +23,11 @@ public class Feedback {
     private Patient patient;
 
     @ManyToOne
-    @JoinColumn(name = "appointment_id")
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private Doctor doctor;
+
+    @ManyToOne
+    @JoinColumn(name = "appointment_id", nullable = false)
     private Appointment appointment;
 
     @Column(nullable = false)
@@ -36,11 +40,14 @@ public class Feedback {
     @Column(nullable = false)
     private FeedbackStatus status = FeedbackStatus.PENDING;
 
-    @Column(name = "admin_reply", columnDefinition = "TEXT")
-    private String adminReply;
+    @Column(name = "doctor_reply", columnDefinition = "TEXT")
+    private String doctorReply;
 
-    @Column(name = "replied_at")
-    private LocalDateTime repliedAt;
+    @Column(name = "doctor_replied_at")
+    private LocalDateTime doctorRepliedAt;
+
+    @Column(name = "is_hidden", nullable = false)
+    private Boolean isHidden = false;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

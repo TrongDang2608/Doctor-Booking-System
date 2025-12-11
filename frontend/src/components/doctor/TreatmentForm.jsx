@@ -69,7 +69,7 @@ const TreatmentForm = ({ treatment, appointment, onClose, onSuccess }) => {
         await doctorService.updateTreatment(treatment.id, formData);
       } else {
         if (!formData.patientId) {
-          setError('Please select a patient');
+          setError('Vui lòng chọn bệnh nhân');
           setLoading(false);
           return;
         }
@@ -82,7 +82,7 @@ const TreatmentForm = ({ treatment, appointment, onClose, onSuccess }) => {
       }
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save treatment');
+      setError(err.response?.data?.message || 'Không thể lưu thông tin điều trị');
     } finally {
       setLoading(false);
     }
@@ -99,19 +99,20 @@ const TreatmentForm = ({ treatment, appointment, onClose, onSuccess }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1000,
+        zIndex: 99999,
+        padding: '20px',
       }}>
         <div style={{
           backgroundColor: 'white',
-          padding: '30px',
+          padding: '25px',
           borderRadius: '8px',
           width: '90%',
-          maxWidth: '700px',
-          maxHeight: '90vh',
+          maxWidth: '650px',
+          maxHeight: '75vh',
           overflowY: 'auto',
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2>{treatment ? 'Edit Treatment' : 'Add New Treatment'}</h2>
+            <h2 style={{ color: '#1a1a1a', fontWeight: '600' }}>{treatment ? 'Chỉnh Sửa Điều Trị' : 'Thêm Điều Trị Mới'}</h2>
             <button
                 onClick={onClose}
                 style={{
@@ -129,26 +130,26 @@ const TreatmentForm = ({ treatment, appointment, onClose, onSuccess }) => {
 
           <form onSubmit={handleSubmit}>
             {appointment && (
-                <div style={{ marginBottom: '15px', padding: '15px', backgroundColor: '#e8f5e9', borderRadius: '4px' }}>
-                  <div><strong>Patient:</strong> {appointment.patientName}</div>
-                  <div><strong>Date:</strong> {formatDate(appointment.appointmentDate)}</div>
-                  <div><strong>Time:</strong> {formatTime(appointment.appointmentTime)}</div>
+                <div style={{ marginBottom: '15px', padding: '15px', backgroundColor: '#e8f5e9', borderRadius: '4px', color: '#1a1a1a' }}>
+                  <div><strong>Bệnh nhân:</strong> {appointment.patientName}</div>
+                  <div><strong>Ngày:</strong> {formatDate(appointment.appointmentDate)}</div>
+                  <div><strong>Giờ:</strong> {formatTime(appointment.appointmentTime)}</div>
                 </div>
             )}
 
             {!treatment && !appointment && (
                 <div style={{ marginBottom: '15px' }}>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                    Patient *
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#1a1a1a' }}>
+                    Bệnh nhân *
                   </label>
                   <select
                       name="patientId"
                       value={formData.patientId || ''}
                       onChange={handleChange}
                       required
-                      style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+                      style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', color: '#1a1a1a' }}
                   >
-                    <option value="">Select a patient</option>
+                    <option value="">Chọn bệnh nhân</option>
                     {patients.map((patient) => (
                         <option key={patient.id} value={patient.id}>
                           {patient.fullName} ({patient.email})
@@ -159,89 +160,101 @@ const TreatmentForm = ({ treatment, appointment, onClose, onSuccess }) => {
             )}
 
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                Diagnosis
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#1a1a1a' }}>
+                Chẩn đoán
               </label>
               <textarea
                   name="diagnosis"
                   value={formData.diagnosis}
                   onChange={handleChange}
                   rows="3"
-                  placeholder="Enter diagnosis..."
-                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit' }}
+                  placeholder="Nhập chẩn đoán..."
+                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit', color: '#1a1a1a' }}
               />
             </div>
 
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                Prescription
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#1a1a1a' }}>
+                Đơn thuốc
               </label>
               <textarea
                   name="prescription"
                   value={formData.prescription}
                   onChange={handleChange}
                   rows="3"
-                  placeholder="Enter prescription..."
-                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit' }}
+                  placeholder="Nhập đơn thuốc..."
+                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit', color: '#1a1a1a' }}
               />
             </div>
 
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                Treatment Notes
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#1a1a1a' }}>
+                Ghi chú điều trị
               </label>
               <textarea
                   name="treatmentNotes"
                   value={formData.treatmentNotes}
                   onChange={handleChange}
                   rows="4"
-                  placeholder="Enter treatment notes..."
-                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit' }}
+                  placeholder="Nhập ghi chú điều trị..."
+                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontFamily: 'inherit', color: '#1a1a1a' }}
               />
             </div>
 
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-                Follow-up Date
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500', color: '#1a1a1a' }}>
+                Ngày tái khám
               </label>
               <input
                   type="date"
                   name="followUpDate"
                   value={formData.followUpDate}
                   onChange={handleChange}
-                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+                  style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', color: '#1a1a1a' }}
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
               <button
                   type="button"
                   onClick={onClose}
                   style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#95a5a6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
+                    padding: '0.75rem 1.5rem',
+                    height: '49.6px',
+                    background: 'white',
+                    border: '1px solid #333',
+                    color: '#333',
+                    borderRadius: '8px',
                     cursor: 'pointer',
+                    fontWeight: '500',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
               >
-                Cancel
+                Hủy
               </button>
               <button
                   type="submit"
                   disabled={loading}
                   style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#2ecc71',
+                    padding: '0.75rem 1.5rem',
+                    height: '49.6px',
+                    margin: 0,
+                    background: loading ? 'rgba(16, 185, 129, 0.5)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                     color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
+                    border: '1px solid transparent',
+                    borderRadius: '8px',
                     cursor: loading ? 'not-allowed' : 'pointer',
-                    opacity: loading ? 0.6 : 1,
+                    fontWeight: '500',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
               >
-                {loading ? 'Saving...' : treatment ? 'Update' : 'Create'}
+                {loading ? 'Đang lưu...' : treatment ? 'Cập nhật' : 'Tạo mới'}
               </button>
             </div>
           </form>

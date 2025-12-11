@@ -40,6 +40,36 @@ public class EmailService {
     }
 
     /**
+     * Generic method to send plain text email
+     */
+    public void sendEmail(String toEmail, String subject, String content) {
+        // Kiểm tra cấu hình SMTP trước khi gửi
+        if (!isSmtpConfigured()) {
+            logger.warn("⚠️ Skipping email send - SMTP not configured");
+            return;
+        }
+        
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setText(content, false); // Plain text
+
+            mailSender.send(message);
+            logger.info("Email sent successfully to: {}", toEmail);
+        } catch (org.springframework.mail.MailAuthenticationException e) {
+            logger.error("❌ SMTP Authentication failed for email: {}. Error: {}", toEmail, e.getMessage());
+        } catch (jakarta.mail.MessagingException e) {
+            logger.error("❌ Messaging error sending email to: {}. Error: {}", toEmail, e.getMessage());
+        } catch (Exception e) {
+            logger.error("❌ Unexpected error sending email to: {}. Error: {}", toEmail, e.getMessage(), e);
+        }
+    }
+
+    /**
      * Gửi email thông báo đặt lịch thành công
      * Tất cả dữ liệu đều lấy từ database, không hardcode
      */

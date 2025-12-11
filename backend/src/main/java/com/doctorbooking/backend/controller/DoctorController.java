@@ -31,6 +31,7 @@ public class DoctorController {
     private final AppointmentService appointmentService;
     private final TreatmentService treatmentService;
     private final UserService userService;
+    private final FeedbackService feedbackService;
 
     // ========== Profile Management ==========
 
@@ -74,22 +75,37 @@ public class DoctorController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         try {
             Long doctorId = getCurrentDoctorId();
+            System.out.println("🔍 Doctor ID: " + doctorId);
             
             if (date != null) {
-                List<AppointmentResponse> appointments = appointmentService.getAppointmentsByDate(date)
-                        .stream()
-                        .filter(a -> a.getDoctorId().equals(doctorId))
+                List<AppointmentResponse> allByDate = appointmentService.getAppointmentsByDate(date);
+                System.out.println("📅 Total appointments on " + date + ": " + allByDate.size());
+                
+                List<AppointmentResponse> appointments = allByDate.stream()
+                        .filter(a -> {
+                            System.out.println("  - Appointment ID: " + a.getId() + ", Doctor ID: " + a.getDoctorId());
+                            return a.getDoctorId().equals(doctorId);
+                        })
                         .toList();
+                System.out.println("✅ Filtered appointments: " + appointments.size());
                 return ResponseEntity.ok(appointments);
             }
             
             // Get all appointments for this doctor
-            List<AppointmentResponse> allAppointments = appointmentService.getAllAppointments()
-                    .stream()
-                    .filter(a -> a.getDoctorId().equals(doctorId))
+            List<AppointmentResponse> allAppointments = appointmentService.getAllAppointments();
+            System.out.println("📋 Total appointments in system: " + allAppointments.size());
+            
+            List<AppointmentResponse> filtered = allAppointments.stream()
+                    .filter(a -> {
+                        System.out.println("  - Appointment ID: " + a.getId() + ", Doctor ID: " + a.getDoctorId() + ", Patient: " + a.getPatientName());
+                        return a.getDoctorId().equals(doctorId);
+                    })
                     .toList();
-            return ResponseEntity.ok(allAppointments);
+            System.out.println("✅ Filtered appointments for doctor " + doctorId + ": " + filtered.size());
+            return ResponseEntity.ok(filtered);
         } catch (RuntimeException e) {
+            System.err.println("❌ Error getting appointments: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
@@ -119,6 +135,19 @@ public class DoctorController {
             return ResponseEntity.ok(appointment);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/appointments/{id}/cancel")
+    public ResponseEntity<?> cancelAppointment(
+            @PathVariable Long id,
+            @RequestBody com.doctorbooking.backend.dto.appointment.CancelAppointmentRequest request) {
+        try {
+            Long doctorId = getCurrentDoctorId();
+            appointmentService.cancelAppointmentByDoctor(id, doctorId, request.getCancellationReason());
+            return ResponseEntity.ok().body(java.util.Map.of("message", "Appointment cancelled successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("message", e.getMessage()));
         }
     }
 
@@ -233,6 +262,78 @@ public class DoctorController {
             return ResponseEntity.ok(treatments);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    // ========== Feedback Management ==========
+
+    @GetMapping("/feedbacks")
+    public ResponseEntity<List<FeedbackResponse>> getDoctorFeedbacks() {
+        try {
+            Long doctorId = getCurrentDoctorId();
+            List<FeedbackResponse> feedbacks = feedbackService.getDoctorFeedbacks(doctorId);
+            return ResponseEntity.ok(feedbacks);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/feedbacks/rating/{rating}")
+    public ResponseEntity<List<FeedbackResponse>> getFeedbacksByRating(@PathVariable Integer rating) {
+        try {
+            Long doctorId = getCurrentDoctorId();
+            List<FeedbackResponse> feedbacks = feedbackService.getDoctorFeedbacksByRating(doctorId, rating);
+            return ResponseEntity.ok(feedbacks);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/feedbacks/{id}")
+    public ResponseEntity<FeedbackResponse> getFeedbackById(@PathVariable Long id) {
+        try {
+            Long doctorId = getCurrentDoctorId();
+            FeedbackResponse feedback = feedbackService.getDoctorFeedbackById(doctorId, id);
+            return ResponseEntity.ok(feedback);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/feedbacks/{id}/reply")
+    public ResponseEntity<FeedbackResponse> replyToFeedback(
+            @PathVariable Long id,
+            @Valid @RequestBody com.doctorbooking.backend.dto.request.ReplyFeedbackRequest request) {
+        try {
+            Long doctorId = getCurrentDoctorId();
+            FeedbackResponse feedback = feedbackService.replyToFeedback(doctorId, id, request);
+            return ResponseEntity.ok(feedback);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/feedbacks/{id}/reply")
+    public ResponseEntity<FeedbackResponse> updateDoctorReply(
+            @PathVariable Long id,
+            @Valid @RequestBody com.doctorbooking.backend.dto.request.ReplyFeedbackRequest request) {
+        try {
+            Long doctorId = getCurrentDoctorId();
+            FeedbackResponse feedback = feedbackService.updateDoctorReply(doctorId, id, request);
+            return ResponseEntity.ok(feedback);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/average-rating")
+    public ResponseEntity<Double> getAverageRating() {
+        try {
+            Long doctorId = getCurrentDoctorId();
+            Double avgRating = feedbackService.getDoctorAverageRating(doctorId);
+            return ResponseEntity.ok(avgRating);
+        } catch (RuntimeException e) {
+            return ResponseEntity.ok(0.0);
         }
     }
 

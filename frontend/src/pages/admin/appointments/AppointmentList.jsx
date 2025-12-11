@@ -4,9 +4,10 @@ import AdminLayout from '../../../components/admin/AdminLayout';
 import { adminService } from '../../../services/adminService';
 import Loading from '../../../components/common/Loading';
 import ErrorMessage from '../../../components/common/ErrorMessage';
+import CancelAppointmentModal from '../../../components/doctor/CancelAppointmentModal';
 import { formatDate } from '../../../utils/formatDate';
 import { formatTime } from '../../../utils/formatTime';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import useFeatherIcons from '../../../hooks/useFeatherIcons';
 
@@ -21,6 +22,8 @@ const AppointmentList = () => {
   const [filterStatus, setFilterStatus] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [appointmentToCancel, setAppointmentToCancel] = useState(null);
 
   useEffect(() => {
     loadAllAppointments();
@@ -175,6 +178,30 @@ const AppointmentList = () => {
 
   const handleEdit = (appointment) => {
     navigate(`/admin/appointments/${appointment.id}/edit`);
+  };
+
+  const handleCancelClick = (appointment) => {
+    setAppointmentToCancel(appointment);
+    setShowCancelModal(true);
+  };
+
+  const handleConfirmCancel = async (cancellationReason) => {
+    try {
+      await adminService.cancelAppointment(appointmentToCancel.id, cancellationReason);
+      setShowCancelModal(false);
+      setAppointmentToCancel(null);
+      toast.success('Đã hủy lịch hẹn thành công', {
+        position: "top-right",
+        autoClose: 3000
+      });
+      // Delay reload để toast hiển thị đầy đủ
+      setTimeout(() => {
+        loadAllAppointments();
+      }, 1500);
+    } catch (err) {
+      // Let the modal handle the error display
+      throw err;
+    }
   };
 
   const getStatusDisplay = (status) => {
@@ -352,6 +379,15 @@ const AppointmentList = () => {
                           >
                             <i data-feather="edit-2" className="w-4 h-4"></i>
                           </button>
+                          {(appointment.status === 'PENDING' || appointment.status === 'CONFIRMED') && (
+                            <button
+                              onClick={() => handleCancelClick(appointment)}
+                              className="text-red-600 hover:text-red-800 transition-colors"
+                              title="Hủy lịch hẹn"
+                            >
+                              <i data-feather="x-circle" className="w-4 h-4"></i>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -376,6 +412,19 @@ const AppointmentList = () => {
           </div>
         )}
       </div>
+
+      {showCancelModal && appointmentToCancel && (
+        <CancelAppointmentModal
+          appointment={appointmentToCancel}
+          onClose={() => {
+            setShowCancelModal(false);
+            setAppointmentToCancel(null);
+          }}
+          onConfirm={handleConfirmCancel}
+          isAdmin={true}
+        />
+      )}
+
       <ToastContainer />
     </AdminLayout>
   );

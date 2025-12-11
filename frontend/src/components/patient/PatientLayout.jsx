@@ -89,6 +89,7 @@ const PatientLayout = ({ children }) => {
         { path: '/patient/booking', label: 'Đặt lịch mới', icon: 'calendar', route: '/patient/booking' },
         { path: '/patient/history', label: 'Lịch sử đặt lịch', icon: 'clock', route: '/patient/history' },
         { path: '/patient/doctors', label: 'Tìm bác sĩ', icon: 'search', route: '/patient/doctors' },
+        { path: '/patient/feedbacks', label: 'Phản hồi của tôi', icon: 'message-square', route: '/patient/feedbacks' },
         { path: '/patient/family', label: 'Hồ sơ Gia đình', icon: 'users', route: '/patient/family' },
         { path: '/patient/wallet', label: 'Ví Sức khỏe', icon: 'credit-card', route: '/patient/wallet' },
         { path: '/patient/healthlyai', label: 'Trợ lý AI', icon: 'message-circle', route: '/patient/healthlyai' },

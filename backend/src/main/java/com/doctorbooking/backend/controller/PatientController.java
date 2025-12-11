@@ -273,6 +273,30 @@ public class PatientController {
             return ResponseEntity.badRequest().build();
         }
     }
+    
+    @GetMapping("/feedbacks/{id}")
+    public ResponseEntity<FeedbackResponse> getFeedbackById(@PathVariable Long id) {
+        try {
+            Long patientId = getCurrentPatientId();
+            FeedbackResponse feedback = feedbackService.getPatientFeedbackById(patientId, id);
+            return ResponseEntity.ok(feedback);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    @PutMapping("/feedbacks/{id}")
+    public ResponseEntity<FeedbackResponse> updateFeedback(
+            @PathVariable Long id,
+            @Valid @RequestBody com.doctorbooking.backend.dto.request.UpdateFeedbackRequest request) {
+        try {
+            Long patientId = getCurrentPatientId();
+            FeedbackResponse feedback = feedbackService.updateFeedback(patientId, id, request);
+            return ResponseEntity.ok(feedback);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
     // ========== Helper Methods ==========
 
