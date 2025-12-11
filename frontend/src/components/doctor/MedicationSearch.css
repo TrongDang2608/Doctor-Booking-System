@@ -1,0 +1,150 @@
+.medication-search-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1rem;
+  z-index: 100;
+}
+
+.medication-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.medication-search-input {
+  width: 100%;
+  padding: 0.875rem 3rem 0.875rem 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  color: #e0e0e0;
+}
+
+.medication-search-input::placeholder {
+  color: #64748b;
+}
+
+.medication-search-input:focus {
+  outline: none;
+  border-color: #10b981;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.medication-search-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.medication-search-icon svg {
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.4));
+}
+
+.medication-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(40, 40, 50, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 9999;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  margin-top: -2px;
+}
+
+.medication-suggestion-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.medication-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.medication-suggestion-item:hover:not(.selected):not(.no-results) {
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 3px solid #10b981;
+}
+
+.medication-suggestion-item.selected {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  cursor: not-allowed;
+}
+
+.medication-suggestion-item.no-results {
+  color: #94a3b8;
+  cursor: default;
+  text-align: center;
+  font-style: italic;
+}
+
+.suggestion-name {
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.medication-suggestion-item.selected .suggestion-name {
+  color: #10b981;
+}
+
+.suggestion-details {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  flex-wrap: wrap;
+}
+
+.suggestion-generic {
+  font-style: italic;
+}
+
+.suggestion-category {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+}
+
+.suggestion-checkmark {
+  float: right;
+  color: #10b981;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Scrollbar styling */
+.medication-suggestions::-webkit-scrollbar {
+  width: 6px;
+}
+
+.medication-suggestions::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.medication-suggestions::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.medication-suggestions::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

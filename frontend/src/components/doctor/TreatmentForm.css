@@ -1,0 +1,400 @@
+/* Treatment Form - Dark Theme */
+.treatment-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.treatment-form-container {
+  background: rgba(30, 30, 40, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.treatment-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.treatment-form-header h2 {
+  color: #e0e0e0;
+  font-weight: 600;
+  font-size: 24px;
+  margin: 0;
+  background: linear-gradient(135deg, #FFFFFF 0%, #A5B4FC 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.close-button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94A3B8;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.treatment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.appointment-info-card {
+  padding: 15px 20px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 12px;
+  color: #e0e0e0;
+  border-left: 4px solid #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.appointment-info-card div {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.appointment-info-card div:last-child {
+  margin-bottom: 0;
+}
+
+.appointment-info-card strong {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.form-section {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.prescription-section {
+  z-index: 2;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  text-align: center;
+  border-bottom: 1px solid #10b981;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #94A3B8;
+  font-size: 14px;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #e0e0e0;
+  transition: all 0.3s;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #94a3b8;
+  opacity: 0.7;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #10b981;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+  background: rgba(40, 40, 50, 0.7);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-textarea:focus {
+  background: rgba(40, 40, 50, 0.8);
+  border-color: #10b981;
+}
+
+select.form-input {
+  cursor: pointer;
+}
+
+select.form-input option {
+  background: #1e1e28;
+  color: #e0e0e0;
+}
+
+.prescription-section {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.medications-list {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.medication-card {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  position: relative;
+  transition: all 0.2s;
+}
+
+.medication-card:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.medication-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.med-number {
+  font-weight: bold;
+  font-size: 16px;
+  color: #10b981;
+}
+
+.remove-med-button {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.remove-med-button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: scale(1.05);
+}
+
+.medication-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.quantity-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.quantity-input-group .form-input {
+  flex: 1;
+}
+
+.unit-select {
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.preview-toggle-button {
+  width: 100%;
+  padding: 14px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.preview-toggle-button:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+.prescription-preview-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 24px;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.button-cancel,
+.button-submit {
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+}
+
+.button-cancel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #94A3B8;
+}
+
+.button-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #e0e0e0;
+}
+
+.button-submit {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.button-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.button-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Scrollbar styling */
+.treatment-form-container::-webkit-scrollbar,
+.prescription-preview-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.treatment-form-container::-webkit-scrollbar-track,
+.prescription-preview-section::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.treatment-form-container::-webkit-scrollbar-thumb,
+.prescription-preview-section::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.treatment-form-container::-webkit-scrollbar-thumb:hover,
+.prescription-preview-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .treatment-form-container {
+    padding: 20px;
+    max-width: 100%;
+    border-radius: 12px;
+  }
+
+  .medication-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .button-cancel,
+  .button-submit {
+    width: 100%;
+  }
+}

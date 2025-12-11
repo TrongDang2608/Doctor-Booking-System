@@ -49,6 +49,14 @@ export const doctorService = {
     return response.data;
   },
 
+  searchMedications: async (search, limit = 5) => {
+    const params = {};
+    if (search) params.search = search;
+    if (limit) params.limit = limit;
+    const response = await api.get('/doctor/medications', { params });
+    return response.data;
+  },
+
   createTreatment: async (treatmentData) => {
     const response = await api.post('/doctor/treatments', treatmentData);
     return response.data;
