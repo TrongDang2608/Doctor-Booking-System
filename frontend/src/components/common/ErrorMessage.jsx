@@ -3,15 +3,17 @@ const ErrorMessage = ({ message, onClose }) => {
 
   return (
     <div style={{
-      padding: '15px',
-      backgroundColor: '#fee',
-      border: '1px solid #fcc',
-      borderRadius: '4px',
-      color: '#c33',
-      marginBottom: '15px',
+      padding: '16px 20px',
+      backgroundColor: 'rgba(239, 68, 68, 0.15)',
+      border: '1px solid rgba(239, 68, 68, 0.3)',
+      borderRadius: '12px',
+      color: '#f87171',
+      marginBottom: '24px',
       display: 'flex',
       justifyContent: 'space-between',
-      alignItems: 'center'
+      alignItems: 'center',
+      fontSize: '0.95rem',
+      fontWeight: '500'
     }}>
       <span>{message}</span>
       {onClose && (
@@ -20,11 +22,15 @@ const ErrorMessage = ({ message, onClose }) => {
           style={{
             background: 'none',
             border: 'none',
-            color: '#c33',
-            fontSize: '20px',
+            color: '#f87171',
+            fontSize: '24px',
             cursor: 'pointer',
-            padding: '0 10px'
+            padding: '0 10px',
+            lineHeight: '1',
+            transition: 'opacity 0.2s ease'
           }}
+          onMouseEnter={(e) => e.target.style.opacity = '0.7'}
+          onMouseLeave={(e) => e.target.style.opacity = '1'}
         >
           ×
         </button>

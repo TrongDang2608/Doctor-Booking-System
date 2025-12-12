@@ -45,11 +45,44 @@ const TreatmentForm = ({ treatment, appointment, onClose, onSuccess }) => {
       });
       if (treatment.medications) {
         // Map medications to ensure both name and medicationName are set
-        const mappedMeds = treatment.medications.map(med => ({
-          ...med,
-          name: med.medicationName || med.name,
-          medicationName: med.medicationName || med.name
-        }));
+        // Parse commonDosages and commonFrequencies if they exist (from medication selection)
+        const mappedMeds = treatment.medications.map(med => {
+          let commonDosages = [];
+          let commonFrequencies = [];
+          
+          // Parse if they exist (when medication was selected from search)
+          if (med.commonDosages) {
+            try {
+              if (typeof med.commonDosages === 'string') {
+                commonDosages = JSON.parse(med.commonDosages || '[]');
+              } else if (Array.isArray(med.commonDosages)) {
+                commonDosages = med.commonDosages;
+              }
+            } catch (e) {
+              commonDosages = [];
+            }
+          }
+          
+          if (med.commonFrequencies) {
+            try {
+              if (typeof med.commonFrequencies === 'string') {
+                commonFrequencies = JSON.parse(med.commonFrequencies || '[]');
+              } else if (Array.isArray(med.commonFrequencies)) {
+                commonFrequencies = med.commonFrequencies;
+              }
+            } catch (e) {
+              commonFrequencies = [];
+            }
+          }
+          
+          return {
+            ...med,
+            name: med.medicationName || med.name,
+            medicationName: med.medicationName || med.name,
+            commonDosages: commonDosages,
+            commonFrequencies: commonFrequencies
+          };
+        });
         setMedications(mappedMeds);
       }
     } else if (appointment) {
@@ -286,24 +319,64 @@ const TreatmentForm = ({ treatment, appointment, onClose, onSuccess }) => {
                       </div>
                       <div className="form-group">
                         <label>Liều dùng <span className="required">*</span></label>
-                        <input
-                          type="text"
-                          value={med.dosage}
-                          onChange={(e) => handleMedicationChange(index, 'dosage', e.target.value)}
-                          placeholder="VD: sáng 1 gói - chiều 1 gói"
-                          className="form-input"
-                          required
-                        />
+                        <div className="selectable-input-group">
+                          {med.commonDosages && Array.isArray(med.commonDosages) && med.commonDosages.length > 0 && (
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                if (e.target.value) {
+                                  handleMedicationChange(index, 'dosage', e.target.value);
+                                }
+                              }}
+                              className="form-select"
+                            >
+                              <option value="">Chọn liều dùng...</option>
+                              {med.commonDosages.map((dose, idx) => (
+                                <option key={idx} value={dose}>
+                                  {dose}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                          <input
+                            type="text"
+                            value={med.dosage || ''}
+                            onChange={(e) => handleMedicationChange(index, 'dosage', e.target.value)}
+                            placeholder="VD: 500mg hoặc sáng 1 gói - chiều 1 gói"
+                            className="form-input"
+                            required
+                          />
+                        </div>
                       </div>
                       <div className="form-group">
                         <label>Tần suất</label>
-                        <input
-                          type="text"
-                          value={med.frequency}
-                          onChange={(e) => handleMedicationChange(index, 'frequency', e.target.value)}
-                          placeholder="VD: 2 lần/ngày"
-                          className="form-input"
-                        />
+                        <div className="selectable-input-group">
+                          {med.commonFrequencies && Array.isArray(med.commonFrequencies) && med.commonFrequencies.length > 0 && (
+                            <select
+                              value=""
+                              onChange={(e) => {
+                                if (e.target.value) {
+                                  handleMedicationChange(index, 'frequency', e.target.value);
+                                }
+                              }}
+                              className="form-select"
+                            >
+                              <option value="">Chọn tần suất...</option>
+                              {med.commonFrequencies.map((freq, idx) => (
+                                <option key={idx} value={freq}>
+                                  {freq}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                          <input
+                            type="text"
+                            value={med.frequency || ''}
+                            onChange={(e) => handleMedicationChange(index, 'frequency', e.target.value)}
+                            placeholder="VD: 2 lần/ngày"
+                            className="form-input"
+                          />
+                        </div>
                       </div>
                       <div className="form-group">
                         <label>Số lượng</label>
