@@ -65,6 +65,32 @@ const MedicationSearch = ({ onSelectMedication, selectedMedications = [] }) => {
     );
 
     if (!isAlreadySelected) {
+      // Parse commonDosages and commonFrequencies from JSON string or array
+      let dosages = [];
+      let frequencies = [];
+      
+      try {
+        if (typeof medication.commonDosages === 'string') {
+          dosages = JSON.parse(medication.commonDosages || '[]');
+        } else if (Array.isArray(medication.commonDosages)) {
+          dosages = medication.commonDosages;
+        }
+      } catch (e) {
+        // If parsing fails, treat as single string
+        dosages = medication.commonDosages ? [medication.commonDosages] : [];
+      }
+      
+      try {
+        if (typeof medication.commonFrequencies === 'string') {
+          frequencies = JSON.parse(medication.commonFrequencies || '[]');
+        } else if (Array.isArray(medication.commonFrequencies)) {
+          frequencies = medication.commonFrequencies;
+        }
+      } catch (e) {
+        // If parsing fails, treat as single string
+        frequencies = medication.commonFrequencies ? [medication.commonFrequencies] : [];
+      }
+
       const newMedication = {
         id: medication.id,
         medicationId: medication.id,
@@ -72,8 +98,10 @@ const MedicationSearch = ({ onSelectMedication, selectedMedications = [] }) => {
         medicationName: medication.name,
         genericName: medication.genericName,
         category: medication.category,
-        dosage: Array.isArray(medication.commonDosages) ? medication.commonDosages[0] : medication.commonDosages || '',
-        frequency: Array.isArray(medication.commonFrequencies) ? medication.commonFrequencies[0] : medication.commonFrequencies || '',
+        dosage: dosages.length > 0 ? dosages[0] : '',
+        frequency: frequencies.length > 0 ? frequencies[0] : '',
+        commonDosages: dosages, // Store array for dropdown
+        commonFrequencies: frequencies, // Store array for dropdown
         quantity: 0,
         instructions: '',
         unit: medication.unit || (medication.name?.toLowerCase().includes('gói') ? 'gói' : 'viên')
