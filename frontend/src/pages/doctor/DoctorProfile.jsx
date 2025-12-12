@@ -63,10 +63,10 @@ const DoctorProfile = () => {
       const updated = await doctorService.updateProfile(formData);
       setProfile(updated);
       setEditMode(false);
-      setSuccess('Profile updated successfully');
+      setSuccess('Cập nhật hồ sơ thành công!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update profile');
+      setError(err.response?.data?.message || 'Không thể cập nhật hồ sơ');
     }
   };
 
@@ -76,12 +76,12 @@ const DoctorProfile = () => {
     setSuccess('');
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('New passwords do not match');
+      setError('Mật khẩu mới không khớp');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Mật khẩu phải có ít nhất 6 ký tự');
       return;
     }
 
@@ -89,10 +89,10 @@ const DoctorProfile = () => {
       await doctorService.changePassword(passwordData.currentPassword, passwordData.newPassword);
       setShowPasswordForm(false);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setSuccess('Password changed successfully');
+      setSuccess('Đổi mật khẩu thành công!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to change password');
+      setError(err.response?.data?.message || 'Không thể đổi mật khẩu');
     }
   };
 
@@ -107,72 +107,166 @@ const DoctorProfile = () => {
   if (!profile) {
     return (
       <DoctorLayout>
-        <div>Profile not found</div>
+        <div className="doctor-profile-page">
+          <div className="error-state">
+            <p>Không tìm thấy hồ sơ</p>
+          </div>
+        </div>
       </DoctorLayout>
     );
   }
 
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <DoctorLayout>
-      <div className="doctor-profile">
-        <div className="profile-header">
-          <h1 className="profile-title">My Profile</h1>
-          {!editMode && (
-            <button
-              onClick={() => setEditMode(true)}
-              className="edit-btn"
-            >
-              Edit Profile
-            </button>
-          )}
+      <div className="doctor-profile-page">
+        {/* Header Section */}
+        <div className="profile-header-section">
+          <div className="profile-header-content">
+            <div className="profile-avatar-section">
+              <div className="profile-avatar">
+                <span className="avatar-initials">{getInitials(profile.fullName)}</span>
+              </div>
+              <div className="avatar-badge">
+                <span className="badge-icon">👨‍⚕️</span>
+              </div>
+            </div>
+            <div className="profile-header-info">
+              <h1 className="profile-name">{profile.fullName}</h1>
+              <p className="profile-specialization">{profile.specialization}</p>
+              <div className="profile-meta">
+                <span className="meta-item">
+                  <span className="meta-icon">📧</span>
+                  {profile.email}
+                </span>
+                {profile.phone && (
+                  <span className="meta-item">
+                    <span className="meta-icon">📞</span>
+                    {profile.phone}
+                  </span>
+                )}
+              </div>
+            </div>
+            {!editMode && (
+              <button
+                onClick={() => setEditMode(true)}
+                className="edit-profile-btn"
+              >
+                <span className="btn-icon">✏️</span>
+                Chỉnh sửa hồ sơ
+              </button>
+            )}
+          </div>
         </div>
 
+        {/* Messages */}
         <ErrorMessage message={error} onClose={() => setError('')} />
         {success && (
           <div className="success-message">
+            <span className="success-icon">✓</span>
             {success}
           </div>
         )}
 
-        <div className="profile-grid">
-          {/* Profile Information */}
-          <div className="profile-card">
-            <h2 className="card-title">Profile Information</h2>
+        {/* Main Content */}
+        <div className="profile-content-grid">
+          {/* Profile Information Card */}
+          <div className="profile-section-card">
+            <div className="section-card-header">
+              <div className="section-header-left">
+                <span className="section-icon">👤</span>
+                <h2 className="section-title">Thông tin cá nhân</h2>
+              </div>
+              {editMode && (
+                <button
+                  onClick={() => {
+                    setEditMode(false);
+                    loadProfile();
+                  }}
+                  className="cancel-edit-btn"
+                >
+                  ✕ Hủy
+                </button>
+              )}
+            </div>
+
             {!editMode ? (
-              <div className="profile-info">
-                <div className="info-item">
-                  <strong>Full Name:</strong> {profile.fullName}
+              <div className="profile-info-display">
+                <div className="info-row">
+                  <div className="info-label">
+                    <span className="label-icon">👤</span>
+                    Họ và tên
+                  </div>
+                  <div className="info-value">{profile.fullName}</div>
                 </div>
-                <div className="info-item">
-                  <strong>Specialization:</strong> {profile.specialization}
+                <div className="info-row">
+                  <div className="info-label">
+                    <span className="label-icon">🏥</span>
+                    Chuyên khoa
+                  </div>
+                  <div className="info-value">{profile.specialization}</div>
                 </div>
-                <div className="info-item">
-                  <strong>Qualification:</strong> {profile.qualification || '-'}
+                <div className="info-row">
+                  <div className="info-label">
+                    <span className="label-icon">🎓</span>
+                    Bằng cấp
+                  </div>
+                  <div className="info-value">{profile.qualification || 'Chưa cập nhật'}</div>
                 </div>
-                <div className="info-item">
-                  <strong>Experience:</strong> {profile.experience} years
+                <div className="info-row">
+                  <div className="info-label">
+                    <span className="label-icon">⭐</span>
+                    Kinh nghiệm
+                  </div>
+                  <div className="info-value">
+                    {profile.experience} {profile.experience === 1 ? 'năm' : 'năm'}
+                  </div>
                 </div>
-                <div className="info-item">
-                  <strong>Email:</strong> {profile.email}
+                <div className="info-row">
+                  <div className="info-label">
+                    <span className="label-icon">📧</span>
+                    Email
+                  </div>
+                  <div className="info-value">{profile.email}</div>
                 </div>
-                <div className="info-item">
-                  <strong>Phone:</strong> {profile.phone || '-'}
+                <div className="info-row">
+                  <div className="info-label">
+                    <span className="label-icon">📞</span>
+                    Số điện thoại
+                  </div>
+                  <div className="info-value">{profile.phone || 'Chưa cập nhật'}</div>
                 </div>
-                <div className="info-item">
-                  <strong>Address:</strong> {profile.address || '-'}
+                <div className="info-row">
+                  <div className="info-label">
+                    <span className="label-icon">📍</span>
+                    Địa chỉ
+                  </div>
+                  <div className="info-value">{profile.address || 'Chưa cập nhật'}</div>
                 </div>
                 {profile.bio && (
-                  <div className="info-item">
-                    <strong>Bio:</strong>
-                    <p>{profile.bio}</p>
+                  <div className="info-row info-row-full">
+                    <div className="info-label">
+                      <span className="label-icon">📝</span>
+                      Giới thiệu
+                    </div>
+                    <div className="info-value info-bio">{profile.bio}</div>
                   </div>
                 )}
               </div>
             ) : (
-              <form onSubmit={handleUpdateProfile} className="profile-form">
-                <div>
+              <form onSubmit={handleUpdateProfile} className="profile-edit-form">
+                <div className="form-group">
                   <label className="form-label">
-                    Full Name *
+                    <span className="label-icon">👤</span>
+                    Họ và tên <span className="required">*</span>
                   </label>
                   <input
                     type="text"
@@ -181,11 +275,14 @@ const DoctorProfile = () => {
                     onChange={handleInputChange}
                     required
                     className="form-input"
+                    placeholder="Nhập họ và tên"
                   />
                 </div>
-                <div>
+
+                <div className="form-group">
                   <label className="form-label">
-                    Specialization *
+                    <span className="label-icon">🏥</span>
+                    Chuyên khoa <span className="required">*</span>
                   </label>
                   <input
                     type="text"
@@ -194,36 +291,47 @@ const DoctorProfile = () => {
                     onChange={handleInputChange}
                     required
                     className="form-input"
+                    placeholder="VD: Tim mạch, Nội khoa..."
                   />
                 </div>
-                <div>
-                  <label className="form-label">
-                    Qualification
-                  </label>
-                  <input
-                    type="text"
-                    name="qualification"
-                    value={formData.qualification}
-                    onChange={handleInputChange}
-                    className="form-input"
-                  />
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="label-icon">🎓</span>
+                      Bằng cấp
+                    </label>
+                    <input
+                      type="text"
+                      name="qualification"
+                      value={formData.qualification}
+                      onChange={handleInputChange}
+                      className="form-input"
+                      placeholder="VD: Tiến sĩ Y khoa"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="label-icon">⭐</span>
+                      Kinh nghiệm (năm)
+                    </label>
+                    <input
+                      type="number"
+                      name="experience"
+                      value={formData.experience}
+                      onChange={handleInputChange}
+                      min="0"
+                      className="form-input"
+                      placeholder="0"
+                    />
+                  </div>
                 </div>
-                <div>
+
+                <div className="form-group">
                   <label className="form-label">
-                    Experience (years)
-                  </label>
-                  <input
-                    type="number"
-                    name="experience"
-                    value={formData.experience}
-                    onChange={handleInputChange}
-                    min="0"
-                    className="form-input"
-                  />
-                </div>
-                <div>
-                  <label className="form-label">
-                    Phone
+                    <span className="label-icon">📞</span>
+                    Số điện thoại
                   </label>
                   <input
                     type="tel"
@@ -231,11 +339,14 @@ const DoctorProfile = () => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="form-input"
+                    placeholder="VD: 0901234567"
                   />
                 </div>
-                <div>
+
+                <div className="form-group">
                   <label className="form-label">
-                    Address
+                    <span className="label-icon">📍</span>
+                    Địa chỉ
                   </label>
                   <input
                     type="text"
@@ -243,11 +354,14 @@ const DoctorProfile = () => {
                     value={formData.address}
                     onChange={handleInputChange}
                     className="form-input"
+                    placeholder="Nhập địa chỉ"
                   />
                 </div>
-                <div>
+
+                <div className="form-group">
                   <label className="form-label">
-                    Bio
+                    <span className="label-icon">📝</span>
+                    Giới thiệu
                   </label>
                   <textarea
                     name="bio"
@@ -255,14 +369,17 @@ const DoctorProfile = () => {
                     onChange={handleInputChange}
                     rows="4"
                     className="form-textarea"
+                    placeholder="Viết giới thiệu về bản thân..."
                   />
                 </div>
-                <div className="form-buttons">
+
+                <div className="form-actions">
                   <button
                     type="submit"
-                    className="btn-save"
+                    className="btn-primary"
                   >
-                    Save Changes
+                    <span className="btn-icon">💾</span>
+                    Lưu thay đổi
                   </button>
                   <button
                     type="button"
@@ -270,30 +387,45 @@ const DoctorProfile = () => {
                       setEditMode(false);
                       loadProfile();
                     }}
-                    className="btn-cancel"
+                    className="btn-secondary"
                   >
-                    Cancel
+                    Hủy
                   </button>
                 </div>
               </form>
             )}
           </div>
 
-          {/* Change Password */}
-          <div className="profile-card">
-            <h2 className="card-title">Change Password</h2>
+          {/* Change Password Card */}
+          <div className="profile-section-card">
+            <div className="section-card-header">
+              <div className="section-header-left">
+                <span className="section-icon">🔒</span>
+                <h2 className="section-title">Bảo mật</h2>
+              </div>
+            </div>
+
             {!showPasswordForm ? (
-              <button
-                onClick={() => setShowPasswordForm(true)}
-                className="btn-change-password"
-              >
-                Change Password
-              </button>
+              <div className="password-section-content">
+                <div className="password-info">
+                  <p className="password-description">
+                    Để bảo vệ tài khoản của bạn, hãy đảm bảo mật khẩu của bạn mạnh và không chia sẻ với người khác.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowPasswordForm(true)}
+                  className="btn-change-password"
+                >
+                  <span className="btn-icon">🔑</span>
+                  Đổi mật khẩu
+                </button>
+              </div>
             ) : (
-              <form onSubmit={handleChangePassword} className="profile-form">
-                <div>
+              <form onSubmit={handleChangePassword} className="password-form">
+                <div className="form-group">
                   <label className="form-label">
-                    Current Password *
+                    <span className="label-icon">🔒</span>
+                    Mật khẩu hiện tại <span className="required">*</span>
                   </label>
                   <input
                     type="password"
@@ -301,11 +433,14 @@ const DoctorProfile = () => {
                     onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
                     required
                     className="form-input"
+                    placeholder="Nhập mật khẩu hiện tại"
                   />
                 </div>
-                <div>
+
+                <div className="form-group">
                   <label className="form-label">
-                    New Password *
+                    <span className="label-icon">🔑</span>
+                    Mật khẩu mới <span className="required">*</span>
                   </label>
                   <input
                     type="password"
@@ -314,11 +449,14 @@ const DoctorProfile = () => {
                     required
                     minLength={6}
                     className="form-input"
+                    placeholder="Tối thiểu 6 ký tự"
                   />
                 </div>
-                <div>
+
+                <div className="form-group">
                   <label className="form-label">
-                    Confirm New Password *
+                    <span className="label-icon">✓</span>
+                    Xác nhận mật khẩu mới <span className="required">*</span>
                   </label>
                   <input
                     type="password"
@@ -327,14 +465,17 @@ const DoctorProfile = () => {
                     required
                     minLength={6}
                     className="form-input"
+                    placeholder="Nhập lại mật khẩu mới"
                   />
                 </div>
-                <div className="form-buttons">
+
+                <div className="form-actions">
                   <button
                     type="submit"
-                    className="btn-save"
+                    className="btn-primary"
                   >
-                    Update Password
+                    <span className="btn-icon">💾</span>
+                    Cập nhật mật khẩu
                   </button>
                   <button
                     type="button"
@@ -342,9 +483,9 @@ const DoctorProfile = () => {
                       setShowPasswordForm(false);
                       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
                     }}
-                    className="btn-cancel"
+                    className="btn-secondary"
                   >
-                    Cancel
+                    Hủy
                   </button>
                 </div>
               </form>
@@ -357,4 +498,3 @@ const DoctorProfile = () => {
 };
 
 export default DoctorProfile;
-
