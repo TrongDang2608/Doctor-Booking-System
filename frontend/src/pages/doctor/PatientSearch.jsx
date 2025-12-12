@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, MapPin, Clock, Star, Award, Video, 
+  Search, Clock, Star, Award, Video, 
   CheckCircle, XCircle, GitCompare, X, Calendar,
   TrendingUp, DollarSign, User, Mail, Phone, FileText
 } from 'lucide-react';
@@ -161,14 +161,6 @@ const PatientSearch = () => {
     setHighlightedPatientId(patientId);
   };
 
-  const handlePinClick = (patientId) => {
-    setHighlightedPatientId(patientId);
-    const element = document.getElementById(`patient-card-${patientId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
   const toggleCompare = (patient) => {
     if (compareList.find(p => p.id === patient.id)) {
       setCompareList(compareList.filter(p => p.id !== patient.id));
@@ -208,13 +200,24 @@ const PatientSearch = () => {
   return (
     <DoctorLayout>
       <div className="smart-patient-finder">
+        {/* Page Header */}
+        <div className="page-header">
+          <h1 className="page-title">
+            <Search size={32} />
+            Tìm kiếm Bệnh nhân
+          </h1>
+          <p className="page-subtitle">
+            Tìm kiếm và quản lý thông tin bệnh nhân một cách thông minh và hiệu quả
+          </p>
+        </div>
+
         {/* AI Search Bar */}
         <div className="ai-search-container">
           <div className="ai-search-bar">
-            <Search className="search-icon" size={20} />
+            <Search className="search-icon" size={22} />
             <input
               type="text"
-              placeholder="Search patients by name, email, ID, or condition..."
+              placeholder="Tìm kiếm theo tên, email, ID, hoặc tình trạng bệnh..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="ai-search-input"
@@ -229,12 +232,13 @@ const PatientSearch = () => {
                 exit={{ opacity: 0, y: -10 }}
                 className="suggested-categories"
               >
-                <span className="suggestion-label">Suggested Categories:</span>
+                <span className="suggestion-label">Gợi ý danh mục:</span>
                 {suggestedCategories.map((category, index) => (
                   <motion.span
                     key={index}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
                     className="category-tag"
                   >
                     {category}
@@ -247,18 +251,19 @@ const PatientSearch = () => {
 
         {error && <ErrorMessage message={error} />}
 
-        {/* Split Screen Layout */}
+        {/* Patient Cards Layout */}
         <div className="finder-layout">
-          {/* Left Panel: Patient Cards */}
           <div className="patients-panel">
             {loading && patients.length === 0 ? (
               <div className="loading-container">
-                <Loading message="Loading patients..." />
+                <div className="loading-spinner"></div>
+                <p style={{ color: '#cbd5e1', fontSize: '1rem', margin: 0 }}>Đang tải danh sách bệnh nhân...</p>
               </div>
             ) : filteredPatients.length === 0 ? (
               <div className="empty-state">
-                <Search size={48} />
-                <p>No patients found matching your criteria</p>
+                <Search size={64} />
+                <h3 style={{ color: '#ffffff', margin: '0.5rem 0', fontSize: '1.5rem' }}>Không tìm thấy bệnh nhân</h3>
+                <p>Không có bệnh nhân nào phù hợp với tiêu chí tìm kiếm của bạn</p>
               </div>
             ) : (
               <div className="patients-list">
@@ -274,7 +279,8 @@ const PatientSearch = () => {
                   >
                     {/* Match Score Badge */}
                     <div className="match-score-badge">
-                      {patient.matchScore || 85}% Match
+                      <span>{patient.matchScore || 85}%</span>
+                      <span style={{ fontSize: '0.7rem', opacity: 0.9 }}>Khớp</span>
                     </div>
 
                     {/* Video Story Ring */}
@@ -308,31 +314,31 @@ const PatientSearch = () => {
                     <div className="patient-info">
                       <h3 className="patient-name">{patient.fullName}</h3>
                       <div className="patient-id">
-                        <User size={14} />
+                        <User size={16} />
                         <span>ID: {patient.id}</span>
                       </div>
                       
                       <div className="patient-meta">
                         <div className="meta-item">
-                          <Mail size={14} />
-                          <span>{patient.email || 'No email'}</span>
+                          <Mail size={16} />
+                          <span>{patient.email || 'Chưa có email'}</span>
                         </div>
                         <div className="meta-item">
-                          <Phone size={14} />
-                          <span>{patient.phone || 'No phone'}</span>
+                          <Phone size={16} />
+                          <span>{patient.phone || 'Chưa có số điện thoại'}</span>
                         </div>
                       </div>
 
                       {patient.dateOfBirth && (
                         <div className="patient-dob">
-                          <Calendar size={14} />
-                          <span>DOB: {formatDate(patient.dateOfBirth)}</span>
+                          <Calendar size={16} />
+                          <span>Ngày sinh: {formatDate(patient.dateOfBirth)}</span>
                         </div>
                       )}
 
                       <div className="visit-badge">
-                        <Clock size={14} />
-                        <span>Last visit: {patient.lastVisit || 'N/A'}</span>
+                        <Clock size={16} />
+                        <span>Lần khám cuối: {patient.lastVisit || 'Chưa có'}</span>
                       </div>
 
                       <div className="patient-actions">
@@ -345,8 +351,8 @@ const PatientSearch = () => {
                             handleViewDetails(patient.id);
                           }}
                         >
-                          <FileText size={16} />
-                          View Details
+                          <FileText size={18} />
+                          Xem chi tiết
                         </motion.button>
                         <motion.button
                           className="btn-secondary"
@@ -357,8 +363,8 @@ const PatientSearch = () => {
                             handleViewDetails(patient.id);
                           }}
                         >
-                          <FileText size={16} />
-                          Treatments
+                          <FileText size={18} />
+                          Lịch sử điều trị
                         </motion.button>
                       </div>
                     </div>
@@ -371,55 +377,12 @@ const PatientSearch = () => {
                         onChange={() => toggleCompare(patient)}
                         onClick={(e) => e.stopPropagation()}
                       />
-                      <label>Compare</label>
+                      <label>So sánh</label>
                     </div>
                   </motion.div>
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Right Panel: Interactive Map */}
-          <div className="map-panel">
-            <div className="map-container">
-              <div className="map-header">
-                <MapPin size={18} />
-                <span>Patient Locations</span>
-              </div>
-              <div className="map-legend">
-                <div className="legend-item">
-                  <div className="pin green-pin"></div>
-                  <span>Recent Visit</span>
-                </div>
-                <div className="legend-item">
-                  <div className="pin red-pin"></div>
-                  <span>No Recent Visit</span>
-                </div>
-              </div>
-              
-              {/* Mock Map */}
-              <div className="mock-map">
-                {filteredPatients.map((patient) => (
-                  <motion.div
-                    key={patient.id}
-                    className={`map-pin ${patient.lastVisit?.includes('days') ? 'green' : 'red'} ${highlightedPatientId === patient.id ? 'highlighted' : ''}`}
-                    style={{
-                      left: `${50 + (patient.location?.lng - 106.660172) * 1000}%`,
-                      top: `${50 + (patient.location?.lat - 10.762622) * 1000}%`,
-                    }}
-                    onClick={() => handlePinClick(patient.id)}
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <div className="pin-tooltip">
-                      <strong>{patient.fullName}</strong>
-                      <span>ID: {patient.id}</span>
-                    </div>
-                  </motion.div>
-                ))}
-                <div className="map-grid"></div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -434,8 +397,8 @@ const PatientSearch = () => {
               onClick={() => setShowCompareModal(true)}
             >
               <div className="compare-widget-content">
-                <GitCompare size={20} />
-                <span>Comparing {compareList.length} Patient{compareList.length > 1 ? 's' : ''}</span>
+                <GitCompare size={22} />
+                <span>Đang so sánh {compareList.length} bệnh nhân</span>
                 <button 
                   className="compare-close"
                   onClick={(e) => {
@@ -443,7 +406,7 @@ const PatientSearch = () => {
                     setCompareList([]);
                   }}
                 >
-                  <X size={16} />
+                  <X size={18} />
                 </button>
               </div>
             </motion.div>
@@ -468,7 +431,10 @@ const PatientSearch = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="modal-header">
-                  <h2>Compare Patients</h2>
+                  <h2>
+                    <GitCompare size={24} style={{ marginRight: '0.75rem', verticalAlign: 'middle' }} />
+                    So sánh Bệnh nhân
+                  </h2>
                   <button onClick={() => setShowCompareModal(false)}>
                     <X size={20} />
                   </button>
@@ -478,7 +444,7 @@ const PatientSearch = () => {
                   <table>
                     <thead>
                       <tr>
-                        <th>Criteria</th>
+                        <th>Tiêu chí</th>
                         {compareList.map(patient => (
                           <th key={patient.id}>
                             <div className="compare-patient-header">
@@ -504,7 +470,7 @@ const PatientSearch = () => {
                         ))}
                       </tr>
                       <tr>
-                        <td><Phone size={16} /> Phone</td>
+                        <td><Phone size={16} /> Số điện thoại</td>
                         {compareList.map(patient => (
                           <td key={patient.id}>
                             {patient.phone || '-'}
@@ -512,7 +478,7 @@ const PatientSearch = () => {
                         ))}
                       </tr>
                       <tr>
-                        <td><Calendar size={16} /> Date of Birth</td>
+                        <td><Calendar size={16} /> Ngày sinh</td>
                         {compareList.map(patient => (
                           <td key={patient.id}>
                             {patient.dateOfBirth ? formatDate(patient.dateOfBirth) : '-'}
@@ -520,15 +486,15 @@ const PatientSearch = () => {
                         ))}
                       </tr>
                       <tr>
-                        <td><Clock size={16} /> Last Visit</td>
+                        <td><Clock size={16} /> Lần khám cuối</td>
                         {compareList.map(patient => (
                           <td key={patient.id}>
-                            {patient.lastVisit || 'N/A'}
+                            {patient.lastVisit || 'Chưa có'}
                           </td>
                         ))}
                       </tr>
                       <tr>
-                        <td><FileText size={16} /> Treatment Count</td>
+                        <td><FileText size={16} /> Số lần điều trị</td>
                         {compareList.map(patient => (
                           <td key={patient.id}>
                             {patient.treatmentCount || 0}
@@ -536,7 +502,7 @@ const PatientSearch = () => {
                         ))}
                       </tr>
                       <tr>
-                        <td><TrendingUp size={16} /> Match Score</td>
+                        <td><TrendingUp size={16} /> Độ khớp</td>
                         {compareList.map(patient => (
                           <td key={patient.id}>
                             <div className="match-display">
@@ -559,7 +525,8 @@ const PatientSearch = () => {
                       }
                     }}
                   >
-                    View Best Match
+                    <Star size={18} style={{ marginRight: '0.5rem' }} />
+                    Xem bệnh nhân phù hợp nhất
                   </button>
                 </div>
               </motion.div>
@@ -601,7 +568,10 @@ const PatientDetailModal = ({ patient, treatments, loadingTreatments, onClose })
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <h2>Patient Details</h2>
+          <h2>
+            <User size={24} style={{ marginRight: '0.75rem', verticalAlign: 'middle' }} />
+            Chi tiết Bệnh nhân
+          </h2>
           <button onClick={onClose}>
             <X size={20} />
           </button>
@@ -609,31 +579,38 @@ const PatientDetailModal = ({ patient, treatments, loadingTreatments, onClose })
 
         <div className="patient-detail-grid">
           <div><strong>ID:</strong> {patient.id}</div>
-          <div><strong>Name:</strong> {patient.fullName}</div>
+          <div><strong>Họ và tên:</strong> {patient.fullName}</div>
           <div><strong>Email:</strong> {patient.email || '-'}</div>
-          <div><strong>Phone:</strong> {patient.phone || '-'}</div>
-          <div><strong>Date of Birth:</strong> {patient.dateOfBirth ? formatDate(patient.dateOfBirth) : '-'}</div>
-          <div><strong>Gender:</strong> {patient.gender || '-'}</div>
-          <div><strong>Address:</strong> {patient.address || '-'}</div>
-          <div><strong>Emergency Contact:</strong> {patient.emergencyContact || '-'}</div>
+          <div><strong>Số điện thoại:</strong> {patient.phone || '-'}</div>
+          <div><strong>Ngày sinh:</strong> {patient.dateOfBirth ? formatDate(patient.dateOfBirth) : '-'}</div>
+          <div><strong>Giới tính:</strong> {patient.gender || '-'}</div>
+          <div><strong>Địa chỉ:</strong> {patient.address || '-'}</div>
+          <div><strong>Liên hệ khẩn cấp:</strong> {patient.emergencyContact || '-'}</div>
         </div>
 
         <div className="treatments-section">
-          <h3>Treatment History</h3>
+          <h3>
+            <FileText size={24} style={{ marginRight: '0.75rem', verticalAlign: 'middle' }} />
+            Lịch sử Điều trị
+          </h3>
           {loadingTreatments ? (
-            <div className="loading-treatments">Loading treatments...</div>
+            <div className="loading-treatments">
+              <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
+              <p style={{ textAlign: 'center', color: '#cbd5e1' }}>Đang tải lịch sử điều trị...</p>
+            </div>
           ) : treatments.length === 0 ? (
             <div className="no-treatments">
-              No treatments found
+              <FileText size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
+              <p style={{ margin: 0 }}>Chưa có lịch sử điều trị</p>
             </div>
           ) : (
             <div className="treatments-list">
               {treatments.map((treatment) => (
                 <div key={treatment.id} className="treatment-item">
-                  <div><strong>Date:</strong> {formatDate(treatment.createdAt)}</div>
-                  {treatment.diagnosis && <div><strong>Diagnosis:</strong> {treatment.diagnosis}</div>}
-                  {treatment.prescription && <div><strong>Prescription:</strong> {treatment.prescription}</div>}
-                  {treatment.followUpDate && <div><strong>Follow-up:</strong> {formatDate(treatment.followUpDate)}</div>}
+                  <div><strong>Ngày:</strong> {formatDate(treatment.createdAt)}</div>
+                  {treatment.diagnosis && <div><strong>Chẩn đoán:</strong> {treatment.diagnosis}</div>}
+                  {treatment.prescription && <div><strong>Đơn thuốc:</strong> {treatment.prescription}</div>}
+                  {treatment.followUpDate && <div><strong>Tái khám:</strong> {formatDate(treatment.followUpDate)}</div>}
                 </div>
               ))}
             </div>
@@ -642,7 +619,8 @@ const PatientDetailModal = ({ patient, treatments, loadingTreatments, onClose })
 
         <div className="modal-actions">
           <button className="btn-secondary" onClick={onClose}>
-            Close
+            <X size={18} style={{ marginRight: '0.5rem' }} />
+            Đóng
           </button>
         </div>
       </motion.div>
