@@ -1,0 +1,65 @@
+.simple-chart {
+  width: 100%;
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.chart-bar {
+  transition: all 0.3s ease;
+}
+
+.chart-bar:hover {
+  opacity: 1 !important;
+  transform: scaleY(1.05);
+  transform-origin: bottom;
+}
+
+.chart-line {
+  transition: stroke-width 0.3s ease;
+}
+
+.chart-line:hover {
+  stroke-width: 4;
+}
+
+.chart-point {
+  transition: r 0.3s ease;
+  cursor: pointer;
+}
+
+.chart-point:hover {
+  r: 7;
+}
+
+.chart-label {
+  user-select: none;
+}
+
+.chart-value {
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.simple-chart:hover .chart-value {
+  opacity: 1;
+}
+
+.simple-chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94A3B8;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+}
+
