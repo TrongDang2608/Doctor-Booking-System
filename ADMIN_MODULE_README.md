@@ -247,3 +247,4 @@ Nếu cần hỗ trợ:
 ---
 
 **🎉 Admin module đã sẵn sàng sử dụng với UI hiện đại và đầy đủ chức năng!**
+---
