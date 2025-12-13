@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: doctor_booking
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    ports:
+      - "7070:7070"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DB_URL=jdbc:mysql://db:3306/doctor_booking
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:7070/api
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

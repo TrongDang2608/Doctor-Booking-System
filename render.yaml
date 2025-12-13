@@ -1,0 +1,57 @@
+services:
+  - type: web
+    name: doctor-booking-backend
+    env: docker
+    region: singapore
+    plan: free
+    dockerContext: ./backend
+    envVars:
+      - key: PORT
+        value: 7070
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: JWT_EXPIRATION
+        sync: false
+      - key: JWT_REFRESH_EXPIRATION
+        sync: false
+      - key: GOOGLE_AI_API_KEY
+        sync: false
+      - key: VNPAY_TMN_CODE
+        sync: false
+      - key: VNPAY_HASH_SECRET
+        sync: false
+      - key: VNPAY_URL
+        sync: false
+      - key: VNPAY_RETURN_URL
+        sync: false
+      - key: VNPAY_APPOINTMENT_RETURN_URL
+        sync: false
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+
+  - type: web
+    name: doctor-booking-frontend
+    env: docker
+    region: singapore
+    plan: free
+    dockerContext: ./frontend
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: doctor-booking-backend
+          property: url
