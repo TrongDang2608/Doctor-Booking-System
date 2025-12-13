@@ -51,7 +51,9 @@ services:
     dockerContext: ./frontend
     envVars:
       - key: VITE_API_BASE_URL
+        value: /api
+      - key: BACKEND_URL
         fromService:
           type: web
           name: doctor-booking-backend
-          property: url
+          property: hostport
