@@ -3,9 +3,9 @@ services:
     name: doctor-booking-backend
     env: docker
     region: singapore
-    plan: free
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
+    plan: free
     envVars:
       - key: PORT
         value: 7070
@@ -48,9 +48,9 @@ services:
     name: doctor-booking-frontend
     env: docker
     region: singapore
-    plan: free
     dockerContext: ./frontend
     dockerfilePath: ./frontend/Dockerfile
+    plan: free
     envVars:
       - key: VITE_API_BASE_URL
         value: https://doctor-booking-backend.onrender.com
