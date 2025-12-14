@@ -53,4 +53,9 @@ services:
     plan: free
     envVars:
       - key: VITE_API_BASE_URL
-        value: https://doctor-booking-backend.onrender.com
+        value: /api
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: doctor-booking-backend
+          property: hostport
