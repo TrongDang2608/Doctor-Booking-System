@@ -9,9 +9,7 @@ server {
     }
 
     location /api {
-        resolver 8.8.8.8;
-        set $backend_url https://${BACKEND_URL};
-        proxy_pass $backend_url;
+        proxy_pass ${BACKEND_URL};
         proxy_ssl_server_name on;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

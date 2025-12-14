@@ -58,4 +58,4 @@ services:
         fromService:
           type: web
           name: doctor-booking-backend
-          property: host
+          property: url
