@@ -27,8 +27,9 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        VITE_API_BASE_URL: http://localhost:7070/api
+    environment:
+      - VITE_API_TARGET=http://backend:7070
+      - VITE_API_BASE_URL=/api
     ports:
       - "5173:80"
     depends_on:
