@@ -9,7 +9,9 @@ server {
     }
 
     location /api {
-        proxy_pass ${BACKEND_URL};
+        resolver 8.8.8.8;
+        set $backend_url ${VITE_API_TARGET};
+        proxy_pass $backend_url;
         proxy_ssl_server_name on;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
