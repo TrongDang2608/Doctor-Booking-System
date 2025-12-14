@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-ENV VITE_API_TARGET=http://localhost:7070
+COPY . .
 RUN npm run build
 
 # Run stage
