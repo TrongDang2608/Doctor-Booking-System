@@ -55,7 +55,4 @@ services:
       - key: VITE_API_BASE_URL
         value: /api
       - key: BACKEND_URL
-        fromService:
-          type: web
-          name: doctor-booking-backend
-          property: hostport
+        value: doctor-booking-backend:7070
