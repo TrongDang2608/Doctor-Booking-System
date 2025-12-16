@@ -54,5 +54,5 @@ services:
       - key: VITE_API_BASE_URL
         value: /api
       - key: VITE_API_TARGET
-        value: https://your-backend-url.onrender.com
+        value: https://doctor-booking-backend-yjpf.onrender.com
         
