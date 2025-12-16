@@ -9,7 +9,7 @@ server {
     }
 
     location /api {
-        proxy_pass ${VITE_API_TARGET};
+        proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT};
         proxy_ssl_server_name on;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

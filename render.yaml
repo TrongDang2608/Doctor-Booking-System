@@ -53,8 +53,10 @@ services:
     envVars:
       - key: VITE_API_BASE_URL
         sync: false
-      - key: VITE_API_TARGET
+      - key: BACKEND_HOST
         fromService:
           type: web
           name: doctor-booking-backend
           property: host
+      - key: BACKEND_PORT
+        value: 7070
