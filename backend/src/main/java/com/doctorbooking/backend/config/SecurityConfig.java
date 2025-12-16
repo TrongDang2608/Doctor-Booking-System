@@ -72,6 +72,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/patient/payments/vnpay/appointment-callback").permitAll()
                         // Test endpoints để debug (không cần auth)
                         .requestMatchers("/api/test/**").permitAll()
+                        // Public endpoints (health check, etc.)
+                        .requestMatchers("/api/public/**").permitAll()
                         // Admin endpoints chỉ dành cho ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Doctor endpoints chỉ dành cho DOCTOR
