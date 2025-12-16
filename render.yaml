@@ -52,4 +52,7 @@ services:
     plan: free
     envVars:
       - key: VITE_API_BASE_URL
-        value: https://doctor-booking-backend-yjpf.onrender.com
+        value: /api
+      - key: VITE_API_TARGET
+        value: https://your-backend-url.onrender.com
+        
