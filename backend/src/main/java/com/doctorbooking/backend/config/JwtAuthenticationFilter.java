@@ -30,11 +30,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserService userService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/public/")
+                || path.startsWith("/api/auth/")
+                || path.equals("/error");
+    }
+
+    @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
         // Skip JWT filter for OPTIONS requests (preflight)
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
@@ -55,32 +62,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             username = jwtUtil.extractUsername(jwt);
             logger.info("JWT Filter - Extracted username from token: {}", username);
             logger.info("JWT Filter - Request URI: {}", request.getRequestURI());
-            
+
             // Clear existing authentication to ensure stateless behavior
             // This allows multiple users/roles to login simultaneously
             SecurityContextHolder.clearContext();
-            
+
             if (username != null) {
                 UserDetails userDetails = userService.loadUserByUsername(username);
                 logger.info("JWT Filter - Loaded userDetails for username: {}", username);
-                
+
                 if (jwtUtil.validateToken(jwt, userDetails)) {
                     // Use authorities from UserDetails (already contains ROLE_ prefix)
                     // This ensures role is always loaded from database, not from token
                     Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-                    
+
                     // Log authorities at INFO level for troubleshooting
                     String authoritiesStr = authorities.stream()
                             .map(GrantedAuthority::getAuthority)
                             .reduce((a, b) -> a + ", " + b)
                             .orElse("none");
                     logger.info("JWT Filter - User: {} authenticated with authorities: {}", username, authoritiesStr);
-                    
+
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            authorities
-                    );
+                            authorities);
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                     logger.info("JWT Filter - Authentication token set in SecurityContext");
@@ -98,8 +104,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logger.error("JWT Filter - Authentication error: {}", e.getMessage(), e);
             SecurityContextHolder.clearContext();
         }
-        
+
         filterChain.doFilter(request, response);
     }
 }
-

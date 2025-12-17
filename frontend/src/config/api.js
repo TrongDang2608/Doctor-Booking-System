@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:7070/api';
-
+const API_BASE_URL = import .meta.env.VITE_API_BASE_URL;
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -24,10 +23,10 @@ api.interceptors.request.use(
   (config) => {
     // Determine role from URL
     const role = getRoleFromUrl(config.url);
-    
+
     let token = null;
     let tokenSource = '';
-    
+
     if (role) {
       // CRITICAL: If role is determined from URL, ONLY use token for that specific role
       // Do NOT fallback to other roles' tokens to avoid 403 errors
@@ -48,7 +47,7 @@ api.interceptors.request.use(
           break;
         }
       }
-      
+
       // Final fallback to old token key
       if (!token) {
         token = localStorage.getItem('token');
@@ -57,7 +56,7 @@ api.interceptors.request.use(
         }
       }
     }
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -73,10 +72,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     // Check if JWT expired (401 or 403 with expired token error)
-    const isJwtExpired = error.response?.status === 401 || 
-                         (error.response?.status === 403 && 
-                          error.response?.data?.message?.includes('JWT expired'));
-    
+    const isJwtExpired = error.response?.status === 401 ||
+      (error.response?.status === 403 &&
+        error.response?.data?.message?.includes('JWT expired'));
+
     if (isJwtExpired) {
       // Unauthorized - clear all tokens and redirect to login
       localStorage.removeItem('token');
@@ -87,7 +86,7 @@ api.interceptors.response.use(
         localStorage.removeItem(`refreshToken_${role}`);
         localStorage.removeItem(`user_${role}`);
       });
-      
+
       // Redirect to login page
       if (!window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
@@ -97,7 +96,7 @@ api.interceptors.response.use(
       // If the error message contains "JWT expired" or "expired", treat it as auth issue
       const errorMessage = error.response?.data?.message || error.response?.data || '';
       const errorString = JSON.stringify(errorMessage).toLowerCase();
-      
+
       if (errorString.includes('expired') || errorString.includes('jwt')) {
         // JWT expired - clear all tokens and redirect to login
         console.warn('⚠️ JWT token expired. Clearing tokens and redirecting to login...');

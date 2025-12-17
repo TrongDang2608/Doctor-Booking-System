@@ -5,6 +5,7 @@ import { adminService } from '../../../services/adminService';
 import Loading from '../../../components/common/Loading';
 import ErrorMessage from '../../../components/common/ErrorMessage';
 import CancelAppointmentModal from '../../../components/doctor/CancelAppointmentModal';
+import AppointmentCalendar from '../../../components/admin/AppointmentCalendar';
 import { formatDate } from '../../../utils/formatDate';
 import { formatTime } from '../../../utils/formatTime';
 import { ToastContainer, toast } from 'react-toastify';
@@ -24,6 +25,7 @@ const AppointmentList = () => {
   const [itemsPerPage] = useState(10);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [appointmentToCancel, setAppointmentToCancel] = useState(null);
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'calendar'
 
   useEffect(() => {
     loadAllAppointments();
@@ -176,6 +178,10 @@ const AppointmentList = () => {
     navigate(`/admin/appointments/${appointment.id}`);
   };
 
+  const handleCalendarEventSelect = (appointment) => {
+    navigate(`/admin/appointments/${appointment.id}`);
+  };
+
   const handleEdit = (appointment) => {
     navigate(`/admin/appointments/${appointment.id}/edit`);
   };
@@ -240,6 +246,32 @@ const AppointmentList = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Quản Lý Lịch Hẹn</h1>
             <p className="text-gray-600 mt-1">Tổng số {appointments.length} lịch hẹn</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-1 flex">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${
+                  viewMode === 'list'
+                    ? 'bg-indigo-600 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <i data-feather="list" className="w-4 h-4"></i>
+                Danh sách
+              </button>
+              <button
+                onClick={() => setViewMode('calendar')}
+                className={`px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${
+                  viewMode === 'calendar'
+                    ? 'bg-indigo-600 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <i data-feather="calendar" className="w-4 h-4"></i>
+                Lịch
+              </button>
+            </div>
           </div>
         </div>
 
@@ -318,8 +350,16 @@ const AppointmentList = () => {
           )}
         </div>
 
-        {/* Appointments Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        {/* Calendar or Table View */}
+        {viewMode === 'calendar' ? (
+          <AppointmentCalendar
+            appointments={allAppointments}
+            onSelectEvent={handleCalendarEventSelect}
+          />
+        ) : (
+          <>
+            {/* Appointments Table */}
+            <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -397,9 +437,11 @@ const AppointmentList = () => {
             </table>
           </div>
         </div>
+          </>
+        )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
+        {/* Pagination - Only show in list view */}
+        {viewMode === 'list' && totalPages > 1 && (
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-700">
