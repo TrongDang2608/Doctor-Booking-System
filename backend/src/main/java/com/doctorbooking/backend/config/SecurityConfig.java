@@ -72,6 +72,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/patient/payments/vnpay/appointment-callback").permitAll()
                         // Test endpoints để debug (không cần auth)
                         .requestMatchers("/api/test/**").permitAll()
+                        // Public endpoints (health check, etc.)
+                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/error").permitAll()
                         // Admin endpoints chỉ dành cho ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // Doctor endpoints chỉ dành cho DOCTOR
@@ -79,13 +82,12 @@ public class SecurityConfig {
                         // Patient endpoints chỉ dành cho PATIENT
                         .requestMatchers("/api/patient/**").hasRole("PATIENT")
                         // Tất cả các request khác đều yêu cầu xác thực
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 // Thêm authentication provider
                 .authenticationProvider(authenticationProvider())
                 // Thêm JWT filter trước UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
 }
