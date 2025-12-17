@@ -47,22 +47,56 @@ public class AuthService {
         }
 
         // Create user
+        // Create user
         User user = new User();
         user.setUsername(request.getUsername());
         // Tạm thời dùng plain text password (KHÔNG hash)
         user.setPassword(request.getPassword()); // Plain text
-        // user.setPassword(passwordEncoder.encode(request.getPassword())); // BCrypt - uncomment sau khi test xong
+        // user.setPassword(passwordEncoder.encode(request.getPassword())); // BCrypt -
+        // uncomment sau khi test xong
         user.setEmail(request.getEmail());
-        user.setRole(User.Role.PATIENT);
+
+        // Determine role
+        User.Role role = User.Role.PATIENT; // Default
+        if (request.getRole() != null && !request.getRole().isEmpty()) {
+            try {
+                role = User.Role.valueOf(request.getRole().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // Invalid role, stick to default or throw error
+                // For now, let's default to PATIENT but log it
+                System.err.println("Invalid role provided: " + request.getRole());
+            }
+        }
+        user.setRole(role);
+
         user.setEnabled(true);
         user = userRepository.save(user);
 
-        // Create patient
-        Patient patient = new Patient();
-        patient.setUser(user);
-        patient.setFullName(request.getFullName());
-        patient.setPhone(request.getPhone());
-        patientRepository.save(patient);
+        // Create specific role entity
+        switch (role) {
+            case PATIENT:
+                Patient patient = new Patient();
+                patient.setUser(user);
+                patient.setFullName(request.getFullName());
+                patient.setPhone(request.getPhone());
+                patientRepository.save(patient);
+                break;
+            case DOCTOR:
+                Doctor doctor = new Doctor();
+                doctor.setUser(user);
+                doctor.setFullName(request.getFullName());
+                doctor.setPhone(request.getPhone());
+                // Initialize other doctor fields if necessary
+                doctorRepository.save(doctor);
+                break;
+            case ADMIN:
+                Admin admin = new Admin();
+                admin.setUser(user);
+                admin.setFullName(request.getFullName());
+                // Initialize other admin fields if necessary
+                adminRepository.save(admin);
+                break;
+        }
 
         // Generate tokens
         Map<String, Object> extraClaims = new HashMap<>();
@@ -79,23 +113,21 @@ public class AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole().name())
-                .fullName(patient.getFullName())
+                .fullName(request.getFullName())
                 .build();
     }
 
     public AuthResponse login(LoginRequest request) {
         // Log login attempt
         System.out.println("🔵 AuthService.login - Attempting login for: " + request.getUsername());
-        
+
         // Authenticate user - username field can be either username or email
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
-                            request.getPassword()
-                    )
-            );
+                            request.getPassword()));
             System.out.println("✅ AuthService.login - Authentication successful for: " + request.getUsername());
         } catch (org.springframework.security.core.AuthenticationException e) {
             System.err.println("❌ AuthService.login - Authentication failed: " + e.getMessage());
@@ -104,19 +136,22 @@ public class AuthService {
         }
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        
-        // UserService.loadUserByUsername() trả về User entity (vì User implements UserDetails)
+
+        // UserService.loadUserByUsername() trả về User entity (vì User implements
+        // UserDetails)
         // Nên authentication.getPrincipal() sẽ là User object
         // Sử dụng trực tiếp để tránh query lại từ DB
         User user;
         if (userDetails instanceof User) {
             // Nếu UserDetails là User entity, sử dụng trực tiếp (không cần query lại)
             user = (User) userDetails;
-            System.out.println("🔵 AuthService.login - Using User from authentication principal (ID: " + user.getId() + ", Username: " + user.getUsername() + ")");
+            System.out.println("🔵 AuthService.login - Using User from authentication principal (ID: " + user.getId()
+                    + ", Username: " + user.getUsername() + ")");
         } else {
             // Fallback: nếu không phải User entity, load từ database
             String usernameFromDetails = userDetails.getUsername();
-            System.out.println("⚠️ AuthService.login - Principal is not User entity, loading from DB with username: " + usernameFromDetails);
+            System.out.println("⚠️ AuthService.login - Principal is not User entity, loading from DB with username: "
+                    + usernameFromDetails);
             user = userRepository.findByUsername(usernameFromDetails)
                     .orElse(userRepository.findByEmail(usernameFromDetails)
                             .orElseThrow(() -> {
@@ -126,7 +161,8 @@ public class AuthService {
         }
 
         // Generate tokens
-        // QUAN TRỌNG: Sử dụng user.getUsername() (username thực tế từ DB) thay vì userDetails.getUsername()
+        // QUAN TRỌNG: Sử dụng user.getUsername() (username thực tế từ DB) thay vì
+        // userDetails.getUsername()
         // Vì userDetails.getUsername() có thể trả về email nếu login bằng email
         // Nhưng token phải có subject là username thực tế để validate đúng
         Map<String, Object> extraClaims = new HashMap<>();
@@ -135,14 +171,14 @@ public class AuthService {
 
         // Tạo UserDetails wrapper với username thực tế để tạo token
         UserDetails tokenUserDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())  // Dùng username thực tế, không phải email
+                .username(user.getUsername()) // Dùng username thực tế, không phải email
                 .password(user.getPassword())
                 .authorities(user.getAuthorities())
                 .build();
-        
+
         String token = jwtUtil.generateToken(tokenUserDetails, extraClaims);
         String refreshToken = jwtUtil.generateRefreshToken(tokenUserDetails);
-        
+
         System.out.println("🔵 AuthService.login - Token created with username: " + user.getUsername());
 
         // Get full name based on role
@@ -159,7 +195,7 @@ public class AuthService {
                 .role(user.getRole().name())
                 .fullName(fullName)
                 .build();
-        
+
         System.out.println("✅ AuthService.login - Response built successfully");
         return response;
     }
@@ -195,4 +231,3 @@ public class AuthService {
         }
     }
 }
-
