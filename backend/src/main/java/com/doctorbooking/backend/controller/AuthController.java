@@ -19,13 +19,15 @@ public class AuthController {
 
     private final AuthService authService;
 
+    // Re-writing the method to be cleaner and return the error
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         try {
             AuthResponse response = authService.register(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
         }
     }
 
@@ -51,4 +53,3 @@ public class AuthController {
         return ResponseEntity.ok("Auth endpoint is working!");
     }
 }
-
