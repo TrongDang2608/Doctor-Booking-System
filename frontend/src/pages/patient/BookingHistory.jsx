@@ -239,13 +239,25 @@ const BookingHistory = () => {
                                                 <i data-feather="file-text"></i>
                                                 Xem kết quả khám
                                             </button>
-                                            <button
-                                                onClick={() => handleSendFeedback(appointment)}
-                                                className="action-btn feedback"
-                                            >
-                                                <i data-feather="star"></i>
-                                                Gửi đánh giá
-                                            </button>
+                                            {!appointment.hasFeedback && (
+                                                <button
+                                                    onClick={() => handleSendFeedback(appointment)}
+                                                    className="action-btn feedback"
+                                                >
+                                                    <i data-feather="star"></i>
+                                                    Gửi đánh giá
+                                                </button>
+                                            )}
+                                            {appointment.hasFeedback && (
+                                                <button
+                                                    className="action-btn feedback disabled"
+                                                    disabled
+                                                    style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                                                >
+                                                    <i data-feather="check-circle"></i>
+                                                    Đã đánh giá
+                                                </button>
+                                            )}
                                         </>
                                     )}
                                 </div>

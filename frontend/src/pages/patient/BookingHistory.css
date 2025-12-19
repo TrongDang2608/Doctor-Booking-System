@@ -96,7 +96,7 @@
 .doctor-name {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #e0e0e0;
+  color: #e0e0e0 !important;
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -106,7 +106,7 @@
 .doctor-name i {
   width: 20px;
   height: 20px;
-  color: #667eea;
+  color: #667eea !important;
 }
 
 .doctor-specialty {
@@ -140,7 +140,7 @@
 
 .info-label {
   font-size: 0.8rem;
-  color: #888;
+  color: #888 !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 500;
@@ -156,7 +156,7 @@
 
 .info-value {
   font-size: 1rem;
-  color: #e0e0e0;
+  color: #e0e0e0 !important;
   font-weight: 500;
 }
 

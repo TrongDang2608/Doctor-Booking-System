@@ -30,6 +30,7 @@ public class AppointmentResponse {
     private String paymentMethod;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean hasFeedback;
 
     public static AppointmentResponse fromEntity(Appointment appointment) {
         AppointmentResponse response = new AppointmentResponse();
@@ -49,6 +50,7 @@ public class AppointmentResponse {
         response.setPaymentMethod(appointment.getPaymentMethod());
         response.setCreatedAt(appointment.getCreatedAt());
         response.setUpdatedAt(appointment.getUpdatedAt());
+        response.setHasFeedback(false); // Default value, will be set by service layer
         return response;
     }
 }
