@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { User, Stethoscope, Award, Clock, Phone, MapPin, FileText, CheckCircle, XCircle, Calendar, X } from 'lucide-react';
+import './DoctorDetail.css';
 
 const DoctorDetail = ({ doctor, onClose }) => {
   const navigate = useNavigate();
@@ -9,115 +11,127 @@ const DoctorDetail = ({ doctor, onClose }) => {
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 1000,
-    }}>
-      <div style={{
-        backgroundColor: 'white',
-        padding: '30px',
-        borderRadius: '8px',
-        width: '90%',
-        maxWidth: '600px',
-        maxHeight: '90vh',
-        overflowY: 'auto',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2>Doctor Details</h2>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '24px',
-              cursor: 'pointer',
-            }}
-          >
-            ×
+    <div className="doctor-detail-overlay" onClick={onClose}>
+      <div className="doctor-detail-modal" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="doctor-detail-header">
+          <h2>
+            <User />
+            Doctor Profile
+          </h2>
+          <button className="close-button" onClick={onClose}>
+            <X />
           </button>
         </div>
 
-        <div style={{ display: 'grid', gap: '15px' }}>
-          <div>
-            <strong>Name:</strong> Dr. {doctor.fullName}
-          </div>
-          <div>
-            <strong>Specialization:</strong> {doctor.specialization}
-          </div>
-          {doctor.qualification && (
-            <div>
-              <strong>Qualification:</strong> {doctor.qualification}
+        {/* Body */}
+        <div className="doctor-detail-body">
+          <div className="doctor-info-grid">
+            {/* Name */}
+            <div className="info-item">
+              <div className="info-label">
+                <User />
+                Full Name
+              </div>
+              <div className="info-value">Dr. {doctor.fullName}</div>
             </div>
-          )}
-          {doctor.experience > 0 && (
-            <div>
-              <strong>Experience:</strong> {doctor.experience} years
+
+            {/* Specialization */}
+            <div className="info-item">
+              <div className="info-label">
+                <Stethoscope />
+                Specialization
+              </div>
+              <div className="info-value">{doctor.specialization}</div>
             </div>
-          )}
-          {doctor.phone && (
-            <div>
-              <strong>Phone:</strong> {doctor.phone}
+
+            {/* Qualification */}
+            {doctor.qualification && (
+              <div className="info-item">
+                <div className="info-label">
+                  <Award />
+                  Qualification
+                </div>
+                <div className="info-value">{doctor.qualification}</div>
+              </div>
+            )}
+
+            {/* Experience */}
+            {doctor.experience > 0 && (
+              <div className="info-item">
+                <div className="info-label">
+                  <Clock />
+                  Experience
+                </div>
+                <div className="info-value">
+                  <span className="experience-badge">
+                    <Clock />
+                    {doctor.experience} {doctor.experience === 1 ? 'year' : 'years'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Phone */}
+            {doctor.phone && (
+              <div className="info-item">
+                <div className="info-label">
+                  <Phone />
+                  Contact Number
+                </div>
+                <div className="info-value">{doctor.phone}</div>
+              </div>
+            )}
+
+            {/* Address */}
+            {doctor.address && (
+              <div className="info-item">
+                <div className="info-label">
+                  <MapPin />
+                  Clinic Address
+                </div>
+                <div className="info-value">{doctor.address}</div>
+              </div>
+            )}
+
+            {/* Bio */}
+            {doctor.bio && (
+              <div className="info-item">
+                <div className="info-label">
+                  <FileText />
+                  About Doctor
+                </div>
+                <div className="bio-section">
+                  <div className="bio-text">{doctor.bio}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Status */}
+            <div className="info-item">
+              <div className="info-label">
+                {doctor.status === 'ACTIVE' ? <CheckCircle /> : <XCircle />}
+                Current Status
+              </div>
+              <div className="info-value">
+                <span className={`status-badge ${doctor.status === 'ACTIVE' ? 'active' : 'inactive'}`}>
+                  {doctor.status === 'ACTIVE' ? <CheckCircle /> : <XCircle />}
+                  {doctor.status}
+                </span>
+              </div>
             </div>
-          )}
-          {doctor.address && (
-            <div>
-              <strong>Address:</strong> {doctor.address}
-            </div>
-          )}
-          {doctor.bio && (
-            <div>
-              <strong>Bio:</strong>
-              <p style={{ marginTop: '5px', color: '#666', lineHeight: '1.6' }}>{doctor.bio}</p>
-            </div>
-          )}
-          <div>
-            <strong>Status:</strong>{' '}
-            <span style={{
-              padding: '4px 8px',
-              borderRadius: '4px',
-              backgroundColor: doctor.status === 'ACTIVE' ? '#d4edda' : '#f8d7da',
-              color: doctor.status === 'ACTIVE' ? '#155724' : '#721c24',
-              fontSize: '12px',
-            }}>
-              {doctor.status}
-            </span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'flex-end' }}>
-          <button
-            onClick={onClose}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#95a5a6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
+        {/* Footer */}
+        <div className="doctor-detail-footer">
+          <button className="modal-button button-secondary" onClick={onClose}>
+            <X />
             Close
           </button>
           {doctor.status === 'ACTIVE' && (
-            <button
-              onClick={handleBookAppointment}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#2ecc71',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
+            <button className="modal-button button-primary" onClick={handleBookAppointment}>
+              <Calendar />
               Book Appointment
             </button>
           )}

@@ -365,49 +365,6 @@ const DoctorSearch = () => {
               </div>
             )}
           </div>
-
-          {/* Right Panel: Interactive Map */}
-          <div className="map-panel">
-            <div className="map-container">
-              <div className="map-header">
-                <MapPin size={18} />
-                <span>Doctor Locations</span>
-              </div>
-              <div className="map-legend">
-                <div className="legend-item">
-                  <div className="pin green-pin"></div>
-                  <span>Available Now</span>
-                </div>
-                <div className="legend-item">
-                  <div className="pin red-pin"></div>
-                  <span>Fully Booked</span>
-                </div>
-              </div>
-              
-              {/* Mock Map */}
-              <div className="mock-map">
-                {filteredDoctors.map((doctor) => (
-                  <motion.div
-                    key={doctor.id}
-                    className={`map-pin ${doctor.isAvailable ? 'green' : 'red'} ${highlightedDoctorId === doctor.id ? 'highlighted' : ''}`}
-                    style={{
-                      left: `${50 + (doctor.location?.lng - 106.660172) * 1000}%`,
-                      top: `${50 + (doctor.location?.lat - 10.762622) * 1000}%`,
-                    }}
-                    onClick={() => handlePinClick(doctor.id)}
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <div className="pin-tooltip">
-                      <strong>Dr. {doctor.fullName}</strong>
-                      <span>{doctor.specialization}</span>
-                    </div>
-                  </motion.div>
-                ))}
-                <div className="map-grid"></div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Compare Mode Floating Widget */}
