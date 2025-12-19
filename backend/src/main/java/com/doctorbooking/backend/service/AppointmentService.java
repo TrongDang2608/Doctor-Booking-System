@@ -39,6 +39,7 @@ public class AppointmentService {
     private final jakarta.persistence.EntityManager entityManager;
     private final FamilyAppointmentRepository familyAppointmentRepository;
     private final FamilyMemberRepository familyMemberRepository;
+    private final com.doctorbooking.backend.repository.FeedbackRepository feedbackRepository;
 
     public List<AppointmentResponse> getAllAppointments() {
         // Use custom query to fetch all with relationships
@@ -360,7 +361,13 @@ public class AppointmentService {
 
     public List<AppointmentResponse> getPatientAppointments(Long patientId) {
         return appointmentRepository.findByPatientIdOrderByDateDesc(patientId).stream()
-                .map(AppointmentResponse::fromEntity)
+                .map(appointment -> {
+                    AppointmentResponse response = AppointmentResponse.fromEntity(appointment);
+                    // Check if appointment already has feedback
+                    boolean hasFeedback = feedbackRepository.findByAppointmentId(appointment.getId()).isPresent();
+                    response.setHasFeedback(hasFeedback);
+                    return response;
+                })
                 .collect(Collectors.toList());
     }
 
