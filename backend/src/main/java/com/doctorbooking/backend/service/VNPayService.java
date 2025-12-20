@@ -10,8 +10,10 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class VNPayService {
@@ -63,6 +65,43 @@ public class VNPayService {
     }
 
     /**
+     * Loại bỏ dấu tiếng Việt và ký tự đặc biệt để tránh lỗi checksum với VNPay
+     * VNPay không hỗ trợ tốt các ký tự Unicode đặc biệt, dễ gây lỗi 70 (checksum invalid)
+     */
+    private String removeVietnameseAccents(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        
+        try {
+            // Normalize Unicode (NFD = Canonical Decomposition)
+            String normalized = Normalizer.normalize(str, Normalizer.Form.NFD);
+            
+            // Remove dấu thanh (combining diacritical marks)
+            Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+            String withoutAccents = pattern.matcher(normalized).replaceAll("");
+            
+            // Replace Đ/đ (không được normalize bởi NFD)
+            withoutAccents = withoutAccents.replace("Đ", "D").replace("đ", "d");
+            
+            // Chỉ giữ lại các ký tự: chữ cái, số, khoảng trắng, và một số ký tự đặc biệt an toàn
+            // Loại bỏ các ký tự có thể gây lỗi encoding
+            withoutAccents = withoutAccents.replaceAll("[^a-zA-Z0-9\\s\\-_.,]", "");
+            
+            // Normalize khoảng trắng (loại bỏ khoảng trắng thừa)
+            withoutAccents = withoutAccents.trim().replaceAll("\\s+", " ");
+            
+            logger.debug("Text normalization: '{}' -> '{}'", str, withoutAccents);
+            
+            return withoutAccents;
+        } catch (Exception e) {
+            logger.error("Error removing Vietnamese accents from: {}", str, e);
+            // Fallback: chỉ giữ lại ASCII an toàn
+            return str.replaceAll("[^a-zA-Z0-9\\s]", "").trim();
+        }
+    }
+
+    /**
      * Tạo payment URL cho VNPAY (wallet top-up)
      */
     public String createPaymentUrl(Long amount, String orderInfo, String orderId) {
@@ -86,6 +125,9 @@ public class VNPayService {
             String vnp_Url = vnpUrl;
             String vnp_ReturnUrl = customReturnUrl;
 
+            // ✅ Normalize orderInfo để tránh lỗi encoding với ký tự tiếng Việt
+            String normalizedOrderInfo = removeVietnameseAccents(orderInfo);
+
             // Log để kiểm tra Secret Key
             logger.info("=== VNPAY Payment URL Creation ===");
             logger.info("Terminal Code: {}", vnp_TmnCode);
@@ -93,7 +135,8 @@ public class VNPayService {
                 ? vnp_HashSecret.substring(0, 10) + "..." : "NULL or EMPTY");
             logger.info("Return URL: {}", vnp_ReturnUrl);
             logger.info("Amount: {} (will be multiplied by 100: {})", amount, amount * 100);
-            logger.info("Order Info: {}", orderInfo);
+            logger.info("Order Info (original): {}", orderInfo);
+            logger.info("Order Info (normalized): {}", normalizedOrderInfo);
             logger.info("Order ID: {}", orderId);
 
             Map<String, String> vnp_Params = new HashMap<>();
@@ -103,7 +146,7 @@ public class VNPayService {
             vnp_Params.put("vnp_Amount", String.valueOf(amount * 100)); // VNPAY yêu cầu số tiền nhân 100
             vnp_Params.put("vnp_CurrCode", "VND");
             vnp_Params.put("vnp_TxnRef", orderId);
-            vnp_Params.put("vnp_OrderInfo", orderInfo);
+            vnp_Params.put("vnp_OrderInfo", normalizedOrderInfo); // ✅ Sử dụng orderInfo đã normalize
             vnp_Params.put("vnp_OrderType", "other");
             vnp_Params.put("vnp_Locale", "vn");
             vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl);
