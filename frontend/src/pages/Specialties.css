@@ -8,15 +8,21 @@
   max-width: 1400px;
   margin: 0 auto;
   padding: 3rem 2rem;
+  width: 100%;
 }
 
 .specialties-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 4rem;
+  padding: 3rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.page-title {
-  font-size: 2.5rem;
+.specialties-header .page-title {
+  font-size: 3rem;
   font-weight: 800;
   color: #1f2937;
   margin: 0 0 1rem 0;
@@ -150,6 +156,7 @@
 
   .page-title {
     font-size: 2rem;
+    text-align: center !important;
   }
 
   .specialties-grid {

@@ -1,9 +1,9 @@
+/* React Big Calendar Custom Styles */
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* React Big Calendar Custom Styles */
-@import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 * {
   box-sizing: border-box;
