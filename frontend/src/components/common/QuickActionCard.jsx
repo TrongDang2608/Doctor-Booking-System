@@ -1,8 +1,17 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './QuickActionCard.css';
 
 const QuickActionCard = ({ to, icon, title, description, color, gradient }) => {
+  const iconRef = useRef(null);
+
+  useEffect(() => {
+    // Initialize Feather Icons
+    if (window.feather && iconRef.current) {
+      window.feather.replace();
+    }
+  }, [icon]);
+
   const cardStyle = {
     background: gradient || `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
     borderColor: `${color}40`,
@@ -14,8 +23,8 @@ const QuickActionCard = ({ to, icon, title, description, color, gradient }) => {
 
   return (
     <Link to={to} className="quick-action-card" style={cardStyle}>
-      <div className="quick-action-icon" style={iconStyle}>
-        {icon}
+      <div className="quick-action-icon" style={iconStyle} ref={iconRef}>
+        <i data-feather={icon} style={{ width: '24px', height: '24px', color: 'white' }}></i>
       </div>
       <div className="quick-action-content">
         <h3 className="quick-action-title">{title}</h3>

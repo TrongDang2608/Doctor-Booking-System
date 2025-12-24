@@ -42,8 +42,8 @@ const DoctorDashboard = () => {
       const completed = allApps.filter(a => a.status === 'COMPLETED');
       const cancelled = allApps.filter(a => a.status === 'CANCELLED');
       const upcoming = allApps
-        .filter(a => 
-          a.status !== 'CANCELLED' && 
+        .filter(a =>
+          a.status !== 'CANCELLED' &&
           a.status !== 'COMPLETED' &&
           new Date(a.appointmentDate + 'T' + a.appointmentTime) >= new Date()
         )
@@ -120,8 +120,8 @@ const DoctorDashboard = () => {
         return t.createdAt.startsWith(monthStr);
       }).length;
       const monthName = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'][date.getMonth()];
-      months.push({ 
-        label: `${monthName}/${date.getFullYear().toString().slice(-2)}`, 
+      months.push({
+        label: `${monthName}/${date.getFullYear().toString().slice(-2)}`,
         appointments: appsCount,
         treatments: treatmentsCount
       });
@@ -130,32 +130,32 @@ const DoctorDashboard = () => {
   }, [appointments, treatments]);
 
   const statCards = useMemo(() => [
-    { 
-      label: "Lịch hẹn hôm nay", 
-      value: stats.todayAppointments, 
-      color: '#3b82f6', 
-      icon: '📅',
+    {
+      label: "Lịch hẹn hôm nay",
+      value: stats.todayAppointments,
+      color: '#3b82f6',
+      icon: 'calendar',
       onClick: () => window.location.href = '/doctor/appointments'
     },
-    { 
-      label: 'Lịch hẹn đang chờ', 
-      value: stats.pendingAppointments, 
-      color: '#f59e0b', 
-      icon: '⏳',
+    {
+      label: 'Lịch hẹn đang chờ',
+      value: stats.pendingAppointments,
+      color: '#f59e0b',
+      icon: 'clock',
       onClick: () => window.location.href = '/doctor/appointments?status=PENDING'
     },
-    { 
-      label: 'Tổng điều trị', 
-      value: stats.totalTreatments, 
-      color: '#10b981', 
-      icon: '💊',
+    {
+      label: 'Tổng điều trị',
+      value: stats.totalTreatments,
+      color: '#10b981',
+      icon: 'activity',
       onClick: () => window.location.href = '/doctor/treatments'
     },
-    { 
-      label: 'Đã hoàn thành', 
-      value: stats.completedAppointments, 
-      color: '#8b5cf6', 
-      icon: '✅',
+    {
+      label: 'Đã hoàn thành',
+      value: stats.completedAppointments,
+      color: '#8b5cf6',
+      icon: 'check-circle',
       onClick: () => window.location.href = '/doctor/appointments?status=COMPLETED'
     },
   ], [stats]);
@@ -179,13 +179,13 @@ const DoctorDashboard = () => {
             Tổng quan hoạt động và thống kê của bạn
           </p>
         </div>
-        
+
         {error && (
           <div className="error-message">
             {error}
           </div>
         )}
-        
+
         {/* Stats Cards */}
         <div className="stats-grid">
           {statCards.map((card, index) => (
@@ -200,10 +200,10 @@ const DoctorDashboard = () => {
               <h3 className="chart-title">Lịch hẹn 7 ngày qua</h3>
               <span className="chart-subtitle">Theo ngày</span>
             </div>
-            <SimpleChart 
-              data={appointmentsChartData} 
-              type="bar" 
-              color="#3b82f6" 
+            <SimpleChart
+              data={appointmentsChartData}
+              type="bar"
+              color="#3b82f6"
               height={220}
             />
           </div>
@@ -213,10 +213,10 @@ const DoctorDashboard = () => {
               <h3 className="chart-title">Điều trị 7 ngày qua</h3>
               <span className="chart-subtitle">Theo ngày</span>
             </div>
-            <SimpleChart 
-              data={treatmentsChartData} 
-              type="line" 
-              color="#10b981" 
+            <SimpleChart
+              data={treatmentsChartData}
+              type="line"
+              color="#10b981"
               height={220}
             />
           </div>
@@ -227,19 +227,19 @@ const DoctorDashboard = () => {
           <h3 className="section-title">Thống kê 6 tháng gần đây</h3>
           <div className="monthly-stats-content">
             <div className="monthly-chart">
-              <SimpleChart 
-                data={monthlyStats.map(m => ({ label: m.label, value: m.appointments }))} 
-                type="bar" 
-                color="#8b5cf6" 
+              <SimpleChart
+                data={monthlyStats.map(m => ({ label: m.label, value: m.appointments }))}
+                type="bar"
+                color="#8b5cf6"
                 height={180}
               />
               <p className="chart-legend">Lịch hẹn</p>
             </div>
             <div className="monthly-chart">
-              <SimpleChart 
-                data={monthlyStats.map(m => ({ label: m.label, value: m.treatments }))} 
-                type="bar" 
-                color="#10b981" 
+              <SimpleChart
+                data={monthlyStats.map(m => ({ label: m.label, value: m.treatments }))}
+                type="bar"
+                color="#10b981"
                 height={180}
               />
               <p className="chart-legend">Điều trị</p>
@@ -271,13 +271,13 @@ const DoctorDashboard = () => {
                         </span>
                       </div>
                       <div className={`appointment-status-badge status-${appointment.status.toLowerCase()}`}>
-                        {appointment.status === 'PENDING' ? 'Đang chờ' : 
-                         appointment.status === 'CONFIRMED' ? 'Đã xác nhận' : appointment.status}
+                        {appointment.status === 'PENDING' ? 'Đang chờ' :
+                          appointment.status === 'CONFIRMED' ? 'Đã xác nhận' : appointment.status}
                       </div>
                     </div>
                     <div className="appointment-card-body">
                       <div className="appointment-time-display">
-                        <span className="time-icon">🕐</span>
+                        <i data-feather="clock" style={{ width: '16px', height: '16px', marginRight: '8px' }}></i>
                         <span className="time-text">{formatTime(appointment.appointmentTime)}</span>
                       </div>
                       <div className="appointment-patient">
@@ -288,7 +288,7 @@ const DoctorDashboard = () => {
                       </div>
                     </div>
                     <div className="appointment-card-footer">
-                      <button 
+                      <button
                         className="view-appointment-btn"
                         onClick={() => window.location.href = `/doctor/appointments`}
                       >
@@ -309,28 +309,28 @@ const DoctorDashboard = () => {
             <div className="quick-actions-grid">
               <QuickActionCard
                 to="/doctor/appointments"
-                icon="📅"
+                icon="calendar"
                 title="Lịch hẹn"
                 description="Xem và quản lý lịch hẹn"
                 color="#3b82f6"
               />
               <QuickActionCard
                 to="/doctor/treatments"
-                icon="💊"
+                icon="activity"
                 title="Điều trị"
                 description="Quản lý đơn thuốc và điều trị"
                 color="#10b981"
               />
               <QuickActionCard
                 to="/doctor/patients"
-                icon="🔍"
+                icon="search"
                 title="Tìm bệnh nhân"
                 description="Tìm kiếm và xem hồ sơ bệnh nhân"
                 color="#8b5cf6"
               />
               <QuickActionCard
                 to="/doctor/profile"
-                icon="👤"
+                icon="user"
                 title="Hồ sơ"
                 description="Chỉnh sửa thông tin cá nhân"
                 color="#f59e0b"
