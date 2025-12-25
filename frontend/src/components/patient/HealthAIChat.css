@@ -31,6 +31,7 @@
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -111,7 +112,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 1.5rem;
+  padding: 1.25rem;
 }
 
 .chat-messages {
@@ -209,6 +210,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -309,10 +311,14 @@
 }
 
 @keyframes typing {
-  0%, 60%, 100% {
+
+  0%,
+  60%,
+  100% {
     transform: translateY(0);
     opacity: 0.5;
   }
+
   30% {
     transform: translateY(-8px);
     opacity: 1;
@@ -321,14 +327,15 @@
 
 /* Input Area */
 .chat-input-container {
-  padding-top: 1rem;
+  padding-top: 0.5rem !important;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
 }
 
 .feature-buttons {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   flex-wrap: wrap;
 }
 
@@ -336,13 +343,13 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #aaa;
-  padding: 0.4rem 0.75rem;
+  padding: 0.3rem 0.6rem !important;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.3rem;
   transition: all 0.2s;
 }
 
@@ -358,19 +365,20 @@
 }
 
 .input-wrapper {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 0.6rem 0.75rem;
+  display: flex !important;
+  gap: 0.5rem !important;
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  padding: 0.4rem 0.6rem !important;
   transition: all 0.2s;
+  max-height: 42px;
 }
 
 .input-wrapper:focus-within {
-  border-color: rgba(102, 126, 234, 0.5);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(102, 126, 234, 0.5) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 .chat-input {
@@ -378,28 +386,33 @@
   background: transparent;
   border: none;
   color: #e0e0e0;
-  font-size: 0.9rem;
+  font-size: 0.85rem !important;
   outline: none;
   font-family: inherit;
+  padding: 0 !important;
+  line-height: 1.4;
 }
 
 .chat-input::placeholder {
   color: #666;
+  font-size: 0.85rem;
 }
 
 .send-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: #fff;
-  padding: 0.4rem;
-  border-radius: 6px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  color: #fff !important;
+  padding: 0.35rem !important;
+  border-radius: 6px !important;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   transition: opacity 0.2s;
-  width: 32px;
-  height: 32px;
+  width: 249px !important;
+  height: 30px !important;
+  flex-shrink: 0;
+  margin-top: 0 !important;
 }
 
 .send-btn:hover:not(:disabled) {
@@ -412,8 +425,8 @@
 }
 
 .send-btn i {
-  width: 16px;
-  height: 16px;
+  width: 14px !important;
+  height: 14px !important;
 }
 
 /* Mode Container */
@@ -462,4 +475,3 @@
     width: 100%;
   }
 }
-

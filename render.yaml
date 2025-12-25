@@ -9,7 +9,7 @@ services:
     healthCheckPath: /api/public/health
     envVars:
       - key: PORT
-        value: 7070
+        value: 8080
       - key: DB_URL
         sync: false
       - key: DB_USERNAME
