@@ -48,7 +48,7 @@ const PatientLayout = ({ children }) => {
     // Reload notifications mỗi 30 giây để cập nhật real-time
     useEffect(() => {
         if (!user) return;
-        
+
         const interval = setInterval(() => {
             loadNotifications();
         }, 30000); // 30 giây
@@ -135,7 +135,7 @@ const PatientLayout = ({ children }) => {
     return (
         <div className="patient-layout">
             {/* Background Video */}
-            <video 
+            <video
                 className="patient-background-video"
                 autoPlay
                 loop
@@ -144,15 +144,15 @@ const PatientLayout = ({ children }) => {
             >
                 <source src="/backgroundfe.mp4" type="video/mp4" />
             </video>
-            
+
             {/* Sidebar */}
             <aside className={`patient-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
                 <div className="sidebar-header">
                     <Link to="/" className="sidebar-logo">
                         <div className="logo-icon-wrapper">
-                            <img 
-                                src={logoImage} 
-                                alt="Doctor Booking Logo" 
+                            <img
+                                src={logoImage}
+                                alt="Doctor Booking Logo"
                                 className="logo-image"
                             />
                         </div>
@@ -203,8 +203,8 @@ const PatientLayout = ({ children }) => {
                         </Link>
                     )}
                     <div className="animated-logout-wrapper">
-                        <AnimatedLogoutButton 
-                            onLogout={handleLogout} 
+                        <AnimatedLogoutButton
+                            onLogout={handleLogout}
                             variant="transparent"
                             showText={sidebarOpen}
                         />
@@ -215,16 +215,16 @@ const PatientLayout = ({ children }) => {
             {/* Main Content */}
             <main className="patient-main">
                 <div className="main-header">
-                    <button 
+                    <button
                         className="sidebar-toggle"
                         onClick={() => setSidebarOpen(!sidebarOpen)}
                     >
                         <i data-feather={sidebarOpen ? 'chevron-left' : 'chevron-right'}></i>
                     </button>
-                    
+
                     {/* Notification Bell */}
                     <div className="notification-container">
-                        <button 
+                        <button
                             className="notification-bell"
                             onClick={() => setNotificationsOpen(!notificationsOpen)}
                             aria-label="Thông báo"
@@ -244,7 +244,7 @@ const PatientLayout = ({ children }) => {
                                         <span className="unread-count">{unreadCount} chưa đọc</span>
                                     )}
                                 </div>
-                                
+
                                 <div className="notification-list">
                                     {loadingNotifications ? (
                                         <div className="notification-empty">
@@ -258,7 +258,7 @@ const PatientLayout = ({ children }) => {
                                         </div>
                                     ) : (
                                         notifications.map((notification) => (
-                                            <div 
+                                            <div
                                                 key={notification.id}
                                                 className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
                                                 onClick={() => {
@@ -293,7 +293,7 @@ const PatientLayout = ({ children }) => {
                                         ))
                                     )}
                                 </div>
-                                
+
                                 {notifications.length > 0 && (
                                     <div className="notification-footer">
                                         <button className="mark-all-read" onClick={handleMarkAllAsRead}>
@@ -312,13 +312,7 @@ const PatientLayout = ({ children }) => {
 
             {/* HealthAI Chat Panel - Only show if NOT on healthlyai route (because HealthAIPage renders it) */}
             {chatOpen && location.pathname !== '/patient/healthlyai' && (
-                <HealthAIChat onClose={() => {
-                    setChatOpen(false);
-                    // Only navigate if not already on a patient route
-                    if (!location.pathname.startsWith('/patient/')) {
-                        navigate('/patient/dashboard');
-                    }
-                }} />
+                <HealthAIChat onClose={() => setChatOpen(false)} />
             )}
         </div>
     );
