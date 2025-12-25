@@ -42,13 +42,13 @@ const NewBooking = () => {
       setLoadingFamilyMembers(true);
       const members = await familyService.getFamilyMembers();
       console.log('✅ Family members loaded:', members);
-      
+
       // Filter ra main account (isMainAccount = true hoặc relationship = 'SELF')
       // Vì "Cho bản thân tôi" đã đại diện cho main account rồi
-      const familyMembersOnly = members.filter(member => 
+      const familyMembersOnly = members.filter(member =>
         !member.isMainAccount && member.relationship !== 'SELF'
       );
-      
+
       console.log('✅ Filtered family members (excluding main account):', familyMembersOnly);
       setFamilyMembers(familyMembersOnly);
     } catch (err) {
@@ -110,7 +110,7 @@ const NewBooking = () => {
     if ((name === 'doctorId' || name === 'appointmentDate') && value) {
       const doctorId = name === 'doctorId' ? value : formData.doctorId;
       const date = name === 'appointmentDate' ? value : formData.appointmentDate;
-      
+
       if (doctorId && date) {
         await loadAvailableSlots(doctorId, date);
       }
@@ -122,7 +122,7 @@ const NewBooking = () => {
     setLoadingSlots(true);
     setAvailableTimeSlots([]);
     setFormData(prev => ({ ...prev, appointmentTime: '' })); // Reset time selection
-    
+
     try {
       const slots = await patientService.getAvailableTimeSlots(doctorId, date);
       console.log('✅ Available slots loaded:', slots);
@@ -159,7 +159,7 @@ const NewBooking = () => {
       }
 
       console.log('📤 Calling API to create appointment...');
-      
+
       // Chuẩn bị request data
       const appointmentData = {
         doctorId: parseInt(formData.doctorId),
@@ -168,7 +168,7 @@ const NewBooking = () => {
         notes: formData.notes,
         paymentMethod: formData.paymentMethod,
       };
-      
+
       // Nếu đặt cho người nhà (không phải 'self'), thêm familyMemberId
       if (formData.patientFor !== 'self') {
         appointmentData.familyMemberId = parseInt(formData.patientFor);
@@ -176,7 +176,7 @@ const NewBooking = () => {
       } else {
         console.log('👤 Booking for self');
       }
-      
+
       const response = await patientService.createAppointment(appointmentData);
 
       console.log('✅ API response received:', response);
@@ -333,39 +333,39 @@ const NewBooking = () => {
                   </div>
                 ) : (
                   familyMembers.map((member) => (
-                  <label 
-                    key={member.id} 
-                    className={`patient-option-card ${formData.patientFor === String(member.id) ? 'selected' : ''}`}
-                  >
-                    <input
-                      type="radio"
-                      name="patientFor"
-                      value={String(member.id)}
-                      checked={formData.patientFor === String(member.id)}
-                      onChange={handleChange}
-                    />
-                    <div className="patient-option-content">
-                      <div className="patient-option-icon">
-                        {member.relationship === 'CHILD' ? '👶' : 
-                         member.relationship === 'PARENT' ? '👨‍👩' : 
-                         member.relationship === 'SPOUSE' ? '💑' : '👤'}
-                      </div>
-                      <div className="patient-option-info">
-                        <div className="patient-option-name">{member.fullName}</div>
-                        <div className="patient-option-desc">
-                          {member.relationship === 'CHILD' ? 'Con cái' : 
-                           member.relationship === 'PARENT' ? 'Bố/Mẹ' : 
-                           member.relationship === 'SPOUSE' ? 'Vợ/Chồng' : 'Thành viên'}
-                          {member.medicalHistory && (
-                            <span className="medical-history-badge"> • {member.medicalHistory}</span>
-                          )}
+                    <label
+                      key={member.id}
+                      className={`patient-option-card ${formData.patientFor === String(member.id) ? 'selected' : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name="patientFor"
+                        value={String(member.id)}
+                        checked={formData.patientFor === String(member.id)}
+                        onChange={handleChange}
+                      />
+                      <div className="patient-option-content">
+                        <div className="patient-option-icon">
+                          {member.relationship === 'CHILD' ? '👶' :
+                            member.relationship === 'PARENT' ? '👨‍👩' :
+                              member.relationship === 'SPOUSE' ? '💑' : '👤'}
+                        </div>
+                        <div className="patient-option-info">
+                          <div className="patient-option-name">{member.fullName}</div>
+                          <div className="patient-option-desc">
+                            {member.relationship === 'CHILD' ? 'Con cái' :
+                              member.relationship === 'PARENT' ? 'Bố/Mẹ' :
+                                member.relationship === 'SPOUSE' ? 'Vợ/Chồng' : 'Thành viên'}
+                            {member.medicalHistory && (
+                              <span className="medical-history-badge"> • {member.medicalHistory}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="patient-check-icon">
-                      <span style={{ fontSize: '1.2rem' }}>✓</span>
-                    </div>
-                  </label>
+                      <div className="patient-check-icon">
+                        <span style={{ fontSize: '1.2rem' }}>✓</span>
+                      </div>
+                    </label>
                   ))
                 )}
               </div>
@@ -378,16 +378,18 @@ const NewBooking = () => {
                 <span className="required">*</span>
               </label>
               <div className="doctor-select-wrapper">
+                <i data-feather="user-check" className="input-icon"></i>
                 <select
                   name="doctorId"
                   value={formData.doctorId}
                   onChange={handleChange}
                   required
+                  className="with-icon"
                 >
                   <option value="">Chọn bác sĩ chuyên khoa...</option>
                   {doctors.map((doctor) => (
                     <option key={doctor.id} value={doctor.id}>
-                      Dr. {doctor.fullName} - {doctor.specialization} 
+                      Dr. {doctor.fullName} - {doctor.specialization}
                       {doctor.consultationFee > 0 ? ` • ${Number(doctor.consultationFee).toLocaleString('vi-VN')} VNĐ` : ' • Miễn phí'}
                     </option>
                   ))}
@@ -402,14 +404,18 @@ const NewBooking = () => {
                   Ngày Hẹn
                   <span className="required">*</span>
                 </label>
-                <input
-                  type="date"
-                  name="appointmentDate"
-                  value={formData.appointmentDate}
-                  onChange={handleChange}
-                  min={new Date().toISOString().split('T')[0]}
-                  required
-                />
+                <div className="input-wrapper">
+                  <i data-feather="calendar" className="input-icon"></i>
+                  <input
+                    type="date"
+                    name="appointmentDate"
+                    value={formData.appointmentDate}
+                    onChange={handleChange}
+                    min={new Date().toISOString().split('T')[0]}
+                    required
+                    className="with-icon"
+                  />
+                </div>
               </div>
 
               <div>
@@ -417,32 +423,36 @@ const NewBooking = () => {
                   Giờ Hẹn
                   <span className="required">*</span>
                 </label>
-                <select
-                  name="appointmentTime"
-                  value={formData.appointmentTime}
-                  onChange={handleChange}
-                  required
-                  disabled={!formData.doctorId || !formData.appointmentDate || loadingSlots}
-                >
-                  {loadingSlots ? (
-                    <option value="">Đang tải khung giờ...</option>
-                  ) : availableTimeSlots.length === 0 ? (
-                    formData.doctorId && formData.appointmentDate ? (
-                      <option value="">Lịch bác sĩ đã full trong ngày này</option>
+                <div className="input-wrapper">
+                  <i data-feather="clock" className="input-icon"></i>
+                  <select
+                    name="appointmentTime"
+                    value={formData.appointmentTime}
+                    onChange={handleChange}
+                    required
+                    disabled={!formData.doctorId || !formData.appointmentDate || loadingSlots}
+                    className="with-icon"
+                  >
+                    {loadingSlots ? (
+                      <option value="">Đang tải khung giờ...</option>
+                    ) : availableTimeSlots.length === 0 ? (
+                      formData.doctorId && formData.appointmentDate ? (
+                        <option value="">Lịch bác sĩ đã full trong ngày này</option>
+                      ) : (
+                        <option value="">Chọn bác sĩ và ngày trước...</option>
+                      )
                     ) : (
-                      <option value="">Chọn bác sĩ và ngày trước...</option>
-                    )
-                  ) : (
-                    <>
-                      <option value="">Chọn giờ khám...</option>
-                      {availableTimeSlots.map((time) => (
-                        <option key={time} value={time}>
-                          {time}
-                        </option>
-                      ))}
-                    </>
-                  )}
-                </select>
+                      <>
+                        <option value="">Chọn giờ khám...</option>
+                        {availableTimeSlots.map((time) => (
+                          <option key={time} value={time}>
+                            {time}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </select>
+                </div>
                 {formData.doctorId && formData.appointmentDate && availableTimeSlots.length > 0 && (
                   <div style={{ fontSize: '0.85rem', color: '#10b981', marginTop: '0.5rem' }}>
                     ✓ Có {availableTimeSlots.length} khung giờ trống
@@ -481,7 +491,7 @@ const NewBooking = () => {
                   <span className="required">*</span>
                 </div>
                 <div className="payment-options-grid">
-                  
+
                   {/* CASH */}
                   <label className={`payment-option-card ${formData.paymentMethod === 'CASH' ? 'selected' : ''}`}>
                     <input
@@ -559,13 +569,16 @@ const NewBooking = () => {
               <label className="form-label">
                 Ghi Chú (Tùy chọn)
               </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                className="notes-textarea"
-                placeholder="💬 Mô tả triệu chứng, yêu cầu đặc biệt hoặc thông tin bổ sung..."
-              />
+              <div className="textarea-wrapper">
+                <i data-feather="file-text" className="textarea-icon"></i>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  className="notes-textarea with-icon"
+                  placeholder="Mô tả triệu chứng, yêu cầu đặc biệt hoặc thông tin bổ sung..."
+                />
+              </div>
             </div>
 
             {/* Form Actions */}
