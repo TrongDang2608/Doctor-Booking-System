@@ -68,12 +68,24 @@ public class UserController {
         try {
             userService.deleteUser(id);
             return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
-            errorResponse.put("message", e.getMessage());
-            errorResponse.put("status", HttpStatus.NOT_FOUND.value());
+            errorResponse.put("message", "Không thể xóa người dùng này vì vẫn còn dữ liệu liên quan (ví dụ: lịch hẹn, phản hồi, v.v.). Bạn cần xóa hoặc chuyển các dữ liệu liên quan trước khi xóa người dùng này.");
+            errorResponse.put("status", HttpStatus.CONFLICT.value());
             errorResponse.put("timestamp", java.time.LocalDateTime.now());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        } catch (RuntimeException e) {
+            String msg = e.getMessage();
+            java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("message", msg);
+            errorResponse.put("timestamp", java.time.LocalDateTime.now());
+            if (msg != null && msg.contains("not found")) {
+                errorResponse.put("status", HttpStatus.NOT_FOUND.value());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            } else {
+                errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
         }
     }
 
