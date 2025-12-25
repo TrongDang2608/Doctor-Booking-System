@@ -49,7 +49,7 @@ const MyFeedbacks = () => {
 
   const handleSubmitEdit = async (e) => {
     e.preventDefault();
-    
+
     try {
       await patientService.updateFeedback(selectedFeedback.id, editData);
       toast.success('Cập nhật phản hồi thành công!', { position: 'top-right' });
@@ -87,7 +87,7 @@ const MyFeedbacks = () => {
 
   return (
     <PatientLayout>
-      <div className="space-y-8 bg-[#111827] min-h-screen py-8 px-2 md:px-6">
+      <div className="space-y-8 bg-[#0a0a0a] min-h-screen py-8 px-2 md:px-6">
         {/* Page Header */}
         <div>
           <h1 className="text-3xl font-bold text-gray-100 mb-2">Phản Hồi Của Tôi</h1>
@@ -103,9 +103,6 @@ const MyFeedbacks = () => {
           ) : feedbacks.length === 0 ? (
             <div className="p-8 text-center text-gray-400">
               <p>Bạn chưa gửi phản hồi nào</p>
-              <a href="/patient/feedback/new" className="text-blue-400 hover:text-blue-300 mt-2 inline-block">
-                Gửi phản hồi đầu tiên →
-              </a>
             </div>
           ) : (
             <div className="divide-y divide-[#232b3b]">
@@ -150,9 +147,9 @@ const MyFeedbacks = () => {
                       ) : (
                         <div className="text-xs text-gray-500 text-center opacity-80">
                           {feedback.doctorReply ? (
-                            <p>Không thể sửa<br/>(đã có phản hồi)</p>
+                            <p>Không thể sửa<br />(đã có phản hồi)</p>
                           ) : (
-                            <p>Không thể sửa<br/>(quá 24h)</p>
+                            <p>Không thể sửa<br />(quá 24h)</p>
                           )}
                         </div>
                       )}
