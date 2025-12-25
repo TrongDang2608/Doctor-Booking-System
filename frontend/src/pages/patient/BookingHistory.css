@@ -15,7 +15,7 @@
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -96,17 +96,23 @@
 .doctor-name {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #e0e0e0 !important;
+  color: #ffffff !important;
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
+/* Force white color for all text in doctor name */
+.appointment-card .doctor-name,
+.appointment-card .doctor-name * {
+  color: #ffffff !important;
+}
+
 .doctor-name i {
   width: 20px;
   height: 20px;
-  color: #667eea !important;
+  color: #ffffff !important;
 }
 
 .doctor-specialty {
@@ -177,10 +183,7 @@
 .payment-amount {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #42950d !important;
 }
 
 .payment-details {
@@ -445,4 +448,3 @@
     justify-content: center;
   }
 }
-

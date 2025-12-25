@@ -2,11 +2,12 @@ import { useEffect, useRef } from 'react';
 import './AnimatedLogoutButton.css';
 
 /**
- * AnimatedLogoutButton Component
+ * Animated Logout Button Component
+ * Features a stick figure walking through a door and falling animation
  * 
- * @param {Function} onLogout - Callback function called after animation completes
- * @param {String} variant - Color variant: 'dark' | 'light' | 'transparent' | 'danger'
- * @param {Boolean} showText - Whether to show "Log Out" text
+ * @param {Function} onLogout - Callback function executed after animation completes
+ * @param {String} variant - Button color variant: 'dark' | 'light'
+ * @param {Boolean} showText - Whether to display "Log Out" text (default: true)
  */
 const AnimatedLogoutButton = ({ onLogout, variant = 'dark', showText = true }) => {
   const buttonRef = useRef(null);
@@ -17,7 +18,7 @@ const AnimatedLogoutButton = ({ onLogout, variant = 'dark', showText = true }) =
 
     button.state = 'default';
 
-    // function to transition a button from one state to the next
+    // Transition button from one state to the next
     const updateButtonState = (button, state) => {
       if (logoutButtonStates[state]) {
         button.state = state;
@@ -27,7 +28,7 @@ const AnimatedLogoutButton = ({ onLogout, variant = 'dark', showText = true }) =
       }
     };
 
-    // mouse hover listeners on button
+    // Mouse hover listeners
     const handleMouseEnter = () => {
       if (button.state === 'default') {
         updateButtonState(button, 'hover');
@@ -40,33 +41,33 @@ const AnimatedLogoutButton = ({ onLogout, variant = 'dark', showText = true }) =
       }
     };
 
-    // click listener on button
+    // Click listener with animation sequence
     const handleClick = () => {
       if (button.state === 'default' || button.state === 'hover') {
         button.classList.add('clicked');
         updateButtonState(button, 'walking1');
-        
+
         setTimeout(() => {
           button.classList.add('door-slammed');
           updateButtonState(button, 'walking2');
-          
+
           setTimeout(() => {
             button.classList.add('falling');
             updateButtonState(button, 'falling1');
-            
+
             setTimeout(() => {
               updateButtonState(button, 'falling2');
-              
+
               setTimeout(() => {
                 updateButtonState(button, 'falling3');
-                
+
                 setTimeout(() => {
                   button.classList.remove('clicked');
                   button.classList.remove('door-slammed');
                   button.classList.remove('falling');
                   updateButtonState(button, 'default');
-                  
-                  // Call the actual logout function after animation completes
+
+                  // Execute logout callback after animation
                   if (onLogout) {
                     onLogout();
                   }
@@ -90,7 +91,7 @@ const AnimatedLogoutButton = ({ onLogout, variant = 'dark', showText = true }) =
   }, [onLogout]);
 
   return (
-    <button 
+    <button
       ref={buttonRef}
       className={`logoutButton logoutButton--${variant}`}
     >
@@ -213,4 +214,3 @@ const logoutButtonStates = {
 };
 
 export default AnimatedLogoutButton;
-
