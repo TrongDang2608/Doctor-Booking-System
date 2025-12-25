@@ -5,12 +5,18 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(99, 102, 241, 0.15);
+  background: rgba(15, 23, 42, 0.65); /* dark, semi-transparent */
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(139, 92, 246, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
   overflow: visible;  /* Allow logout animation to show */
+}
+
+/* Always white text for navbar */
+.navbar, .navbar * {
+  color: #fff !important;
+  text-shadow: 0 2px 8px rgba(15,23,42,0.18);
 }
 
 .navbar.scrolled {

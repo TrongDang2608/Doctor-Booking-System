@@ -167,23 +167,23 @@ const DoctorAppointments = () => {
       } else {
         date = new Date(dateString);
       }
-      
+
       if (isNaN(date.getTime())) return { day: '--', month: '--', year: '----', fullDate: '--/--/----', dayOfWeek: '' };
-      
-      const monthNames = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 
-                         'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+
+      const monthNames = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+        'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
       const monthNamesShort = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
       const dayNames = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
       const dayNamesShort = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-      
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const appointmentDate = new Date(date);
       appointmentDate.setHours(0, 0, 0, 0);
-      
+
       const diffTime = appointmentDate - today;
       const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-      
+
       let relativeDate = '';
       if (diffDays === 0) {
         relativeDate = 'Hôm nay';
@@ -196,7 +196,7 @@ const DoctorAppointments = () => {
       } else if (diffDays < -1 && diffDays >= -7) {
         relativeDate = `${Math.abs(diffDays)} ngày trước`;
       }
-      
+
       return {
         day: date.getDate().toString().padStart(2, '0'),
         month: date.getMonth() + 1,
@@ -216,245 +216,245 @@ const DoctorAppointments = () => {
 
   if (loading && appointments.length === 0) {
     return (
-        <DoctorLayout>
-          <Loading />
-        </DoctorLayout>
+      <DoctorLayout>
+        <Loading />
+      </DoctorLayout>
     );
   }
 
   return (
-      <DoctorLayout>
-        <div className="doctor-appointments">
-          <div className="appointments-header">
-            <div className="header-content">
-              <h1 className="page-title">
-                <Calendar size={32} />
-                Lịch hẹn của tôi
-              </h1>
-              <p className="page-subtitle">Quản lý và theo dõi các cuộc hẹn với bệnh nhân</p>
+    <DoctorLayout>
+      <div className="doctor-appointments">
+        <div className="appointments-header">
+          <div className="header-content">
+            <h1 className="page-title">
+              <Calendar size={32} />
+              Lịch hẹn của tôi
+            </h1>
+            <p className="page-subtitle">Quản lý và theo dõi các cuộc hẹn với bệnh nhân</p>
+          </div>
+        </div>
+
+        <ErrorMessage message={error} onClose={() => setError('')} />
+
+        {/* Statistics Cards */}
+        <div className="stats-grid">
+          <StatCard
+            label="Tổng số lịch hẹn"
+            value={stats.total}
+            color="#3B82F6"
+            icon={<Calendar size={24} />}
+          />
+          <StatCard
+            label="Đang chờ xác nhận"
+            value={stats.pending}
+            color="#f39c12"
+            icon={<AlertCircle size={24} />}
+          />
+          <StatCard
+            label="Đã xác nhận"
+            value={stats.confirmed}
+            color="#3498db"
+            icon={<CheckCircle size={24} />}
+          />
+          <StatCard
+            label="Hoàn thành"
+            value={stats.completed}
+            color="#2ecc71"
+            icon={<CheckCircle size={24} />}
+          />
+        </div>
+
+        {/* Filter Section */}
+        <div className="filter-section">
+          <div className="filter-wrapper">
+            <div className="filter-icon-wrapper">
+              <Filter size={20} />
             </div>
+            <label className="filter-label">Lọc theo ngày:</label>
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              className="filter-input"
+            />
+            {filterDate && (
+              <button
+                onClick={() => setFilterDate('')}
+                className="clear-filter-btn"
+                title="Xóa bộ lọc"
+              >
+                <X size={16} />
+                Xóa bộ lọc
+              </button>
+            )}
           </div>
+        </div>
 
-          <ErrorMessage message={error} onClose={() => setError('')} />
-
-          {/* Statistics Cards */}
-          <div className="stats-grid">
-            <StatCard
-                label="Tổng số lịch hẹn"
-                value={stats.total}
-                color="#3B82F6"
-                icon={<Calendar size={24} />}
-            />
-            <StatCard
-                label="Đang chờ xác nhận"
-                value={stats.pending}
-                color="#f39c12"
-                icon={<AlertCircle size={24} />}
-            />
-            <StatCard
-                label="Đã xác nhận"
-                value={stats.confirmed}
-                color="#3498db"
-                icon={<CheckCircle size={24} />}
-            />
-            <StatCard
-                label="Hoàn thành"
-                value={stats.completed}
-                color="#2ecc71"
-                icon={<CheckCircle size={24} />}
-            />
+        {/* Appointments List */}
+        {loading && appointments.length === 0 ? (
+          <div className="loading-container">
+            <Loading />
           </div>
-
-          {/* Filter Section */}
-          <div className="filter-section">
-            <div className="filter-wrapper">
-              <div className="filter-icon-wrapper">
-                <Filter size={20} />
-              </div>
-              <label className="filter-label">Lọc theo ngày:</label>
-              <input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  className="filter-input"
-              />
-              {filterDate && (
-                  <button
-                      onClick={() => setFilterDate('')}
-                      className="clear-filter-btn"
-                      title="Xóa bộ lọc"
-                  >
-                    <X size={16} />
-                    Xóa bộ lọc
-                  </button>
-              )}
-            </div>
+        ) : appointments.length === 0 ? (
+          <div className="empty-state">
+            <Calendar size={64} className="empty-icon" />
+            <h3 className="empty-title">Không có lịch hẹn</h3>
+            <p className="empty-description">
+              {filterDate
+                ? `Không có lịch hẹn nào vào ngày ${formatDate(filterDate)}`
+                : 'Chưa có lịch hẹn nào được đặt'}
+            </p>
+            {filterDate && (
+              <button
+                onClick={() => setFilterDate('')}
+                className="empty-action-btn"
+              >
+                Xem tất cả lịch hẹn
+              </button>
+            )}
           </div>
-
-          {/* Appointments List */}
-          {loading && appointments.length === 0 ? (
-              <div className="loading-container">
-                <Loading />
-              </div>
-          ) : appointments.length === 0 ? (
-              <div className="empty-state">
-                <Calendar size={64} className="empty-icon" />
-                <h3 className="empty-title">Không có lịch hẹn</h3>
-                <p className="empty-description">
-                  {filterDate 
-                    ? `Không có lịch hẹn nào vào ngày ${formatDate(filterDate)}`
-                    : 'Chưa có lịch hẹn nào được đặt'}
-                </p>
-                {filterDate && (
-                    <button
-                        onClick={() => setFilterDate('')}
-                        className="empty-action-btn"
-                    >
-                      Xem tất cả lịch hẹn
-                    </button>
-                )}
-              </div>
-          ) : (
-              <div className="appointments-grid">
-                {appointments.map((appointment) => (
-                    <div key={appointment.id} className="appointment-card">
-                      <div className="appointment-card-header">
-                        <div className="appointment-date-badge">
-                          <Calendar size={18} className="date-icon" />
-                          <div className="date-content">
-                            <div className="date-primary">
-                              <span className="date-day-name">{formatAppointmentDate(appointment.appointmentDate).dayOfWeek}</span>
-                              {formatAppointmentDate(appointment.appointmentDate).relativeDate && (
-                                <span className="date-relative-badge">{formatAppointmentDate(appointment.appointmentDate).relativeDate}</span>
-                              )}
-                            </div>
-                            <div className="date-secondary">
-                              {formatAppointmentDate(appointment.appointmentDate).day} {formatAppointmentDate(appointment.appointmentDate).monthName} {formatAppointmentDate(appointment.appointmentDate).year}
-                            </div>
-                          </div>
-                        </div>
-                        <span 
-                          className="status-badge" 
-                          style={{
-                            backgroundColor: getStatusColor(appointment.status) + '20',
-                            color: getStatusColor(appointment.status),
-                          }}
-                        >
-                          {getStatusIcon(appointment.status)}
-                          {getStatusText(appointment.status)}
-                        </span>
-                      </div>
-
-                      <div className="appointment-card-body">
-                        <div className="appointment-time">
-                          <Clock size={18} />
-                          <span>{formatTime(appointment.appointmentTime)}</span>
-                        </div>
-                        
-                        <div className="appointment-patient">
-                          <div className="patient-avatar">
-                            <User size={20} />
-                          </div>
-                          <div className="patient-details">
-                            <div className="patient-name">{appointment.patientName}</div>
-                            {appointment.patientPhone && (
-                                <div className="patient-contact">
-                                  <Phone size={14} />
-                                  <span>{appointment.patientPhone}</span>
-                                </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {appointment.notes && (
-                            <div className="appointment-notes">
-                              <FileText size={16} />
-                              <span>{appointment.notes}</span>
-                            </div>
+        ) : (
+          <div className="appointments-grid">
+            {appointments.map((appointment) => (
+              <div key={appointment.id} className="appointment-card">
+                <div className="appointment-card-header">
+                  <div className="appointment-date-badge">
+                    <Calendar size={18} className="date-icon" />
+                    <div className="date-content">
+                      <div className="date-primary">
+                        <span className="date-day-name">{formatAppointmentDate(appointment.appointmentDate).dayOfWeek}</span>
+                        {formatAppointmentDate(appointment.appointmentDate).relativeDate && (
+                          <span className="date-relative-badge">{formatAppointmentDate(appointment.appointmentDate).relativeDate}</span>
                         )}
                       </div>
-
-                      <div className="appointment-card-footer">
-                        {appointment.status === 'PENDING' && (
-                            <div className="action-buttons-group">
-                              <button
-                                  onClick={() => handleConfirm(appointment.id)}
-                                  disabled={processingId === appointment.id}
-                                  className="action-btn confirm-btn"
-                              >
-                                <CheckCircle size={16} />
-                                {processingId === appointment.id ? 'Đang xác nhận...' : 'Xác nhận'}
-                              </button>
-                              <button
-                                  onClick={() => handleCancelClick(appointment)}
-                                  className="action-btn cancel-btn"
-                              >
-                                <XCircle size={16} />
-                                Hủy lịch
-                              </button>
-                            </div>
-                        )}
-                        {appointment.status === 'CONFIRMED' && (
-                            <div className="action-buttons-group">
-                              <button
-                                  onClick={() => handleCreateTreatment(appointment)}
-                                  className="action-btn treatment-btn"
-                              >
-                                <Plus size={16} />
-                                Tạo phiếu điều trị
-                              </button>
-                              <button
-                                  onClick={() => handleCancelClick(appointment)}
-                                  className="action-btn cancel-btn"
-                              >
-                                <XCircle size={16} />
-                                Hủy lịch
-                              </button>
-                            </div>
-                        )}
-                        {appointment.status === 'COMPLETED' && (
-                            <div className="completed-indicator">
-                              <CheckCircle size={18} />
-                              <span>Đã hoàn thành</span>
-                            </div>
-                        )}
-                        {appointment.status === 'CANCELLED' && (
-                            <div className="cancelled-indicator">
-                              <XCircle size={18} />
-                              <span>Đã hủy</span>
-                            </div>
-                        )}
+                      <div className="date-secondary">
+                        {formatAppointmentDate(appointment.appointmentDate).day} {formatAppointmentDate(appointment.appointmentDate).monthName} {formatAppointmentDate(appointment.appointmentDate).year}
                       </div>
                     </div>
-                ))}
+                  </div>
+                  <span
+                    className="status-badge"
+                    style={{
+                      backgroundColor: getStatusColor(appointment.status) + '20',
+                      color: getStatusColor(appointment.status),
+                    }}
+                  >
+                    {getStatusIcon(appointment.status)}
+                    {getStatusText(appointment.status)}
+                  </span>
+                </div>
+
+                <div className="appointment-card-body">
+                  <div className="appointment-time">
+                    <Clock size={18} />
+                    <span>{formatTime(appointment.appointmentTime)}</span>
+                  </div>
+
+                  <div className="appointment-patient">
+                    <div className="patient-avatar">
+                      <User size={20} />
+                    </div>
+                    <div className="patient-details">
+                      <div className="patient-name">{appointment.patientName}</div>
+                      {appointment.patientPhone && (
+                        <div className="patient-contact">
+                          <Phone size={14} />
+                          <span>{appointment.patientPhone}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {appointment.notes && (
+                    <div className="appointment-notes">
+                      <FileText size={16} />
+                      <span>{appointment.notes}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="appointment-card-footer">
+                  {appointment.status === 'PENDING' && (
+                    <div className="action-buttons-group">
+                      <button
+                        onClick={() => handleConfirm(appointment.id)}
+                        disabled={processingId === appointment.id}
+                        className="action-btn confirm-btn"
+                      >
+                        <CheckCircle size={16} />
+                        {processingId === appointment.id ? 'Đang xác nhận...' : 'Xác nhận'}
+                      </button>
+                      <button
+                        onClick={() => handleCancelClick(appointment)}
+                        className="action-btn cancel-btn"
+                      >
+                        <XCircle size={16} />
+                        Hủy lịch
+                      </button>
+                    </div>
+                  )}
+                  {appointment.status === 'CONFIRMED' && (
+                    <div className="action-buttons-group">
+                      <button
+                        onClick={() => handleCreateTreatment(appointment)}
+                        className="action-btn treatment-btn"
+                      >
+                        <Plus size={16} />
+                        Tạo phiếu điều trị
+                      </button>
+                      <button
+                        onClick={() => handleCancelClick(appointment)}
+                        className="action-btn cancel-btn"
+                      >
+                        <XCircle size={16} />
+                        Hủy lịch
+                      </button>
+                    </div>
+                  )}
+                  {appointment.status === 'COMPLETED' && (
+                    <div className="completed-indicator">
+                      <CheckCircle size={18} />
+                      <span>Đã hoàn thành</span>
+                    </div>
+                  )}
+                  {appointment.status === 'CANCELLED' && (
+                    <div className="cancelled-indicator">
+                      <XCircle size={18} />
+                      <span>Đã hủy</span>
+                    </div>
+                  )}
+                </div>
               </div>
-          )}
+            ))}
+          </div>
+        )}
 
-          {showTreatmentForm && (
-              <TreatmentForm
-                  treatment={null}
-                  appointment={selectedAppointment}
-                  onClose={() => {
-                    setShowTreatmentForm(false);
-                    setSelectedAppointment(null);
-                  }}
-                  onSuccess={handleTreatmentSuccess}
-              />
-          )}
+        {showTreatmentForm && (
+          <TreatmentForm
+            treatment={null}
+            appointment={selectedAppointment}
+            onClose={() => {
+              setShowTreatmentForm(false);
+              setSelectedAppointment(null);
+            }}
+            onSuccess={handleTreatmentSuccess}
+          />
+        )}
 
-          {showCancelModal && appointmentToCancel && (
-              <CancelAppointmentModal
-                  appointment={appointmentToCancel}
-                  onClose={() => {
-                    setShowCancelModal(false);
-                    setAppointmentToCancel(null);
-                  }}
-                  onConfirm={handleConfirmCancel}
-              />
-          )}
-        </div>
-        <ToastContainer position="top-right" autoClose={3000} />
-      </DoctorLayout>
+        {showCancelModal && appointmentToCancel && (
+          <CancelAppointmentModal
+            appointment={appointmentToCancel}
+            onClose={() => {
+              setShowCancelModal(false);
+              setAppointmentToCancel(null);
+            }}
+            onConfirm={handleConfirmCancel}
+          />
+        )}
+      </div>
+      <ToastContainer position="top-right" autoClose={3000} />
+    </DoctorLayout>
   );
 };
 

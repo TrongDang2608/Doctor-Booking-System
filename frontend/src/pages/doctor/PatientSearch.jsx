@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, Clock, Star, Award, Video, 
+import {
+  Search, Clock, Star, Award, Video,
   CheckCircle, XCircle, GitCompare, X, Calendar,
   TrendingUp, DollarSign, User, Mail, Phone, FileText
 } from 'lucide-react';
@@ -54,7 +54,7 @@ const PatientSearch = () => {
     // Analyze search and suggest categories
     const lowerSearch = searchTerm.toLowerCase();
     const suggestions = [];
-    
+
     Object.keys(conditionToCategory).forEach(condition => {
       if (lowerSearch.includes(condition)) {
         suggestions.push(conditionToCategory[condition]);
@@ -77,27 +77,27 @@ const PatientSearch = () => {
     // Calculate match scores
     const patientsWithScores = filtered.map(patient => {
       let score = 50; // Base score
-      
+
       // Category match
       if (suggestions.length > 0) {
         score += 20;
       }
-      
+
       // Treatment history bonus (using treatmentCount from patient data)
       const treatmentCount = patient.treatmentCount || 0;
       if (treatmentCount > 5) score += 15;
       else if (treatmentCount > 2) score += 10;
-      
+
       // Recent activity bonus
       if (patient.dateOfBirth) {
         const age = new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear();
         if (age > 0 && age < 100) score += 5;
       }
-      
+
       // Last visit recency bonus
       if (patient.lastVisit?.includes('days')) score += 10;
       else if (patient.lastVisit?.includes('week')) score += 5;
-      
+
       return { ...patient, matchScore: Math.min(100, score) };
     });
 
@@ -110,14 +110,14 @@ const PatientSearch = () => {
     try {
       setLoading(true);
       const data = await doctorService.searchPatients('');
-      
+
       // Enhance patients with mock data for demo
       const enhanced = data.map((patient, index) => ({
         ...patient,
         matchScore: 75 + Math.floor(Math.random() * 20),
-        lastVisit: index % 3 === 0 ? '2 days ago' : 
-                  index % 3 === 1 ? '1 week ago' : 
-                  '3 weeks ago',
+        lastVisit: index % 3 === 0 ? '2 days ago' :
+          index % 3 === 1 ? '1 week ago' :
+            '3 weeks ago',
         treatmentCount: Math.floor(Math.random() * 10),
         location: {
           lat: 10.762622 + (Math.random() - 0.5) * 0.1,
@@ -125,10 +125,10 @@ const PatientSearch = () => {
           address: patient.address || `123 Medical Street, District ${index + 1}`
         },
         // Video URL priority: 1) From API, 2) From public root, 3) null (show initial)
-        videoStoryUrl: patient.videoStoryUrl || 
-                      (patient.id ? `/patient-${patient.id}.mp4` : null)
+        videoStoryUrl: patient.videoStoryUrl ||
+          (patient.id ? `/patient-${patient.id}.mp4` : null)
       }));
-      
+
       setPatients(enhanced);
       setFilteredPatients(enhanced);
       setError('');
@@ -223,7 +223,7 @@ const PatientSearch = () => {
               className="ai-search-input"
             />
           </div>
-          
+
           <AnimatePresence>
             {suggestedCategories.length > 0 && (
               <motion.div
@@ -284,7 +284,7 @@ const PatientSearch = () => {
                     </div>
 
                     {/* Video Story Ring */}
-                    <div 
+                    <div
                       className="video-story-ring"
                       onMouseEnter={() => handleVideoHover(patient.id, true)}
                       onMouseLeave={() => handleVideoHover(patient.id, false)}
@@ -317,7 +317,7 @@ const PatientSearch = () => {
                         <User size={16} />
                         <span>ID: {patient.id}</span>
                       </div>
-                      
+
                       <div className="patient-meta">
                         <div className="meta-item">
                           <Mail size={16} />
@@ -399,7 +399,7 @@ const PatientSearch = () => {
               <div className="compare-widget-content">
                 <GitCompare size={22} />
                 <span>Đang so sánh {compareList.length} bệnh nhân</span>
-                <button 
+                <button
                   className="compare-close"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -439,7 +439,7 @@ const PatientSearch = () => {
                     <X size={20} />
                   </button>
                 </div>
-                
+
                 <div className="compare-table">
                   <table>
                     <thead>
@@ -516,7 +516,7 @@ const PatientSearch = () => {
                 </div>
 
                 <div className="modal-actions">
-                  <button 
+                  <button
                     className="btn-primary"
                     onClick={() => {
                       if (compareList.length > 0) {
