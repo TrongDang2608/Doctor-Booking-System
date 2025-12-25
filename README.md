@@ -105,8 +105,8 @@ JWT_SECRET=your-secret-key-here
 JWT_EXPIRATION=86400000
 JWT_REFRESH_EXPIRATION=604800000
 
-# Google AI (Optional - for AI features)
-GOOGLE_AI_API_KEY=your_google_ai_api_key
+# Groq AI (Optional - for AI features)
+GROQ_API_KEY=your_groq_api_key
 
 # VNPAY (Optional - for payment features)
 VNPAY_TMN_CODE=your_vnpay_tmn_code

@@ -22,7 +22,7 @@ services:
         value: 86400000
       - key: JWT_REFRESH_EXPIRATION
         value: 604800000
-      - key: GOOGLE_AI_API_KEY
+      - key: GROQ_API_KEY
         sync: false
       - key: VNPAY_TMN_CODE
         sync: false
