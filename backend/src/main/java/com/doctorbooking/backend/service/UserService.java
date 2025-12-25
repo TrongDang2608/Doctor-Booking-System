@@ -178,17 +178,17 @@ public class UserService implements UserDetailsService {
             if (doctor.isPresent()) {
                 doctorRepository.delete(doctor.get());
             }
-            
+
             // Delete associated patient if exists
             Optional<Patient> patient = patientRepository.findByUserId(id);
             if (patient.isPresent()) {
                 patientRepository.delete(patient.get());
             }
-            
+
             // Now delete the user
             userRepository.delete(user);
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException("Không thể xóa người dùng: Người dùng có dữ liệu liên quan (lịch hẹn, phản hồi). Vui lòng xóa các dữ liệu liên quan trước.");
+            throw new RuntimeException("Không thể xóa người dùng này vì vẫn còn dữ liệu liên quan (ví dụ: lịch hẹn, phản hồi, v.v.). Bạn cần xóa hoặc chuyển các dữ liệu liên quan trước khi xóa người dùng này.");
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi xóa người dùng: " + e.getMessage());
         }
