@@ -134,28 +134,28 @@ const DoctorDashboard = () => {
       label: "Lịch hẹn hôm nay",
       value: stats.todayAppointments,
       color: '#3b82f6',
-      icon: 'calendar',
+      chartType: 'wave',
       onClick: () => window.location.href = '/doctor/appointments'
     },
     {
       label: 'Lịch hẹn đang chờ',
       value: stats.pendingAppointments,
       color: '#f59e0b',
-      icon: 'clock',
+      chartType: 'bars',
       onClick: () => window.location.href = '/doctor/appointments?status=PENDING'
     },
     {
       label: 'Tổng điều trị',
       value: stats.totalTreatments,
       color: '#10b981',
-      icon: 'activity',
+      chartType: 'line',
       onClick: () => window.location.href = '/doctor/treatments'
     },
     {
       label: 'Đã hoàn thành',
       value: stats.completedAppointments,
       color: '#8b5cf6',
-      icon: 'check-circle',
+      chartType: 'dots',
       onClick: () => window.location.href = '/doctor/appointments?status=COMPLETED'
     },
   ], [stats]);
