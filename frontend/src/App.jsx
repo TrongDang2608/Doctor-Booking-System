@@ -45,6 +45,7 @@ import PatientProfile from './pages/patient/PatientProfile';
 import NewBooking from './pages/patient/NewBooking';
 import BookingHistory from './pages/patient/BookingHistory';
 import DoctorSearch from './pages/patient/DoctorSearch';
+import PatientDoctors from './pages/patient/PatientDoctors';
 import FeedbackForm from './pages/patient/FeedbackForm';
 import MyFeedbacks from './pages/patient/MyFeedbacks';
 import TreatmentHistory from './pages/patient/TreatmentHistory';
@@ -147,7 +148,7 @@ function App() {
                   <Route path="profile" element={<PatientProfile />} />
                   <Route path="booking" element={<NewBooking />} />
                   <Route path="history" element={<BookingHistory />} />
-                  <Route path="doctors" element={<DoctorSearch />} />
+                  <Route path="doctors" element={<PatientDoctors />} />
                   <Route path="treatments" element={<TreatmentHistory />} />
                   <Route path="feedback/new" element={<FeedbackForm />} />
                   <Route path="feedbacks" element={<MyFeedbacks />} />

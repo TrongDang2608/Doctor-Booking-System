@@ -1,64 +1,37 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { mockDoctors, mockSpecialties } from '../data/mockData';
-import RequireAuth from '../components/common/RequireAuth';
-import Navbar from '../components/common/Navbar';
-import './Doctors.css';
+import React, { useState } from "react";
+import Navbar from "../../components/common/Navbar";
+import { Link } from "react-router-dom";
+import { mockDoctors, mockSpecialties } from "../../data/mockData";
+import RequireAuth from "../../components/common/RequireAuth";
+import "./PatientDoctors.css";
 
-const Doctors = () => {
-  const [doctors, setDoctors] = useState(mockDoctors);
-  const [selectedSpecialty, setSelectedSpecialty] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+const PatientDoctors = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState("all");
   const [telemedicineOnly, setTelemedicineOnly] = useState(false);
 
-  useEffect(() => {
-    if (window.feather) {
-      window.feather.replace();
-    }
-  }, [doctors]);
+  const doctors = mockDoctors.filter((doctor) => {
+    const matchesSearch =
+      doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doctor.hospital.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSpecialty =
+      selectedSpecialty === "all" || doctor.specialty === selectedSpecialty;
+    const matchesTelemedicine =
+      !telemedicineOnly || doctor.telemedicine;
+    return matchesSearch && matchesSpecialty && matchesTelemedicine;
+  });
 
-  useEffect(() => {
-    let filtered = [...mockDoctors];
-
-    // Filter by specialty
-    if (selectedSpecialty !== 'all') {
-      filtered = filtered.filter(d => d.specialty === selectedSpecialty);
-    }
-
-    // Filter by search query
-    if (searchQuery) {
-      const lowerQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(d =>
-        d.name.toLowerCase().includes(lowerQuery) ||
-        d.hospital.toLowerCase().includes(lowerQuery) ||
-        d.specialty.toLowerCase().includes(lowerQuery)
-      );
-    }
-
-    // Filter by telemedicine
-    if (telemedicineOnly) {
-      filtered = filtered.filter(d => d.telemedicine === true);
-    }
-
-    // Sort by rating
-    filtered.sort((a, b) => b.rating - a.rating);
-
-    setDoctors(filtered);
-  }, [selectedSpecialty, searchQuery, telemedicineOnly]);
-
-    return (
-      <div className="doctors-page">
-        <Navbar />
-        <div className="doctors-content">
-          {/* Header */}
-          <div className="doctors-header">
-            <h1 className="page-title">Danh sách Bác sĩ</h1>
-            <p className="page-subtitle">
-              Tìm kiếm và chọn bác sĩ phù hợp với nhu cầu của bạn
-            </p>
-          </div>
-
-        {/* Filters */}
+  return (
+    <div className="patient-doctors-page dark">
+      <Navbar />
+      <div className="doctors-content">
+        {/* Header */}
+        <div className="doctors-header">
+          <h1 className="page-title">Danh sách Bác sĩ</h1>
+          <p className="page-subtitle">
+            Tìm kiếm và chọn bác sĩ phù hợp với nhu cầu của bạn
+          </p>
+        </div>
         <div className="doctors-filters">
           <div className="search-box">
             <i data-feather="search"></i>
@@ -69,7 +42,6 @@ const Doctors = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-
           <div className="filter-group">
             <label className="filter-label">Chuyên khoa:</label>
             <select
@@ -78,14 +50,13 @@ const Doctors = () => {
               className="filter-select"
             >
               <option value="all">Tất cả</option>
-              {mockSpecialties.map(specialty => (
+              {mockSpecialties.map((specialty) => (
                 <option key={specialty.id} value={specialty.name}>
                   {specialty.name}
                 </option>
               ))}
             </select>
           </div>
-
           <label className="filter-checkbox">
             <input
               type="checkbox"
@@ -95,15 +66,11 @@ const Doctors = () => {
             <span>Chỉ hiển thị bác sĩ hỗ trợ khám từ xa</span>
           </label>
         </div>
-
-        {/* Results Count */}
         <div className="results-count">
           Tìm thấy <strong>{doctors.length}</strong> bác sĩ
         </div>
-
-        {/* Doctors Grid */}
         <div className="doctors-grid">
-          {doctors.map(doctor => (
+          {doctors.map((doctor) => (
             <div key={doctor.id} className="doctor-card">
               <div className="doctor-avatar-large">{doctor.avatar}</div>
               <div className="doctor-info">
@@ -130,7 +97,7 @@ const Doctors = () => {
                   )}
                 </div>
                 <div className="doctor-price">
-                  {doctor.price.toLocaleString('vi-VN')}đ / lượt khám
+                  {doctor.price.toLocaleString("vi-VN")}đ / lượt khám
                 </div>
                 <RequireAuth message="Bạn cần đăng nhập để đặt lịch khám với bác sĩ này">
                   <Link
@@ -145,7 +112,6 @@ const Doctors = () => {
             </div>
           ))}
         </div>
-
         {doctors.length === 0 && (
           <div className="no-results">
             <i data-feather="search"></i>
@@ -157,5 +123,4 @@ const Doctors = () => {
   );
 };
 
-export default Doctors;
-
+export default PatientDoctors;
