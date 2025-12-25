@@ -254,7 +254,7 @@ const DoctorSearch = () => {
                         onClick={() => handleViewDetails(doctor.id)}
                       >
                         <Calendar size={16} />
-                        Book Fast
+                        Đặt Lịch
                       </motion.button>
                       <motion.button
                         className="btn-profile-glass"
