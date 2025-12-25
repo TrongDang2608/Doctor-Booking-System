@@ -148,7 +148,7 @@ function App() {
                   <Route path="profile" element={<PatientProfile />} />
                   <Route path="booking" element={<NewBooking />} />
                   <Route path="history" element={<BookingHistory />} />
-                  <Route path="doctors" element={<PatientDoctors />} />
+                  <Route path="doctors" element={<DoctorSearch />} />
                   <Route path="treatments" element={<TreatmentHistory />} />
                   <Route path="feedback/new" element={<FeedbackForm />} />
                   <Route path="feedbacks" element={<MyFeedbacks />} />
