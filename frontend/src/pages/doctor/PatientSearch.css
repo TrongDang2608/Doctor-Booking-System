@@ -171,6 +171,7 @@
 }
 
 .ai-search-input {
+  margin-left: 20px;
   flex: 1;
   background: transparent;
   border: none;
