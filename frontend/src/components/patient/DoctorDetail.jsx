@@ -127,12 +127,12 @@ const DoctorDetail = ({ doctor, onClose }) => {
         <div className="doctor-detail-footer">
           <button className="modal-button button-secondary" onClick={onClose}>
             <X />
-            Close
+            Đóng
           </button>
           {doctor.status === 'ACTIVE' && (
             <button className="modal-button button-primary" onClick={handleBookAppointment}>
               <Calendar />
-              Book Appointment
+              Đặt Lịch
             </button>
           )}
         </div>

@@ -242,13 +242,15 @@
   position: relative;
 }
 
-.doctor-select-wrapper::before {
-  content: '👨‍⚕️';
+/* Feather Icon inside doctor select */
+.doctor-select-wrapper .input-icon {
   position: absolute;
   left: 1.25rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.5rem;
+  width: 20px;
+  height: 20px;
+  color: #667eea;
   pointer-events: none;
   z-index: 1;
 }
@@ -314,7 +316,7 @@
   transition: transform 0.3s;
 }
 
-.doctor-select-wrapper select:focus ~ ::after {
+.doctor-select-wrapper select:focus~ ::after {
   transform: translateY(-50%) rotate(180deg);
 }
 
@@ -342,27 +344,26 @@
   gap: 1.5rem;
 }
 
-/* Date Input Wrapper */
-.datetime-grid > div {
+/* Input Wrapper for date and time */
+.input-wrapper {
   position: relative;
 }
 
-.datetime-grid > div::before {
+.input-wrapper .input-icon {
   position: absolute;
   left: 1.25rem;
-  top: calc(50% + 0.75rem);
+  top: 50%;
   transform: translateY(-50%);
-  font-size: 1.5rem;
+  width: 20px;
+  height: 20px;
+  color: #667eea;
   pointer-events: none;
   z-index: 1;
 }
 
-.datetime-grid > div:first-child::before {
-  content: '📅';
-}
-
-.datetime-grid > div:last-child::before {
-  content: '🕐';
+.input-wrapper input.with-icon,
+.input-wrapper select.with-icon {
+  padding-left: 3.5rem;
 }
 
 .datetime-grid input[type="date"],
@@ -429,7 +430,7 @@
   color: #fff;
 }
 
-.datetime-grid > div:last-child::after {
+.datetime-grid>div:last-child::after {
   content: '';
   position: absolute;
   right: 1.25rem;
@@ -444,7 +445,7 @@
   transition: transform 0.3s;
 }
 
-.datetime-grid > div:last-child select:focus ~ ::after {
+.datetime-grid>div:last-child select:focus~ ::after {
   transform: translateY(-50%) rotate(180deg);
 }
 
@@ -467,6 +468,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -528,6 +530,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -685,6 +688,21 @@
 }
 
 /* Notes Textarea */
+.textarea-wrapper {
+  position: relative;
+}
+
+.textarea-wrapper .textarea-icon {
+  position: absolute;
+  left: 1.25rem;
+  top: 1.25rem;
+  width: 18px;
+  height: 18px;
+  color: #667eea;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .notes-textarea {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -697,6 +715,10 @@
   resize: vertical;
   min-height: 100px;
   transition: all 0.2s;
+}
+
+.notes-textarea.with-icon {
+  padding-left: 3.25rem;
 }
 
 .notes-textarea:hover {
@@ -730,7 +752,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e0e0e0;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   font-size: 0.95rem;
@@ -757,19 +779,18 @@
 }
 
 .btn-submit {
-  padding: 0.85rem 2.5rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
+  padding: 0.85rem 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.95rem;
   transition: all 0.2s;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-submit i {
@@ -778,18 +799,14 @@
 }
 
 .btn-submit:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 .btn-submit:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
-}
-
-.btn-submit .loading-spinner-small {
-  margin-right: 0.5rem;
 }
 
 /* Form Labels */
@@ -889,6 +906,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1009,6 +1027,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1040,10 +1059,13 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.5;
     transform: translate(-50%, -50%) scale(1);
   }
+
   50% {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1.1);
@@ -1174,4 +1196,3 @@
     font-size: 0.9rem;
   }
 }
-

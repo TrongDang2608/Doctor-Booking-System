@@ -262,7 +262,7 @@ const DoctorSearch = () => {
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleViewDetails(doctor.id)}
                       >
-                        Profile
+                        Hồ Sơ
                       </motion.button>
                     </div>
                   </div>

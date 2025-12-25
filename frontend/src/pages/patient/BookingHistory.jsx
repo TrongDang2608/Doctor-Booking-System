@@ -152,14 +152,14 @@ const BookingHistory = () => {
                 ) : (
                     <div className="appointments-list">
                         {appointments.map(appointment => (
-                            <div 
-                                key={appointment.id} 
+                            <div
+                                key={appointment.id}
                                 className={`appointment-card status-${appointment.status.toLowerCase()}`}
                             >
                                 {/* Header */}
                                 <div className="appointment-card-header">
                                     <div className="appointment-doctor">
-                                        <div className="doctor-name">
+                                        <div className="doctor-name" style={{ color: '#ffffff' }}>
                                             <i data-feather="user"></i>
                                             Dr. {appointment.doctorName}
                                         </div>
@@ -182,7 +182,7 @@ const BookingHistory = () => {
                                         </div>
                                         <div className="info-value">{formatDate(appointment.appointmentDate)}</div>
                                     </div>
-                                    
+
                                     <div className="info-item">
                                         <div className="info-label">
                                             <i data-feather="clock"></i>
@@ -229,7 +229,7 @@ const BookingHistory = () => {
                                             Hủy lịch hẹn
                                         </button>
                                     )}
-                                    
+
                                     {appointment.status === 'COMPLETED' && (
                                         <>
                                             <button
@@ -413,12 +413,12 @@ const AppointmentDetailsModal = ({ appointment, treatment, loadingTreatment, onC
                                 )}
                                 <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
                                     Tạo lúc: {new Date(treatment.createdAt).toLocaleString('vi-VN', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                })}
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })}
                                 </div>
                             </div>
                         </div>
@@ -586,13 +586,13 @@ const FeedbackModal = ({ appointment, onClose, onSuccess }) => {
                             onChange={handleChange}
                             rows="6"
                             placeholder="Chia sẻ trải nghiệm của bạn..."
-                            style={{ 
-                                width: '100%', 
-                                padding: '0.75rem', 
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem',
                                 background: 'rgba(255, 255, 255, 0.05)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)', 
-                                borderRadius: '8px', 
-                                fontFamily: 'inherit', 
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '8px',
+                                fontFamily: 'inherit',
                                 fontSize: '0.95rem',
                                 color: '#e0e0e0',
                                 resize: 'vertical',
