@@ -24,14 +24,6 @@ const Navbar = () => {
     }
   }, [user]);
 
-  const menuItems = [
-    { path: '/', label: 'Trang chủ' },
-    { path: '/doctors', label: 'Bác sĩ' },
-    { path: '/specialties', label: 'Chuyên khoa' },
-    { path: '/about', label: 'Về chúng tôi' },
-    { path: '/contact', label: 'Liên hệ' }
-  ];
-
   return (
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
       <div className="navbar-container">
@@ -48,17 +40,6 @@ const Navbar = () => {
             <span className="logo-brand-name">Doctor Booking</span>
           </div>
         </Link>
-
-        {/* Menu Items */}
-        <ul className="navbar-menu">
-          {menuItems.map((item) => (
-            <li key={item.path}>
-              <Link to={item.path} className="navbar-link">
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
 
         {/* Right Side Actions */}
         <div className="navbar-actions">
