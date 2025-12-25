@@ -87,71 +87,65 @@ const MyFeedbacks = () => {
 
   return (
     <PatientLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 bg-[#111827] min-h-screen py-8 px-2 md:px-0">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white">Phản Hồi Của Tôi</h1>
-          <p className="text-white mt-1">Xem và chỉnh sửa các phản hồi bạn đã gửi</p>
+          <h1 className="text-3xl font-bold text-gray-100">Phản Hồi Của Tôi</h1>
+          <p className="text-gray-300 mt-1">Xem và chỉnh sửa các phản hồi bạn đã gửi</p>
         </div>
 
         {error && <ErrorMessage message={error} onClose={() => setError('')} />}
 
         {/* Feedbacks List */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-[#181f2a] border border-[#232b3b] rounded-lg shadow-lg overflow-hidden">
           {loading ? (
             <div className="p-8"><Loading /></div>
           ) : feedbacks.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-400">
               <p>Bạn chưa gửi phản hồi nào</p>
-              <a href="/patient/feedback/new" className="text-blue-600 hover:text-blue-800 mt-2 inline-block">
+              <a href="/patient/feedback/new" className="text-blue-400 hover:text-blue-300 mt-2 inline-block">
                 Gửi phản hồi đầu tiên →
               </a>
             </div>
           ) : (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-[#232b3b]">
               {feedbacks.map((feedback) => (
-                <div key={feedback.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div key={feedback.id} className="p-6 hover:bg-[#232b3b] transition-colors">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-gray-900">
+                        <h3 className="font-semibold text-gray-100">
                           Bác sĩ: {feedback.doctorName}
                         </h3>
                         <div className="flex items-center gap-1">
-                          <span className="text-yellow-500">{'⭐'.repeat(feedback.rating)}</span>
-                          <span className="text-xs text-gray-500">({feedback.rating}/5)</span>
+                          <span className="text-yellow-400">{'⭐'.repeat(feedback.rating)}</span>
+                          <span className="text-xs text-gray-400">({feedback.rating}/5)</span>
                         </div>
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(feedback.status)}`}>
-                          {getStatusDisplay(feedback.status)}
-                        </span>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(feedback.status)}`}> {getStatusDisplay(feedback.status)} </span>
                       </div>
-                      
-                      <p className="text-sm text-gray-500 mb-2">
+                      <p className="text-sm text-gray-400 mb-2">
                         Gửi lúc: {formatDate(feedback.createdAt)}
                       </p>
-                      
                       <div className="mb-3">
-                        <p className="text-sm font-medium text-gray-700 mb-1">Nhận xét của bạn:</p>
-                        <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">
+                        <p className="text-sm font-medium text-gray-300 mb-1">Nhận xét của bạn:</p>
+                        <p className="text-gray-200 bg-[#232b3b] p-3 rounded-lg">
                           {feedback.comment || 'Không có nhận xét'}
                         </p>
                       </div>
-                      
                       {feedback.doctorReply && (
-                        <div className="bg-blue-50 p-3 rounded-lg mb-3">
-                          <p className="text-sm font-medium text-blue-900 mb-1">
+                        <div className="bg-[#1e293b] p-3 rounded-lg mb-3">
+                          <p className="text-sm font-medium text-blue-300 mb-1">
                             Phản hồi từ bác sĩ:
                           </p>
-                          <p className="text-sm text-gray-700">{feedback.doctorReply}</p>
+                          <p className="text-sm text-gray-200">{feedback.doctorReply}</p>
                           {feedback.doctorRepliedAt && (
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-400 mt-1">
                               {formatDate(feedback.doctorRepliedAt)}
                             </p>
                           )}
                         </div>
                       )}
                     </div>
-                    
                     <div className="ml-4">
                       {feedback.canEdit ? (
                         <button

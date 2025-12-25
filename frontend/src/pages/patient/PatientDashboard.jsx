@@ -485,6 +485,16 @@ const PatientDashboard = () => {
             </div>
             <i data-feather="chevron-right" className="action-arrow"></i>
           </a>
+          <a href="/patient/feedbacks" className="action-card">
+            <div className="action-icon" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' }}>
+              <i data-feather="star"></i>
+            </div>
+            <div className="action-content">
+              <div className="action-title">Đánh giá của tôi</div>
+              <div className="action-subtitle">Xem & chỉnh sửa phản hồi</div>
+            </div>
+            <i data-feather="chevron-right" className="action-arrow"></i>
+          </a>
           <a href="/patient/doctors" className="action-card">
             <div className="action-icon" style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)' }}>
               <i data-feather="search"></i>
