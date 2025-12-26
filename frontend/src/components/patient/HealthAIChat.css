@@ -364,7 +364,7 @@
   height: 14px;
 }
 
-.input-wrapper {
+.chat-input-wrapper {
   display: flex !important;
   gap: 0.5rem !important;
   align-items: center !important;
@@ -376,7 +376,7 @@
   max-height: 42px;
 }
 
-.input-wrapper:focus-within {
+.chat-input-wrapper:focus-within {
   border-color: rgba(102, 126, 234, 0.5) !important;
   background: rgba(255, 255, 255, 0.08) !important;
 }

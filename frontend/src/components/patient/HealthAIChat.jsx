@@ -255,7 +255,7 @@ const HealthAIChat = ({ onClose, isFullPage = false }) => {
             </div>
 
             <form className="chat-input-container" onSubmit={handleSubmit}>
-              <div className="input-wrapper">
+              <div className="chat-input-wrapper">
                 <input
                   ref={inputRef} type="text" className="chat-input"
                   placeholder="Ví dụ: Đau đầu, chóng mặt, buồn nôn..."
