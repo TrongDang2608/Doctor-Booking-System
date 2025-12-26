@@ -361,11 +361,6 @@
   z-index: 1;
 }
 
-.input-wrapper input.with-icon,
-.input-wrapper select.with-icon {
-  padding-left: 3.5rem;
-}
-
 .datetime-grid input[type="date"],
 .datetime-grid select {
   background: rgba(255, 255, 255, 0.05);
@@ -779,18 +774,22 @@
 }
 
 .btn-submit {
-  padding: 0.85rem 2rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #e0e0e0;
-  border-radius: 8px;
+  padding: 0.85rem 2rem !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: 8px !important;
   cursor: pointer;
-  font-weight: 500;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 0.95rem !important;
   transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 !important;
 }
 
 .btn-submit i {
@@ -799,9 +798,9 @@
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  opacity: 0.9;
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn-submit:disabled {

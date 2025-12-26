@@ -269,7 +269,7 @@ const PatientPortal = () => {
                     <span>Booking</span>
                   </button>
                 </div>
-                <div className="input-wrapper">
+                <div className="chat-input-wrapper">
                   <input
                     ref={inputRef}
                     type="text"
